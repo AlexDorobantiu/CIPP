@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Font Name="Segoe UI" Size="9" />
+  <Class Name="ParametersSDK.ParametersEnum" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ParametersEnum.cs</FileName>
+      <HashCode>AAAIAAAAAREAACAAAAAAAIAAAAAABAAAQAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ParametersSDK.ParametersFloat" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="2.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ParametersFloat.cs</FileName>
+      <HashCode>AAAIAAAAAREAACAAAAAIAIAAAAAAACAAQAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ParametersSDK.ParametersInt32" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="4" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ParametersInt32.cs</FileName>
+      <HashCode>AAAIAAAAAREAACAAAAAIAIAAAAAAACAAQAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Interface Name="ParametersSDK.IParameters" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IParameters.cs</FileName>
+      <HashCode>AAAAAAAAAQEAACAAAAAAAIAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="ParametersSDK.DisplayType" Collapsed="true">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>IParameters.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAASAAAAAAAAAAAAAAAAAAgAAgEAAAA=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+</ClassDiagram>

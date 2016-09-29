@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Font Name="Segoe UI" Size="9" />
+  <Class Name="ProcessingImageSDK.Motion" Collapsed="true">
+    <Position X="0.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Motion.cs</FileName>
+      <HashCode>AIAAAAAAAACAAACBAAAAAAgAAAAAAQAAIAgAAAAAAgA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProcessingImageSDK.MotionVectorBase" Collapsed="true">
+    <Position X="2.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MotionVectors.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProcessingImageSDK.SimpleMotionVector" Collapsed="true">
+    <Position X="5" Y="4" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>MotionVectors.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProcessingImageSDK.AdvancedMotionVector" Collapsed="true">
+    <Position X="0.5" Y="4" Width="2" />
+    <TypeIdentifier>
+      <FileName>MotionVectors.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAABAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProcessingImageSDK.DepthMotionVector" Collapsed="true">
+    <Position X="2.75" Y="4" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>MotionVectors.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAABAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProcessingImageSDK.MotionVectors" Collapsed="true">
+    <Position X="2.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>MotionVectors.cs</FileName>
+      <HashCode>AgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProcessingImageSDK.ProcessingImage" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ProcessingImage.cs</FileName>
+      <HashCode>ghIAMIAQQAABQAAkAAICIAAIqAiFAIBMFQn1IDEAGZA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="ProcessingImageSDK.Pixel32Bpp" Collapsed="true">
+    <Position X="2.25" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ProcessingImage.cs</FileName>
+      <HashCode>EAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAQAAAAAgA=</HashCode>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ProcessingImageSDK.Pixel24Bpp" Collapsed="true">
+    <Position X="4" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ProcessingImage.cs</FileName>
+      <HashCode>EAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAgA=</HashCode>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ProcessingImageSDK.Pixel8Bpp" Collapsed="true">
+    <Position X="5.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ProcessingImage.cs</FileName>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ProcessingImageSDK.ImageDependencies" Collapsed="true">
+    <Position X="2.25" Y="0.5" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>ProcessingImage.cs</FileName>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAgAAAAIAAAAAAAAAAAAgAA=</HashCode>
+    </TypeIdentifier>
+  </Struct>
+  <Enum Name="ProcessingImageSDK.MotionVectorType" Collapsed="true">
+    <Position X="4" Y="2" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>MotionVectors.cs</FileName>
+      <HashCode>AAIAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAIAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="ProcessingImageSDK.BitmapType" Collapsed="true">
+    <Position X="0.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>ProcessingImage.cs</FileName>
+      <HashCode>AAAiACBAAAAEggAAAAAAgIAAAAIAghBAAAAQgBAAAAg=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+</ClassDiagram>

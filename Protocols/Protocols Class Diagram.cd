@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Font Name="Segoe UI" Size="9" />
+  <Class Name="CIPPProtocols.IDGenerator" Collapsed="true">
+    <Position X="4.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CommunicationProtocol.cs</FileName>
+      <HashCode>AAAAAAAAAAAAIACAAAAAAAAAAAAAAAAAAAAAAAAAAgA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CIPPProtocols.Task" Collapsed="true">
+    <Position X="2.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CommunicationProtocol.cs</FileName>
+      <HashCode>AAAAAAAAAAAAACAAAAAAAAAAAAAAAAAEAAAIBACAAgA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CIPPProtocols.FilterTask" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CommunicationProtocol.cs</FileName>
+      <HashCode>AAAAABAAAAAAAABABAAIIAAAABAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CIPPProtocols.MaskTask" Collapsed="true">
+    <Position X="2.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CommunicationProtocol.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAABAAAIAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CIPPProtocols.MotionRecognitionTask" Collapsed="true">
+    <Position X="5" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <FileName>CommunicationProtocol.cs</FileName>
+      <HashCode>AAAAABAAAAAAAABABAAIAAgAABAACAAAICAAAQAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CIPPProtocols.ResultPackage" Collapsed="true">
+    <Position X="0.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CommunicationProtocol.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAABAAAAAAAAAAAAAAIAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CIPPProtocols.PluginInfo" Collapsed="true">
+    <Position X="2.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>PluginHelper.cs</FileName>
+      <HashCode>AAAAAAAAABAAAAAAAACAAAAAgAABAAAAAAAAAACAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CIPPProtocols.PluginHelper" Collapsed="true">
+    <Position X="0.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>PluginHelper.cs</FileName>
+      <HashCode>AAAAAAAAAAABAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="CIPPProtocols.TrasmissionFlags" Collapsed="true">
+    <Position X="2.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CommunicationProtocol.cs</FileName>
+      <HashCode>AAAAAAAAAAAACAAAAAAAAAQAAAAEAAAAQECAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="CIPPProtocols.TaskType" Collapsed="true">
+    <Position X="0.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CommunicationProtocol.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAEAAAIAAAAAAAAAAAAAAAgAA=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="CIPPProtocols.GranularityType" Collapsed="true">
+    <Position X="5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>CommunicationProtocol.cs</FileName>
+      <HashCode>AAQAAIAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+</ClassDiagram>

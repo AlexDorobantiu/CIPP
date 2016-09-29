@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{CE1F1EDE-13B6-4CF1-BC4D-CC124EB39BB2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Protocols</RootNamespace>
+    <AssemblyName>Protocols</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CommunicationProtocol.cs" />
+    <Compile Include="PluginHelper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FilterSDK\FilterSDK.csproj">
+      <Project>{CB41C7F8-9450-46B9-8B47-03C9F57CC2D7}</Project>
+      <Name>FilterSDK</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MaskSDK\MaskSDK.csproj">
+      <Project>{07A7D787-EA45-49C1-A64B-4336B3AD3EA1}</Project>
+      <Name>MaskSDK</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MotionRecognitionSDK\MotionRecognitionSDK.csproj">
+      <Project>{0F836B43-D757-46D3-A107-86A1DCBBDA0F}</Project>
+      <Name>MotionRecognitionSDK</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ParametersSDK\ParametersSDK.csproj">
+      <Project>{9C7A8D84-9C1C-4C16-B117-C683AC342904}</Project>
+      <Name>ParametersSDK</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ProcessingImage\ProcessingImageSDK.csproj">
+      <Project>{E2C1765E-3E77-4D6F-A552-98A0C2CE008A}</Project>
+      <Name>ProcessingImageSDK</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Protocols Class Diagram.cd" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
