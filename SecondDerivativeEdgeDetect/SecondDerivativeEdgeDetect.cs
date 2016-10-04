@@ -23,7 +23,7 @@ namespace SecondDerivativeEdgeDetect
         ProcessingImageSDK.ProcessingImage IFilter.filter(ProcessingImageSDK.ProcessingImage inputImage)
         {
             //this should work only on grayscale images
-            if (!inputImage.isGrayscale)
+            if (!inputImage.grayscale)
             {
                 return inputImage;
             }

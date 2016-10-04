@@ -81,7 +81,7 @@ namespace Plugins.Filters.GaborFilter
                 int imageYSize = pi.getSizeY();
                 int imageXSize = pi.getSizeX();
 
-                if (inputImage.isGrayscale)
+                if (inputImage.grayscale)
                 {
                     int[,] filteredImage = new int[imageYSize, imageXSize];
                     byte[,] g = new byte[imageYSize, imageXSize];

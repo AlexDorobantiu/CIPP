@@ -41,7 +41,7 @@ namespace Plugins.Filters.MedianFilter
 
             int medianSize = (2 * order + 1) * (2 * order + 1);
 
-            if (!inputImage.isGrayscale)
+            if (!inputImage.grayscale)
             {
                 byte[,] r = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
                 byte[,] g = new byte[inputImage.getSizeY(), inputImage.getSizeX()];

@@ -164,7 +164,7 @@ namespace Plugins.Filters.AntSegmentation
 
             Random rand = new Random();
 
-            if (!inputImage.isGrayscale)
+            if (!inputImage.grayscale)
             {
                 if (!copyOrMean)
                 {

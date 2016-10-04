@@ -20,7 +20,7 @@ namespace CIPP
             pi = image;
             piBox.Width = pi.getSizeX();
             piBox.Height = pi.getSizeY();
-            if (pi.isGrayscale)
+            if (pi.grayscale)
             {
                 redCheckBox.Checked = false; redCheckBox.Enabled = false;
                 greenCheckBox.Checked = false; greenCheckBox.Enabled = false;

@@ -130,8 +130,8 @@ namespace CIPP
                 previewPicture.Image = pi.getPreviewBitmap(previewPicture.Size.Width, previewPicture.Size.Height);
                 widthValueLabel.Text = "" + pi.getSizeX();
                 heightValueLabel.Text = "" + pi.getSizeY();
-                grayscaleValueLabel.Text = pi.isGrayscale.ToString();
-                maskedValueLabel.Text = pi.isMasked.ToString();
+                grayscaleValueLabel.Text = pi.grayscale.ToString();
+                maskedValueLabel.Text = pi.masked.ToString();
 
                 watermarkListBox.Items.Clear();
                 List<string> list = pi.getWatermarks();
@@ -334,52 +334,60 @@ namespace CIPP
             {
                 saveFileDialog.AddExtension = true;
                 saveFileDialog.Filter = "PNG(*.png)|*.png|Bitmap(*.bmp)|*.bmp|JPEG|*.jpg|GIF|*.gif|ICO|*.ico|EMF|*.emf|EXIF|*.exif|TIFF|*.tiff|WMF|*.wmf|All files (*.*)|*.*";
+
+                ListBox visibleListBox = null;
+                ArrayList selectedArrayList = null;
+
                 switch (imageTab.SelectedIndex)
                 {
                     //original image tab
                     case 0:
                         {
-                            for (int i = 0; i < originalImageList.SelectedIndices.Count; i++)
-                            {
-                                saveFileDialog.FileName = originalImageList.Items[originalImageList.SelectedIndices[i]].ToString();
-                                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                                {
-                                    ProcessingImage pi = (ProcessingImage)originalImageArrayList[originalImageList.SelectedIndices[i]];
-                                    pi.saveImage(saveFileDialog.FileName);
-                                }
-                            }
+                            visibleListBox = originalImageList;
+                            selectedArrayList = originalImageArrayList;
                         } break;
                     //processed image tab
                     case 1:
                         {
-                            for (int i = 0; i < processedImageList.SelectedIndices.Count; i++)
-                            {
-                                saveFileDialog.FileName = processedImageList.Items[processedImageList.SelectedIndices[i]].ToString();
-                                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                                {
-                                    ProcessingImage pi = (ProcessingImage)processedImageArrayList[processedImageList.SelectedIndices[i]];
-                                    pi.saveImage(saveFileDialog.FileName);
-                                }
-                            }
+                            visibleListBox = processedImageList;
+                            selectedArrayList = processedImageArrayList;
                         } break;
                     //masked image tab
                     case 2:
                         {
-                            for (int i = 0; i < maskedImageList.SelectedIndices.Count; i++)
-                            {
-                                saveFileDialog.FileName = maskedImageList.Items[maskedImageList.SelectedIndices[i]].ToString();
-                                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                                {
-                                    ProcessingImage pi = (ProcessingImage)maskedImageArrayList[maskedImageList.SelectedIndices[i]];
-                                    pi.saveImage(saveFileDialog.FileName);
-                                }
-                            }
+                            visibleListBox = maskedImageList;
+                            selectedArrayList = maskedImageArrayList;
                         } break;
                     //scaned image tab
                     case 3:
                         {
-
                         } break;
+                }
+                if (visibleListBox == null || selectedArrayList == null)
+                {
+                    return;
+                }
+
+                if (visibleListBox.SelectedIndices.Count == 1)
+                {
+                    saveFileDialog.FileName = visibleListBox.Items[visibleListBox.SelectedIndices[0]].ToString();
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        ProcessingImage pi = (ProcessingImage)selectedArrayList[visibleListBox.SelectedIndices[0]];
+                        pi.saveImage(saveFileDialog.FileName);
+                    }
+                }
+                else
+                {
+                    if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        for (int i = 0; i < visibleListBox.SelectedIndices.Count; i++)
+                        {
+                            ProcessingImage pi = (ProcessingImage)selectedArrayList[visibleListBox.SelectedIndices[i]];
+                            String newPath = Path.Combine(folderBrowserDialog.SelectedPath, visibleListBox.Items[visibleListBox.SelectedIndices[i]].ToString());
+                            pi.saveImage(newPath);
+                        }
+                    }
                 }
             }
             catch (Exception exception)

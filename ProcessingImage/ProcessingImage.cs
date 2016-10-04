@@ -65,8 +65,8 @@ namespace ProcessingImageSDK
     [Serializable]
     public class ProcessingImage
     {
-        public bool isGrayscale;
-        public bool isMasked;
+        public bool grayscale;
+        public bool masked;
 
         private int sizeX;
         private int sizeY;
@@ -88,14 +88,13 @@ namespace ProcessingImageSDK
         private string path;
         private string name;
 
-        private List<string> watermaks;
+        private List<string> watermaks = new List<string>();
 
         /// <summary>
         /// Base image processing class for CIPP
         /// </summary>
         public ProcessingImage()
         {
-            watermaks = new List<string>();
         }
 
         public string getName() { return name; }
@@ -123,7 +122,7 @@ namespace ProcessingImageSDK
         {
             try
             {
-                if (isGrayscale)
+                if (grayscale)
                     return Color.FromArgb(alpha[y, x], gray[y, x], gray[y, x], gray[y, x]);
 
                 return Color.FromArgb(alpha[y, x], r[y, x], g[y, x], b[y, x]);
@@ -143,7 +142,7 @@ namespace ProcessingImageSDK
         public void setGray(byte[,] gray)
         {
             this.gray = gray;
-            this.isGrayscale = true;
+            this.grayscale = true;
             this.r = null;
             this.g = null;
             this.b = null;
@@ -158,7 +157,7 @@ namespace ProcessingImageSDK
             sizeX = bitmap.Width;
             sizeY = bitmap.Height;
 
-            isGrayscale = true;
+            grayscale = true;
 
             BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, sizeX, sizeY), ImageLockMode.ReadOnly, bitmap.PixelFormat);
 
@@ -183,8 +182,8 @@ namespace ProcessingImageSDK
                                     g[i, j] = pBase->green;
                                     b[i, j] = pBase->blue;
 
-                                    if (pBase->alpha != 255) isMasked = true;
-                                    if ((pBase->red != pBase->green) || (pBase->green != pBase->blue) || (pBase->red != pBase->blue)) isGrayscale = false;
+                                    if (pBase->alpha != 255) masked = true;
+                                    if ((pBase->red != pBase->green) || (pBase->green != pBase->blue) || (pBase->red != pBase->blue)) grayscale = false;
 
                                     pBase++;
                                 }
@@ -213,7 +212,7 @@ namespace ProcessingImageSDK
                                     if ((((Pixel24Bpp*)pBase)->red != ((Pixel24Bpp*)pBase)->green) ||
                                         (((Pixel24Bpp*)pBase)->green != ((Pixel24Bpp*)pBase)->blue) ||
                                         (((Pixel24Bpp*)pBase)->red != ((Pixel24Bpp*)pBase)->blue))
-                                        isGrayscale = false;
+                                        grayscale = false;
 
                                     pBase += 3;
                                 }
@@ -268,14 +267,14 @@ namespace ProcessingImageSDK
                                     pBase += remainder;
                                 }
                             }
-                            isGrayscale = false;
+                            grayscale = false;
                         }
                     } break;
                 default: { } break;
             }
             bitmap.UnlockBits(bitmapData);
 
-            if (isGrayscale)
+            if (grayscale)
             {
                 this.gray = this.r;
                 this.r = null;
@@ -302,7 +301,7 @@ namespace ProcessingImageSDK
         /// <param name="fileName">Full path of the file to be loaded</param>
         public void saveImage(string fileName)
         {
-            Bitmap b = isGrayscale ? getBitmap(BitmapType.AlphaGray) : getBitmap(BitmapType.AlphaColor);
+            Bitmap b = grayscale ? getBitmap(BitmapType.AlphaGray) : getBitmap(BitmapType.AlphaColor);
             String extension = fileName.Substring(fileName.LastIndexOf('.'));
             switch (extension)
             {
@@ -339,7 +338,7 @@ namespace ProcessingImageSDK
         {
             try
             {
-                if (!isGrayscale)
+                if (!grayscale)
                 {
                     if (y == null) y = new byte[sizeY, sizeX];
                     for (int i = 0; i < sizeY; i++)
@@ -366,7 +365,7 @@ namespace ProcessingImageSDK
                 Bitmap bitmap = new Bitmap(sizeX, sizeY, PixelFormat.Format32bppArgb);
                 BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, sizeX, sizeY), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
 
-                if (!isGrayscale)
+                if (!grayscale)
                 {
                     switch (type)
                     {
@@ -672,7 +671,7 @@ namespace ProcessingImageSDK
                                 }
                             } break;
                         default:
-                            if (isGrayscale)
+                            if (grayscale)
                             {
                                 unsafe
                                 {
@@ -797,7 +796,7 @@ namespace ProcessingImageSDK
                 unsafe
                 {
                     Pixel32Bpp* pBase = (Pixel32Bpp*)bitmapData.Scan0;
-                    if (!isGrayscale)
+                    if (!grayscale)
                     {
                         for (int i = 0; i < newSizeY; i++)
                         {
@@ -861,8 +860,8 @@ namespace ProcessingImageSDK
 
         public void copyAttributes(ProcessingImage originalImage)
         {
-            this.isGrayscale = originalImage.isGrayscale;
-            this.isMasked = originalImage.isMasked;
+            this.grayscale = originalImage.grayscale;
+            this.masked = originalImage.masked;
             this.sizeX = originalImage.sizeX;
             this.sizeY = originalImage.sizeY;
             this.positionX = originalImage.positionX;
@@ -891,13 +890,13 @@ namespace ProcessingImageSDK
             pi.positionY = positionY;
             pi.imageDependencies = imageDependencies;
 
-            pi.isMasked = this.isMasked;
+            pi.masked = this.masked;
             pi.name = this.name;
             pi.watermaks = new List<string>();
             foreach (string s in watermaks) pi.watermaks.Add(s);
 
             pi.alpha = (byte[,])this.alpha.Clone();
-            if (!isGrayscale)
+            if (!grayscale)
             {
                 pi.r = (byte[,])this.r.Clone();
                 pi.g = (byte[,])this.g.Clone();
@@ -905,7 +904,7 @@ namespace ProcessingImageSDK
             }
             else
             {
-                pi.isGrayscale = true;
+                pi.grayscale = true;
                 pi.gray = (byte[,])this.gray.Clone();
             }
 
@@ -921,13 +920,13 @@ namespace ProcessingImageSDK
             pi.positionY = positionY;
             pi.imageDependencies = imageDependencies;
 
-            pi.isMasked = true;
+            pi.masked = true;
             pi.name = this.name;
             pi.watermaks = new List<string>();
             foreach (string s in watermaks) pi.watermaks.Add(s);
 
             pi.alpha = alphaChannel;
-            if (!isGrayscale)
+            if (!grayscale)
             {
                 pi.r = (byte[,])this.r.Clone();
                 pi.g = (byte[,])this.g.Clone();
@@ -935,7 +934,7 @@ namespace ProcessingImageSDK
             }
             else
             {
-                pi.isGrayscale = true;
+                pi.grayscale = true;
                 pi.gray = (byte[,])this.gray.Clone();
             }
             return pi;
@@ -950,7 +949,7 @@ namespace ProcessingImageSDK
             pi.positionY = positionY;
             pi.imageDependencies = imageDependencies;
 
-            pi.isMasked = true;
+            pi.masked = true;
             pi.name = this.name;
             pi.watermaks = new List<string>();
             foreach (string s in watermaks) pi.watermaks.Add(s);
@@ -960,7 +959,7 @@ namespace ProcessingImageSDK
                 for (int j = 0; j < sizeX; j++)
                     pi.alpha[i, j] = 255;
 
-            if (!isGrayscale)
+            if (!grayscale)
             {
                 pi.r = new byte[sizeY, sizeX];
                 pi.g = new byte[sizeY, sizeX];
@@ -968,7 +967,7 @@ namespace ProcessingImageSDK
             }
             else
             {
-                pi.isGrayscale = true;
+                pi.grayscale = true;
                 pi.gray = new byte[sizeY, sizeX];
             }
             return pi;
@@ -983,7 +982,7 @@ namespace ProcessingImageSDK
             int filterX = matrix.GetLength(1);
             int filterY = matrix.GetLength(0);
 
-            if (isGrayscale)
+            if (grayscale)
             {
                 byte[,] g = new byte[sizeY, sizeX];
                 for (int y = filterY - 1; y < sizeY; y++)
@@ -1048,7 +1047,7 @@ namespace ProcessingImageSDK
             int filterX = matrix.GetLength(1);
             int filterY = matrix.GetLength(0);
 
-            if (isGrayscale)
+            if (grayscale)
             {
                 byte[,] g = new byte[sizeY, sizeX];
                 for (int y = filterY - 1; y < sizeY; y++)
@@ -1179,9 +1178,9 @@ namespace ProcessingImageSDK
 
                 pi[i].alpha = al;
 
-                if (isGrayscale)
+                if (grayscale)
                 {
-                    pi[i].isGrayscale = true;
+                    pi[i].grayscale = true;
                     byte[,] gr = new byte[pi[i].sizeY, pi[i].sizeX];
                     if (i == 0)
                     {
@@ -1251,15 +1250,15 @@ namespace ProcessingImageSDK
                         for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
                             alpha[i + subPart.positionY, j + subPart.positionX - subPart.imageDependencies.left] = subPart.alpha[i, j];
                 }
-                if (subPart.isGrayscale)
+                if (subPart.grayscale)
                 {
-                    if (!isGrayscale)
+                    if (!grayscale)
                     {
                         r = null;
                         g = null;
                         b = null;
                         gray = new byte[this.sizeY, this.sizeX];
-                        isGrayscale = true;
+                        grayscale = true;
                     }
                     if (subPart.positionX == 0)
                     {
@@ -1276,13 +1275,13 @@ namespace ProcessingImageSDK
                 }
                 else
                 {
-                    if (isGrayscale)
+                    if (grayscale)
                     {
                         gray = null;
                         r = new byte[this.sizeY, this.sizeX];
                         g = new byte[this.sizeY, this.sizeX];
                         b = new byte[this.sizeY, this.sizeX];
-                        isGrayscale = false;
+                        grayscale = false;
                     }
                     if (subPart.positionX == 0)
                     {

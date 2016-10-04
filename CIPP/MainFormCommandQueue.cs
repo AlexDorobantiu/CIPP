@@ -152,7 +152,10 @@ namespace CIPP
                             m.state = true;
                         }
             }
-            catch { }
+            catch (Exception e)
+            {
+
+            }
         }
 
         public void proxyRequestReceived(object sender, EventArgs e)

@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SinRmsFilter", "SinRmsFilte
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecondDerivativeEdgeDetect", "SecondDerivativeEdgeDetect\SecondDerivativeEdgeDetect.csproj", "{E905DB16-A408-4494-85CC-C77D10771DAA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CropFilter", "CropFilter\CropFilter.csproj", "{21B70597-575C-4951-A1E0-7A69D19E9793}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -151,6 +153,10 @@ Global
 		{E905DB16-A408-4494-85CC-C77D10771DAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E905DB16-A408-4494-85CC-C77D10771DAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E905DB16-A408-4494-85CC-C77D10771DAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21B70597-575C-4951-A1E0-7A69D19E9793}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21B70597-575C-4951-A1E0-7A69D19E9793}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21B70597-575C-4951-A1E0-7A69D19E9793}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21B70597-575C-4951-A1E0-7A69D19E9793}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

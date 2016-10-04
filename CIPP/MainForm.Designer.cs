@@ -111,6 +111,7 @@ namespace CIPP
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.timer = new System.Windows.Forms.Timer(this.components);
+            this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.topMenu.SuspendLayout();
             this.processingAreaGroup.SuspendLayout();
             this.processingTab.SuspendLayout();
@@ -1010,6 +1011,10 @@ namespace CIPP
             this.timer.Interval = 1000;
             this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
+            // folderBrowserDialog
+            // 
+            this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
+            // 
             // CIPPForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1147,6 +1152,7 @@ namespace CIPP
         private System.Windows.Forms.ToolStripStatusLabel totalTimeLabel;
         private System.Windows.Forms.ToolStripStatusLabel totalTimeValueLabel;
         private System.Windows.Forms.Label previewPictureLabel;
+        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
     }
 }
 

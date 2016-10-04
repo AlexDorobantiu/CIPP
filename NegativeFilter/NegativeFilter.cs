@@ -32,7 +32,7 @@ namespace Plugins.Filters.NegativeFilter
             pi.copyAttributesAndAlpha(inputImage);
             pi.addWatermark("Negative Filter, v1.0, Alex Dorobantiu");
 
-            if (!inputImage.isGrayscale)
+            if (!inputImage.grayscale)
             {
                 byte[,] r = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
                 byte[,] g = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
