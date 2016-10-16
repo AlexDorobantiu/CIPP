@@ -159,12 +159,11 @@ namespace ProcessingImageSDK
 
             grayscale = true;
 
-            BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, sizeX, sizeY), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-
             switch (bitmap.PixelFormat)
             {
                 case PixelFormat.Format32bppArgb:
                     {
+                        BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, sizeX, sizeY), ImageLockMode.ReadOnly, bitmap.PixelFormat);
                         alpha = new byte[sizeY, sizeX];
                         r = new byte[sizeY, sizeX];
                         g = new byte[sizeY, sizeX];
@@ -189,9 +188,11 @@ namespace ProcessingImageSDK
                                 }
                             }
                         }
+                        bitmap.UnlockBits(bitmapData);
                     } break;
                 case PixelFormat.Format24bppRgb:
                     {
+                        BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, sizeX, sizeY), ImageLockMode.ReadOnly, bitmap.PixelFormat);
                         int remainder = bitmapData.Stride - sizeX * 3; //aliniament la byte
                         alpha = new byte[sizeY, sizeX];
                         r = new byte[sizeY, sizeX];
@@ -219,11 +220,13 @@ namespace ProcessingImageSDK
                                 pBase += remainder;
                             }
                         }
+                        bitmap.UnlockBits(bitmapData);
                     } break;
                 case PixelFormat.Format8bppIndexed:
                     {
-                        int remainder = bitmapData.Stride - sizeX * 1; //aliniament la byte
-                        if (bitmap.Palette.Flags == 2) //grayscale
+                        BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, sizeX, sizeY), ImageLockMode.ReadOnly, bitmap.PixelFormat);
+                        int remainder = bitmapData.Stride - sizeX * 1; // byte alligned
+                        if (bitmap.Palette.Flags == 2) // grayscale: PaletteFlags.GrayScale = 2
                         {
                             alpha = new byte[sizeY, sizeX];
                             r = new byte[sizeY, sizeX];
@@ -269,10 +272,61 @@ namespace ProcessingImageSDK
                             }
                             grayscale = false;
                         }
+                        bitmap.UnlockBits(bitmapData);
+                    } break;
+                case PixelFormat.Format1bppIndexed:
+                    {
+                        alpha = new byte[sizeY, sizeX];
+                        r = new byte[sizeY, sizeX];
+                        for (int i = 0; i < sizeY; i++)
+                        {
+                            for (int j = 0; j < sizeX; j++)
+                            {
+                                Color c = bitmap.GetPixel(j, i);
+                                alpha[i, j] = c.A;
+                                r[i, j] = c.R;
+                            }
+                        }
+                    } break;
+                case PixelFormat.Format4bppIndexed:
+                    {
+                        if (bitmap.Palette.Flags == 2) // grayscale: PaletteFlags.GrayScale = 2
+                        {
+                            alpha = new byte[sizeY, sizeX];
+                            r = new byte[sizeY, sizeX];
+                            for (int i = 0; i < sizeY; i++)
+                            {
+                                for (int j = 0; j < sizeX; j++)
+                                {
+                                    Color c = bitmap.GetPixel(j, i);
+                                    alpha[i, j] = c.A;
+                                    r[i, j] = c.R;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            alpha = new byte[sizeY, sizeX];
+                            r = new byte[sizeY, sizeX];
+                            g = new byte[sizeY, sizeX];
+                            b = new byte[sizeY, sizeX];
+                            grayscale = false;
+
+                            for (int i = 0; i < sizeY; i++)
+                            {
+                                for (int j = 0; j < sizeX; j++)
+                                {
+                                    Color c = bitmap.GetPixel(j, i);
+                                    alpha[i, j] = c.A;
+                                    r[i, j] = c.R;
+                                    g[i, j] = c.G;
+                                    b[i, j] = c.B;
+                                }
+                            }
+                        }
                     } break;
                 default: { } break;
             }
-            bitmap.UnlockBits(bitmapData);
 
             if (grayscale)
             {
