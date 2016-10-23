@@ -41,7 +41,7 @@ namespace Plugins.Filters.GaussFilter
         {
             float[,] g = new float[size, size];
 
-            float coef1 = (float)(1 / (Math.Sqrt(2 * Math.PI) * sigma));
+            float coef1 = (float)(1 / (2 * Math.PI * sigma * sigma));
             float coef2 = -1 / (2 * sigma * sigma);
             int half = size / 2;
 
