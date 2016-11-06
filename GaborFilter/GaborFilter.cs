@@ -10,7 +10,10 @@ namespace Plugins.Filters.GaborFilter
 {
     public class GaborFilter : IFilter
     {
+        private static string[] intervalEnumValues = { "stretch", "truncate" };
+
         private static readonly List<IParameters> parameters = new List<IParameters>();
+
         static GaborFilter()
         {
             parameters.Add(new ParametersInt32(3, 100, 8, "Size:", DisplayType.textBox));
@@ -19,21 +22,21 @@ namespace Plugins.Filters.GaborFilter
             parameters.Add(new ParametersFloat(0, 3.141592f, 1.5707f, "Phase:", DisplayType.textBox));
             parameters.Add(new ParametersFloat(0, 100, 2, "Bandwidth:", DisplayType.textBox));
             parameters.Add(new ParametersFloat(0, 100, 1, "Aspect Ratio:", DisplayType.textBox));
-            string[] values = { "stretch", "truncate" };
-            parameters.Add(new ParametersEnum("Interval:", 0, values, DisplayType.comboBox));
+            parameters.Add(new ParametersEnum("Interval:", 0, intervalEnumValues, DisplayType.comboBox));
         }
+
         public static List<IParameters> getParametersList()
         {
             return parameters;
         }
 
-        int filterSize;
-        float wavelength;
-        float orientation;
-        float phase;
-        float bandwidth;
-        float aspectRatio;
-        int intervalType;
+        private int filterSize;
+        private float wavelength;
+        private float orientation;
+        private float phase;
+        private float bandwidth;
+        private float aspectRatio;
+        private int intervalType;
 
         public GaborFilter(int filterSize, float wavelength, float orientation, float phase, float bandwidth, float aspectRatio, int intervalType)
         {
@@ -55,7 +58,7 @@ namespace Plugins.Filters.GaborFilter
 
         public ProcessingImage filter(ProcessingImage inputImage)
         {
-            float[,] filter = new float[filterSize, filterSize];
+            float[,] gaborFilterMatrix = new float[filterSize, filterSize];
             float sigma = (float)(wavelength * (1 / Math.PI * Math.Sqrt(Math.Log(2) / 2) * ((Math.Pow(2, bandwidth) + 1) / (Math.Pow(2, bandwidth) - 1))));
 
             for (int x = 0; x < filterSize; x++)
@@ -67,117 +70,41 @@ namespace Plugins.Filters.GaborFilter
 
                     double result = Math.Exp(-(primeX * primeX + aspectRatio * aspectRatio * primeY * primeY) / (2 * sigma * sigma))
                                   * Math.Cos(2 * Math.PI * primeX / wavelength + phase);
-                    filter[y, x] = (float)(result);
+                    gaborFilterMatrix[y, x] = (float)result;
                 }
             }
 
+            ProcessingImage outputImage;
             if (intervalType == 0)
             {
-                ProcessingImage pi = new ProcessingImage();
-                pi.copyAttributesAndAlpha(inputImage);
-                pi.addWatermark("Gabor Filter, size:" + filterSize + ", wavelength:" + wavelength + ", orientation:" + orientation + ", phase:" + phase + ", bandwidth:" + bandwidth + ", aspect ratio:" + aspectRatio + " v1.0 Alex Dorobantiu");
-                inputImage.setSizeX(pi.getSizeX() - filterSize + 1);
-                inputImage.setSizeY(pi.getSizeY() - filterSize + 1);
-                int imageYSize = pi.getSizeY();
-                int imageXSize = pi.getSizeX();
-
+                outputImage = new ProcessingImage();
+                outputImage.copyAttributesAndAlpha(inputImage);
                 if (inputImage.grayscale)
-                {
-                    int[,] filteredImage = new int[imageYSize, imageXSize];
-                    byte[,] g = new byte[imageYSize, imageXSize];
-                    byte[,] ig = inputImage.getGray();
-
-                    int max = int.MinValue;
-                    int min = int.MaxValue;
-
-                    for (int i = 0; i < imageYSize; i++)
-                    {
-                        for (int j = 0; j < imageXSize; j++)
-                        {
-                            float sum = 0;
-                            for (int k = filterSize - 1; k >= 0; k--)
-                                for (int l = filterSize - 1; l >= 0; l--)
-                                    sum += ig[i - k + filterSize - 1, j - l + filterSize - 1] * filter[k, l];
-
-                            if (sum > max) max = (int)sum;
-                            if (sum < min) min = (int)sum;
-                            filteredImage[i, j] = (int)sum;
-                        }
-                    }
-
-                    for (int i = 0; i < imageYSize; i++)
-                        for (int j = 0; j < imageXSize; j++)
-                            g[i, j] = (byte)(((filteredImage[i, j] - min) * 255) / (max - min));
-
-                    pi.setGray(g);
+                {                    
+                    float[,] filteredImage = ProcessingImageUtils.mirroredMarginConvolution(inputImage.getGray(), gaborFilterMatrix);
+                    byte[,] outputGray = ProcessingImageUtils.fitHistogramToDisplay(filteredImage);
+                    outputImage.setGray(outputGray);
                 }
                 else
                 {
-                    int[,] filteredImageR = new int[imageYSize, imageXSize];
-                    int[,] filteredImageG = new int[imageYSize, imageXSize];
-                    int[,] filteredImageB = new int[imageYSize, imageXSize];
-                    byte[,] red = new byte[imageYSize, imageXSize];
-                    byte[,] green = new byte[imageYSize, imageXSize];
-                    byte[,] blue = new byte[imageYSize, imageXSize];
-                    byte[,] ir = inputImage.getRed();
-                    byte[,] ig = inputImage.getGreen();
-                    byte[,] ib = inputImage.getBlue();
-
-                    int maxR = int.MinValue;
-                    int minR = int.MaxValue;
-                    int maxG = int.MinValue;
-                    int minG = int.MaxValue;
-                    int maxB = int.MinValue;
-                    int minB = int.MaxValue;
-
-                    for (int i = 0; i < imageYSize; i++)
-                    {
-                        for (int j = 0; j < imageXSize; j++)
-                        {
-                            float sumR = 0;
-                            float sumG = 0;
-                            float sumB = 0;
-                            for (int k = filterSize - 1; k >= 0; k--)
-                                for (int l = filterSize - 1; l >= 0; l--)
-                                {
-                                    sumR += ir[i - k + filterSize - 1, j - l + filterSize - 1] * filter[k, l];
-                                    sumG += ig[i - k + filterSize - 1, j - l + filterSize - 1] * filter[k, l];
-                                    sumB += ib[i - k + filterSize - 1, j - l + filterSize - 1] * filter[k, l];
-                                }
-                            if (sumR > maxR) maxR = (int)sumR;
-                            if (sumR < minR) minR = (int)sumR;
-                            filteredImageR[i, j] = (int)sumR;
-
-                            if (sumG > maxG) maxG = (int)sumG;
-                            if (sumG < minG) minG = (int)sumG;
-                            filteredImageG[i, j] = (int)sumG;
-
-                            if (sumB > maxB) maxB = (int)sumB;
-                            if (sumB < minB) minB = (int)sumB;
-                            filteredImageB[i, j] = (int)sumB;
-                        }
-                    }
-
-                    for (int i = 0; i < imageYSize; i++)
-                        for (int j = 0; j < imageXSize; j++)
-                        {
-                            red[i, j] = (byte)(((filteredImageR[i, j] - minR) * 255) / (maxR - minR));
-                            green[i, j] = (byte)(((filteredImageG[i, j] - minG) * 255) / (maxG - minG));
-                            blue[i, j] = (byte)(((filteredImageB[i, j] - minB) * 255) / (maxB - minB));
-                        }
-                    pi.setRed(red);
-                    pi.setGreen(green);
-                    pi.setBlue(blue);
+                    float[,] filteredImageR = ProcessingImageUtils.mirroredMarginConvolution(inputImage.getRed(), gaborFilterMatrix);
+                    float[,] filteredImageG = ProcessingImageUtils.mirroredMarginConvolution(inputImage.getGreen(), gaborFilterMatrix);
+                    float[,] filteredImageB = ProcessingImageUtils.mirroredMarginConvolution(inputImage.getBlue(), gaborFilterMatrix);
+                    byte[,] red = ProcessingImageUtils.fitHistogramToDisplay(filteredImageR);
+                    byte[,] green = ProcessingImageUtils.fitHistogramToDisplay(filteredImageG);
+                    byte[,] blue = ProcessingImageUtils.fitHistogramToDisplay(filteredImageB);
+                    outputImage.setRed(red);
+                    outputImage.setGreen(green);
+                    outputImage.setBlue(blue);
                 }
-
-                return pi;
             }
             else
             {
-                ProcessingImage pi = inputImage.convolution(filter);
-                pi.addWatermark("Gabor Filter, size:" + filterSize + ", wavelength:" + wavelength + ", orientation:" + orientation + ", phase:" + phase + ", bandwidth:" + bandwidth + ", aspect ratio:" + aspectRatio + " v1.0 Alex Dorobantiu");
-                return pi;
+                outputImage = inputImage.mirroredMarginConvolution(gaborFilterMatrix);
             }
+            outputImage.addWatermark("Gabor Filter, size:" + filterSize + ", wavelength:" + wavelength + ", orientation:" + orientation + ", phase:" + phase
+                + ", bandwidth:" + bandwidth + ", aspect ratio:" + aspectRatio + ", interval:" + intervalEnumValues[intervalType] + " v1.0, Alex Dorobantiu");
+            return outputImage;
         }
 
         #endregion

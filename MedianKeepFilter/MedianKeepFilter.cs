@@ -11,16 +11,19 @@ namespace Plugins.Filters.MedianKeepFilter
     public class MedianKeepFilter : IFilter
     {
         private static readonly List<IParameters> parameters = new List<IParameters>();
+
         static MedianKeepFilter()
         {
-            parameters.Add(new ParametersInt32(1, 32, 1, "Ordin:", DisplayType.textBox));
+            parameters.Add(new ParametersInt32(1, 32, 1, "Order:", DisplayType.textBox));
         }
+
         public static List<IParameters> getParametersList()
         {
             return parameters;
         }
 
         private int order;
+
         public MedianKeepFilter(int order)
         {
             this.order = order;
@@ -35,72 +38,85 @@ namespace Plugins.Filters.MedianKeepFilter
 
         public ProcessingImage filter(ProcessingImage inputImage)
         {
-            ProcessingImage pi = new ProcessingImage();
-            pi.copyAttributesAndAlpha(inputImage);
-            pi.addWatermark("Median Keep Filter, order: " + order + " v1.0, Alex Dorobantiu");
+            ProcessingImage outputImage = new ProcessingImage();
+            outputImage.copyAttributesAndAlpha(inputImage);
+            outputImage.addWatermark("Median Keep Filter, order: " + order + " v1.0, Alex Dorobantiu");
 
             int medianSize = (2 * order + 1) * (2 * order + 1);
+            int medianPosition = medianSize / 2;
 
             if (!inputImage.grayscale)
             {
-                byte[,] r = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
-                byte[,] g = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
-                byte[,] b = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
+                byte[,] outputRed = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
+                byte[,] outputGreen = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
+                byte[,] outputBlue = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
 
-                byte[,] ir = inputImage.getRed();
-                byte[,] ig = inputImage.getGreen();
-                byte[,] ib = inputImage.getBlue();
-                byte[,] iy = inputImage.getLuminance();
+                byte[,] inputRed = inputImage.getRed();
+                byte[,] inputGreen = inputImage.getGreen();
+                byte[,] inputBlue = inputImage.getBlue();
+                byte[,] inputLuminance = inputImage.getLuminance();
                 
-                byte[] median = new byte[medianSize];
+                byte[] medianLuminance = new byte[medianSize];
 
-                for (int i = order; i < pi.getSizeY() - order; i++)
+                for (int i = order; i < outputImage.getSizeY() - order; i++)
                 {
-                    for (int j = order; j < pi.getSizeX() - order; j++)
+                    for (int j = order; j < outputImage.getSizeX() - order; j++)
                     {
                         int pivot = 0;
                         for (int k = i - order; k <= i + order; k++)
+                        {
                             for (int l = j - order; l <= j + order; l++)
-                                median[pivot++] = iy[k, l];
-                        Array.Sort(median);
-                        byte y = median[medianSize / 2];
+                            {
+                                medianLuminance[pivot++] = inputLuminance[k, l];
+                            }
+                        }
+                        Array.Sort(medianLuminance);
+                        byte y = medianLuminance[medianPosition];
                         for (int k = i - order; k <= i + order; k++)
+                        {
                             for (int l = j - order; l <= j + order; l++)
-                                if (iy[k, l] == y)
+                            {
+                                if (inputLuminance[k, l] == y)
                                 {
-                                    r[i, j] = ir[k, l];
-                                    g[i, j] = ig[k, l];
-                                    b[i, j] = ib[k, l];
+                                    outputRed[i, j] = inputRed[k, l];
+                                    outputGreen[i, j] = inputGreen[k, l];
+                                    outputBlue[i, j] = inputBlue[k, l];
                                     break;
                                 }
+                            }
+                        }
                     }
                 }
-                pi.setRed(r);
-                pi.setGreen(g);
-                pi.setBlue(b);
+                outputImage.setRed(outputRed);
+                outputImage.setGreen(outputGreen);
+                outputImage.setBlue(outputBlue);
             }
             else
             {
-                byte[,] gray = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
-                byte[,] ig = inputImage.getGray();
+                byte[,] outputGray = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
+                byte[,] inputGray = inputImage.getGray();
 
                 byte[] medianGray = new byte[medianSize];
-                for (int i = order; i < pi.getSizeY() - order; i++)
+                for (int i = order; i < outputImage.getSizeY() - order; i++)
                 {
-                    for (int j = order; j < pi.getSizeX() - order; j++)
+                    for (int j = order; j < outputImage.getSizeX() - order; j++)
                     {
                         int pivot = 0;
                         for (int k = i - order; k <= i + order; k++)
+                        {
                             for (int l = j - order; l <= j + order; l++)
-                                medianGray[pivot++] = ig[k, l];
+                            {
+                                medianGray[pivot++] = inputGray[k, l];
+                            }
+                        }
                         Array.Sort(medianGray);
-                        gray[i, j] = medianGray[medianSize / 2];
+                        outputGray[i, j] = medianGray[medianPosition];
                     }
                 }
-                pi.setGray(gray);
+                outputImage.setGray(outputGray);
             }
 
-            return pi;
+            return outputImage;
         }
 
         #endregion

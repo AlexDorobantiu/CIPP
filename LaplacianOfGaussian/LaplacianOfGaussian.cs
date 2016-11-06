@@ -11,16 +11,19 @@ namespace Plugins.Filters.LaplacianOfGaussian
     public class LaplacianOfGaussian : IFilter
     {
         private static readonly List<IParameters> parameters = new List<IParameters>();
+
         static LaplacianOfGaussian()
         {
             parameters.Add(new ParametersInt32(1, 16, 1, "Strength:", DisplayType.textBox));
         }
+
         public static List<IParameters> getParametersList()
         {
             return parameters;
         }
 
         private int strength;
+
         public LaplacianOfGaussian(int strength)
         {
             this.strength = strength;
@@ -30,7 +33,7 @@ namespace Plugins.Filters.LaplacianOfGaussian
 
         public ImageDependencies getImageDependencies()
         {
-            return new ImageDependencies(4, 0, 4, 0);
+            return new ImageDependencies(2, 2, 2, 2);
         }
 
         public ProcessingImage filter(ProcessingImage inputImage)
@@ -49,9 +52,9 @@ namespace Plugins.Filters.LaplacianOfGaussian
             f[3, 2] = -2;
             f[4, 0] = f[4, 1] = f[4, 3] = f[4, 4] = 0;
             f[4, 2] = -1;
-            ProcessingImage pi = inputImage.convolution(f);
-            pi.addWatermark("Low Pass Filter, strength: " + strength + " v1.0, Alex Dorobantiu");
-            return pi;
+            ProcessingImage outputImage = inputImage.mirroredMarginConvolution(f);
+            outputImage.addWatermark("Low Pass Filter, strength: " + strength + " v1.0, Alex Dorobantiu");
+            return outputImage;
         }
 
         #endregion

@@ -5,33 +5,31 @@ using ParametersSDK;
 using Plugins.Filters;
 using ProcessingImageSDK;
 
-namespace SecondDerivativeEdgeDetect
+namespace Plugins.Filters.SecondDerivativeEdgeDetect
 {
     public class SecondDerivativeEdgeDetect : IFilter
     {
-
         public static List<IParameters> getParametersList()
         {
             return new List<IParameters>();
         }
 
-        ProcessingImageSDK.ImageDependencies IFilter.getImageDependencies()
+        public SecondDerivativeEdgeDetect()
+        {
+        }
+
+        public ImageDependencies getImageDependencies()
         {
             return new ImageDependencies(-1, -1, -1, -1);
         }
 
-        ProcessingImageSDK.ProcessingImage IFilter.filter(ProcessingImageSDK.ProcessingImage inputImage)
+        public ProcessingImage filter(ProcessingImageSDK.ProcessingImage inputImage)
         {
-            //this should work only on grayscale images
-            if (!inputImage.grayscale)
-            {
-                return inputImage;
-            }
-
             const int laplacianOfGaussianSize = 5;
-            ProcessingImage pi = new ProcessingImage();
-            pi.copyAttributesAndAlpha(inputImage);
-            pi.addWatermark("Second derivative edge detect, c2015 Alexandru Dorobantiu");
+            ProcessingImage outputImage = new ProcessingImage();
+            outputImage.copyAttributesAndAlpha(inputImage);
+            outputImage.addWatermark("Second derivative edge detect, v1.0, Alex Dorobantiu");
+
             float[,] laplacianOfGaussian = new float[laplacianOfGaussianSize, laplacianOfGaussianSize];
 
             laplacianOfGaussian[0, 0] = 0;
@@ -64,33 +62,17 @@ namespace SecondDerivativeEdgeDetect
             laplacianOfGaussian[4, 3] = 0;
             laplacianOfGaussian[4, 4] = 0;
 
-            float[,] convolutedResult = new float[inputImage.getSizeY(), inputImage.getSizeX()];
+            float[,] convolutedResult = ProcessingImageUtils.mirroredMarginConvolution(inputImage.getGray(), laplacianOfGaussian);
             byte[,] outputGray = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
-            byte[,] inputImageGray = inputImage.getGray();
 
-            for (int i = 0; i < pi.getSizeY() - (laplacianOfGaussianSize - 1); i++)
+            for (int i = 1; i < outputImage.getSizeY() - 1; i++)
             {
-                for (int j = 0; j < pi.getSizeX() - (laplacianOfGaussianSize - 1); j++)
-                {
-                    for (int k = 0; k < laplacianOfGaussianSize; k++)
-                    {
-                        for (int l = 0; l < laplacianOfGaussianSize; l++)
-                        {
-                            convolutedResult[i, j] += laplacianOfGaussian[k, l] * inputImageGray[i + k, j + l];
-                        }
-                    }
-                }
-            }
-
-            for (int i = 1; i < pi.getSizeY() - 1; i++)
-            {
-                for (int j = 1; j < pi.getSizeX() - 1; j++)
+                for (int j = 1; j < outputImage.getSizeX() - 1; j++)
                 {
                     if (convolutedResult[i, j] < 0)
                     {
                         if ((convolutedResult[i - 1, j] > 0) || (convolutedResult[i + 1, j] > 0) || (convolutedResult[i, j + 1] > 0) || (convolutedResult[i, j - 1] > 0) ||
                             (convolutedResult[i - 1, j - 1] > 0) || (convolutedResult[i + 1, j - 1] > 0) || (convolutedResult[i - 1, j + 1] > 0) || (convolutedResult[i + 1, j + 1] > 0))
-                            
                         {
                             outputGray[i, j] = 255;
                         }
@@ -114,9 +96,8 @@ namespace SecondDerivativeEdgeDetect
                 }
             }
 
-            pi.setGray(outputGray);
-
-            return pi;
+            outputImage.setGray(outputGray);
+            return outputImage;
         }
     }
 }

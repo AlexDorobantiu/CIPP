@@ -5,11 +5,12 @@ using ParametersSDK;
 using Plugins.Filters;
 using ProcessingImageSDK;
 
-namespace CropFilter
+namespace Plugins.Filters.CropFilter
 {
     public class CropFilter : IFilter
     {
         private static readonly List<IParameters> parameters = new List<IParameters>();
+
         static CropFilter()
         {
             parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Left:", DisplayType.textBox));
@@ -17,12 +18,14 @@ namespace CropFilter
             parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Top:", DisplayType.textBox));
             parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Bottom:", DisplayType.textBox));
         }
+
         public static List<IParameters> getParametersList()
         {
             return parameters;
         }
 
         private int left, right, top, bottom;
+
         public CropFilter(int left, int right, int top, int bottom)
         {
             this.left = left;
@@ -38,63 +41,61 @@ namespace CropFilter
 
         public ProcessingImage filter(ProcessingImage inputImage)
         {
-            ProcessingImage result = new ProcessingImage();
-            result.setName(inputImage.getName());
+            int outputSizeX = inputImage.getSizeX() - left - right;
+            int outputSizeY = inputImage.getSizeY() - top - bottom;
 
-            int newSizeX = inputImage.getSizeX() - left - right;
-            int newSizeY = inputImage.getSizeY() - top - bottom;
-            if (newSizeX < 0 || newSizeY < 0)
+            if (outputSizeX <= 0 || outputSizeY <= 0)
             {
-                return result;
+                return inputImage;
             }
 
-            result.setSizeX(newSizeX);
-            result.setSizeY(newSizeY);
+            ProcessingImage outputImage = new ProcessingImage();
+            outputImage.initialize(inputImage.getName(), outputSizeX, outputSizeY, false);
 
-            byte[,] alpha = new byte[newSizeY, newSizeX];
-            result.setAlpha(alpha);
-            for (int i = 0; i < newSizeY; i++)
-            {
-                for (int j = 0; j < newSizeX; j++)
-                {
-                    alpha[i, j] = 255;
-                }
-            }
+            byte[,] inputAlpha = inputImage.getAlpha();
+            byte[,] outputAlpha = new byte[outputSizeY, outputSizeX];
 
             if (inputImage.grayscale)
             {
-                byte[,] gray = new byte[newSizeY, newSizeX];
-                result.grayscale = true;
-                result.setGray(gray);
+                byte[,] inputGray = inputImage.getGray();
+                byte[,] outputGray = new byte[outputSizeY, outputSizeX];
 
-                for (int i = 0; i < newSizeY; i++)
+                for (int i = 0; i < outputSizeY; i++)
                 {
-                    for (int j = 0; j < newSizeX; j++)
+                    for (int j = 0; j < outputSizeX; j++)
                     {
-                        gray[i, j] = inputImage.getGray()[i + top, j + left];
+                        outputAlpha[i, j] = inputAlpha[i + top, j + left];
+                        outputGray[i, j] = inputGray[i + top, j + left];
                     }
                 }
+
+                outputImage.setGray(outputGray);
             }
             else
             {
-                byte[,] red = new byte[newSizeY, newSizeX];
-                byte[,] green = new byte[newSizeY, newSizeX];
-                byte[,] blue = new byte[newSizeY, newSizeX];
-                result.setRed(red);
-                result.setGreen(green);
-                result.setBlue(blue);
+                byte[,] outputRed = new byte[outputSizeY, outputSizeX];
+                byte[,] outputGreen = new byte[outputSizeY, outputSizeX];
+                byte[,] outputBlue = new byte[outputSizeY, outputSizeX];
 
-                for (int i = 0; i < newSizeY; i++)
+                for (int i = 0; i < outputSizeY; i++)
                 {
-                    for (int j = 0; j < newSizeX; j++)
+                    for (int j = 0; j < outputSizeX; j++)
                     {
-                        red[i, j] = inputImage.getRed()[i + top, j + left];
-                        green[i, j] = inputImage.getGreen()[i + top, j + left];
-                        blue[i, j] = inputImage.getBlue()[i + top, j + left];
+                        outputAlpha[i, j] = inputAlpha[i + top, j + left];
+                        outputRed[i, j] = inputImage.getRed()[i + top, j + left];
+                        outputGreen[i, j] = inputImage.getGreen()[i + top, j + left];
+                        outputBlue[i, j] = inputImage.getBlue()[i + top, j + left];
                     }
                 }
+
+                outputImage.setRed(outputRed);
+                outputImage.setGreen(outputGreen);
+                outputImage.setBlue(outputBlue);
             }
-            return result;
+            outputImage.setAlpha(outputAlpha);
+
+            outputImage.addWatermark("Crop filter Left: " + left + " Right: " + right + " Top: " + top + " Bottom: " + bottom + " v1.0, Alex Dorobantiu");
+            return outputImage;
         }
     }
 }

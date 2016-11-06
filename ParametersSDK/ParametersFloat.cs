@@ -40,7 +40,9 @@ namespace ParametersSDK
         public List<object> getValues()
         {
             if (valuesList.Count == 0)
+            {
                 valuesList.Add(defaultValue);
+            }
             return valuesList;
         }
 
@@ -56,14 +58,17 @@ namespace ParametersSDK
                 {
                     string n = (string)newValue;
                     string[] values = n.Split(" ".ToCharArray()); //split only for an empty space
-                    foreach (string s in values)
+                    foreach (string value in values)
                     {
                         try
                         {
-                            float value = float.Parse(s);
-                            if (value < minValue) value = minValue;
-                            if (value > maxValue) value = maxValue;
-                            valuesList.Add(value);
+                            if (!string.Empty.Equals(value))
+                            {
+                                float val = float.Parse(value);
+                                if (val < minValue) val = minValue;
+                                if (val > maxValue) val = maxValue;
+                                valuesList.Add(val);
+                            }
                         }
                         catch { }
                     }

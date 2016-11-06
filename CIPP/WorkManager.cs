@@ -284,12 +284,14 @@ namespace CIPP
                     }
                 }
                 else
+                {
                     if (task.taskType == TaskType.mask)
                     {
                         MaskTask m = (MaskTask)task;
-                        addImageResult(m.originalImage.alphaClone(m.result), TaskType.mask);
+                        addImageResult(m.originalImage.cloneAndSubstituteAlpha(m.result), TaskType.mask);
                     }
                     else
+                    {
                         if (task.taskType == TaskType.motionRecognition)
                         {
                             MotionRecognitionTask m = (MotionRecognitionTask)task;
@@ -318,11 +320,15 @@ namespace CIPP
                                 }
                             }
                         }
+                    }
+                }
                 taskList.Remove(task);
                 tasksNumber--;
                 numberChanged(tasksNumber, true);
                 if (taskList.Count == 0 && filterRequests.Count == 0 && maskRequests.Count == 0 && motionRecognitionRequests.Count == 0)
+                {
                     jobDone();
+                }
             }
         }
     }

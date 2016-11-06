@@ -4,12 +4,12 @@ using System.Text;
 
 namespace ParametersSDK
 {
-    public class ParametersInt32: IParameters
+    public class ParametersInt32 : IParameters
     {
         public readonly int minValue;
         public readonly int maxValue;
         public readonly int defaultValue;
-        
+
         private readonly string displayName;
         private readonly DisplayType displayType;
         private List<object> valuesList;
@@ -39,8 +39,10 @@ namespace ParametersSDK
 
         public List<object> getValues()
         {
-            if (valuesList.Count==0)
+            if (valuesList.Count == 0)
+            {
                 valuesList.Add(defaultValue);
+            }
             return valuesList;
         }
 
@@ -56,14 +58,17 @@ namespace ParametersSDK
                 {
                     string n = (string)newValue;
                     string[] values = n.Split(" ".ToCharArray()); //split only for an empty space
-                    foreach (string s in values)
+                    foreach (string value in values)
                     {
                         try
                         {
-                            int value = int.Parse(s);
-                            if (value < minValue) value = minValue;
-                            if (value > maxValue) value = maxValue;
-                            valuesList.Add(value);
+                            if (!string.Empty.Equals(value))
+                            {
+                                int val = int.Parse(value);
+                                if (val < minValue) val = minValue;
+                                if (val > maxValue) val = maxValue;
+                                valuesList.Add(val);
+                            }
                         }
                         catch { }
                     }

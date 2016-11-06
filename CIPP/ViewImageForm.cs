@@ -44,46 +44,46 @@ namespace CIPP
                     {
                         if (blueCheckBox.Checked)
                         {
-                            piBox.Image = pi.getBitmap(BitmapType.AlphaColor);
+                            piBox.Image = pi.getBitmap(ProcessingImageBitmapType.AlphaColor);
                             return;
                         }
-                        piBox.Image = pi.getBitmap(BitmapType.AlphaRedGreen);
+                        piBox.Image = pi.getBitmap(ProcessingImageBitmapType.AlphaRedGreen);
                         return;
                     }
                     if (blueCheckBox.Checked)
                     {
-                        piBox.Image = pi.getBitmap(BitmapType.AlphaRedBlue);
+                        piBox.Image = pi.getBitmap(ProcessingImageBitmapType.AlphaRedBlue);
                         return;
                     }
-                    piBox.Image = pi.getBitmap(BitmapType.AlphaRed);
+                    piBox.Image = pi.getBitmap(ProcessingImageBitmapType.AlphaRed);
                     return;
                 }
                 if (greenCheckBox.Checked)
                 {
                     if (blueCheckBox.Checked)
                     {
-                        piBox.Image = pi.getBitmap(BitmapType.AlphaGreenBlue);
+                        piBox.Image = pi.getBitmap(ProcessingImageBitmapType.AlphaGreenBlue);
                         return;
                     }
-                    piBox.Image = pi.getBitmap(BitmapType.AlphaGreen);
+                    piBox.Image = pi.getBitmap(ProcessingImageBitmapType.AlphaGreen);
                     return;
                 }
                 if (blueCheckBox.Checked)
                 {
-                    piBox.Image = pi.getBitmap(BitmapType.AlphaBlue);
+                    piBox.Image = pi.getBitmap(ProcessingImageBitmapType.AlphaBlue);
                     return;
                 }
                 if (grayCheckButton.Checked)
                 {
-                    piBox.Image = pi.getBitmap(BitmapType.AlphaGray);
+                    piBox.Image = pi.getBitmap(ProcessingImageBitmapType.AlphaGray);
                     return;
                 }
                 if (luminanceCheckButton.Checked)
                 {
-                    piBox.Image = pi.getBitmap(BitmapType.AlphaLuminance);
+                    piBox.Image = pi.getBitmap(ProcessingImageBitmapType.AlphaLuminance);
                     return;
                 }
-                piBox.Image = pi.getBitmap(BitmapType.Alpha);
+                piBox.Image = pi.getBitmap(ProcessingImageBitmapType.Alpha);
                 return;
             }
             if (redCheckBox.Checked)
@@ -92,43 +92,43 @@ namespace CIPP
                 {
                     if (blueCheckBox.Checked)
                     {
-                        piBox.Image = pi.getBitmap(BitmapType.Color);
+                        piBox.Image = pi.getBitmap(ProcessingImageBitmapType.Color);
                         return;
                     }
-                    piBox.Image = pi.getBitmap(BitmapType.RedGreen);
+                    piBox.Image = pi.getBitmap(ProcessingImageBitmapType.RedGreen);
                     return;
                 }
                 if (blueCheckBox.Checked)
                 {
-                    piBox.Image = pi.getBitmap(BitmapType.RedBlue);
+                    piBox.Image = pi.getBitmap(ProcessingImageBitmapType.RedBlue);
                     return;
                 }
-                piBox.Image = pi.getBitmap(BitmapType.Red);
+                piBox.Image = pi.getBitmap(ProcessingImageBitmapType.Red);
                 return;
             }
             if (greenCheckBox.Checked)
             {
                 if (blueCheckBox.Checked)
                 {
-                    piBox.Image = pi.getBitmap(BitmapType.GreenBlue);
+                    piBox.Image = pi.getBitmap(ProcessingImageBitmapType.GreenBlue);
                     return;
                 }
-                piBox.Image = pi.getBitmap(BitmapType.Green);
+                piBox.Image = pi.getBitmap(ProcessingImageBitmapType.Green);
                 return;
             }
             if (blueCheckBox.Checked)
             {
-                piBox.Image = pi.getBitmap(BitmapType.Blue);
+                piBox.Image = pi.getBitmap(ProcessingImageBitmapType.Blue);
                 return;
             }
             if (grayCheckButton.Checked)
             {
-                piBox.Image = pi.getBitmap(BitmapType.Gray);
+                piBox.Image = pi.getBitmap(ProcessingImageBitmapType.Gray);
                 return;
             }
             if (luminanceCheckButton.Checked)
             {
-                piBox.Image = pi.getBitmap(BitmapType.Luminance);
+                piBox.Image = pi.getBitmap(ProcessingImageBitmapType.Luminance);
                 return;
             }
         }

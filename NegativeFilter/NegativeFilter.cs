@@ -28,9 +28,9 @@ namespace Plugins.Filters.NegativeFilter
 
         public ProcessingImage filter(ProcessingImage inputImage)
         {
-            ProcessingImage pi = new ProcessingImage();
-            pi.copyAttributesAndAlpha(inputImage);
-            pi.addWatermark("Negative Filter, v1.0, Alex Dorobantiu");
+            ProcessingImage outputImage = new ProcessingImage();
+            outputImage.copyAttributesAndAlpha(inputImage);
+            outputImage.addWatermark("Negative Filter, v1.0, Alex Dorobantiu");
 
             if (!inputImage.grayscale)
             {
@@ -42,30 +42,34 @@ namespace Plugins.Filters.NegativeFilter
                 byte[,] ig = inputImage.getGreen();
                 byte[,] ib = inputImage.getBlue();
 
-                for (int i = 0; i < pi.getSizeY(); i++)
+                for (int i = 0; i < outputImage.getSizeY(); i++)
                 {
-                    for (int j = 0; j < pi.getSizeX(); j++)
+                    for (int j = 0; j < outputImage.getSizeX(); j++)
                     {
                         r[i, j] = (byte)(255 - ir[i, j]);
                         g[i, j] = (byte)(255 - ig[i, j]);
                         b[i, j] = (byte)(255 - ib[i, j]);
                     }
                 }
-                pi.setRed(r);
-                pi.setGreen(g);
-                pi.setBlue(b);
+                outputImage.setRed(r);
+                outputImage.setGreen(g);
+                outputImage.setBlue(b);
             }
             else
             {
                 byte[,] gray = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
                 byte[,] ig = inputImage.getGray();
-                for (int i = 0; i < pi.getSizeY(); i++)                
-                    for (int j = 0; j < pi.getSizeX(); j++)
+                for (int i = 0; i < outputImage.getSizeY(); i++)
+                {
+                    for (int j = 0; j < outputImage.getSizeX(); j++)
+                    {
                         gray[i, j] = (byte)(255 - ig[i, j]);
-                pi.setGray(gray);
+                    }
+                }
+                outputImage.setGray(gray);
             }
 
-            return pi;
+            return outputImage;
         }
 
         #endregion

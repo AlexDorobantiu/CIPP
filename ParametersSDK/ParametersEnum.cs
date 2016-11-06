@@ -38,7 +38,9 @@ namespace ParametersSDK
         public List<object> getValues()
         {
             if (valuesList.Count == 0)
+            {
                 valuesList.Add(defaultSelected);
+            }
             return valuesList;
         }
 

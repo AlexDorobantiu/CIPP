@@ -11,16 +11,19 @@ namespace Plugins.Filters.HighPassFilter
     public class HighPassFilter : IFilter
     {
         private static readonly List<IParameters> parameters = new List<IParameters>();
+
         static HighPassFilter()
         {
             parameters.Add(new ParametersInt32(1, 3, 2, "Strength:", DisplayType.textBox));
         }
+
         public static List<IParameters> getParametersList()
         {
             return parameters;
         }
 
         private int strength;
+
         public HighPassFilter(int strength)
         {
             this.strength = strength;
@@ -30,7 +33,7 @@ namespace Plugins.Filters.HighPassFilter
 
         public ImageDependencies getImageDependencies()
         {
-            return new ImageDependencies(2, 0, 2, 0);
+            return new ImageDependencies(1, 1, 1, 1);
         }
 
         public ProcessingImage filter(ProcessingImage inputImage)
@@ -57,9 +60,9 @@ namespace Plugins.Filters.HighPassFilter
                     } break;
             }
 
-            ProcessingImage pi = inputImage.convolution(f);
-            pi.addWatermark("High Pass Filter, strength: " + strength + " v1.0, Alex Dorobantiu");
-            return pi;
+            ProcessingImage outputImage = inputImage.mirroredMarginConvolution(f);
+            outputImage.addWatermark("High Pass Filter, strength: " + strength + " v1.0, Alex Dorobantiu");
+            return outputImage;
         }
 
         #endregion

@@ -21,7 +21,7 @@ namespace CIPP
             {
                 p = new PictureBox();
                 p.Size = new Size(motion.imageList[index].getSizeX(), motion.imageList[index].getSizeY());
-                p.BackgroundImage = motion.imageList[index].getBitmap(BitmapType.AlphaColor);
+                p.BackgroundImage = motion.imageList[index].getBitmap(ProcessingImageBitmapType.AlphaColor);
 
                 if (index < motion.imageNumber - 1)
                 {

@@ -73,88 +73,89 @@ namespace CIPP
 
         private void doWork()
         {
-            try
+            displayWorker(Thread.CurrentThread.Name, true);
+            while (true)
             {
-                displayWorker(Thread.CurrentThread.Name, true);
-                while (true)
+                addMessage(Thread.CurrentThread.Name + " requesting task!");
+                Task t = workManager.getTask(RequestType.local);
+
+                if (t == null)
                 {
-                    addMessage(Thread.CurrentThread.Name + " requesting task!");
-                    Task t = workManager.getTask(RequestType.local);
+                    addMessage(Thread.CurrentThread.Name + " finished work!");
+                    break;
+                }
 
-                    if (t == null)
-                    {
-                        addMessage(Thread.CurrentThread.Name + " finished work!");
-                        break;
-                    }
-
-                    addMessage(Thread.CurrentThread.Name + " starting " + t.taskType.ToString() + " task " + t.id);
+                addMessage(Thread.CurrentThread.Name + " starting " + t.taskType.ToString() + " task " + t.id);
+                try
+                {
                     solveTask(t);
                     addMessage(Thread.CurrentThread.Name + " finished task " + t.id);
-                    workManager.taskFinished(t);
                 }
-                displayWorker(Thread.CurrentThread.Name, false);
+                catch (Exception e)
+                {
+                    MessageBox.Show("Task failed with exception: " + e.Message);
+                    addMessage(Thread.CurrentThread.Name + " failed task " + t.id);
+                }                
+                workManager.taskFinished(t);
             }
-            catch { }
+            displayWorker(Thread.CurrentThread.Name, false);
         }
 
         private void solveTask(Task t)
         {
-            try
+            switch (t.taskType)
             {
-                if (t.taskType == TaskType.filter)
-                {
-                    FilterTask f = (FilterTask)t;
+                case TaskType.filter:
+                    {
+                        FilterTask f = (FilterTask)t;
 
-                    PluginInfo pi = null;
-                    foreach (PluginInfo plugIn in filterPluginList)
-                        if (plugIn.fullName == f.pluginFullName)
+                        PluginInfo pi = null;
+                        foreach (PluginInfo plugIn in filterPluginList)
                         {
-                            pi = plugIn;
-                            break;
+                            if (plugIn.fullName == f.pluginFullName)
+                            {
+                                pi = plugIn;
+                                break;
+                            }
                         }
 
-                    IFilter filter = (IFilter)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, f.parameters, null, null);
-                    f.result = filter.filter(f.originalImage);
-                    f.state = true;
-                }
-                else
-                    if (t.taskType == TaskType.mask)
+                        IFilter filter = (IFilter)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, f.parameters, null, null);
+                        f.result = filter.filter(f.originalImage);
+                        f.state = true;
+                    } break;
+                case TaskType.mask:
                     {
                         MaskTask m = (MaskTask)t;
 
                         PluginInfo pi = null;
                         foreach (PluginInfo plugIn in maskPluginList)
+                        {
+                            if (plugIn.fullName == m.pluginFullName)
+                            {
+                                pi = plugIn;
+                                break;
+                            }
+                        }
+                        IMask mask = (IMask)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, m.parameters, null, null);
+                        m.result = mask.mask(m.originalImage);
+                        m.state = true;
+                    } break;
+                case TaskType.motionRecognition:
+                    {
+                        MotionRecognitionTask m = (MotionRecognitionTask)t;
+
+                        PluginInfo pi = null;
+                        foreach (PluginInfo plugIn in motionRecognitionPluginList)
                             if (plugIn.fullName == m.pluginFullName)
                             {
                                 pi = plugIn;
                                 break;
                             }
 
-                        IMask mask = (IMask)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, m.parameters, null, null);
-                        m.result = mask.mask(m.originalImage);
+                        IMotionRecognition motionRecognition = (IMotionRecognition)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, m.parameters, null, null);
+                        m.result = motionRecognition.scan(m.frame, m.nextFrame);
                         m.state = true;
-                    }
-                    else
-                        if (t.taskType == TaskType.motionRecognition)
-                        {
-                            MotionRecognitionTask m = (MotionRecognitionTask)t;
-
-                            PluginInfo pi = null;
-                            foreach (PluginInfo plugIn in motionRecognitionPluginList)
-                                if (plugIn.fullName == m.pluginFullName)
-                                {
-                                    pi = plugIn;
-                                    break;
-                                }
-
-                            IMotionRecognition motionRecognition = (IMotionRecognition)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, m.parameters, null, null);
-                            m.result = motionRecognition.scan(m.frame, m.nextFrame);
-                            m.state = true;
-                        }
-            }
-            catch (Exception e)
-            {
-
+                    } break;
             }
         }
 
