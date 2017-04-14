@@ -45,6 +45,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecondDerivativeEdgeDetect"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CropFilter", "CropFilter\CropFilter.csproj", "{21B70597-575C-4951-A1E0-7A69D19E9793}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CannyFilter", "CannyFilter\CannyFilter.csproj", "{C06D0518-FBA6-4799-8496-0620319A4AD6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KirschFilter", "KirschFilter\KirschFilter.csproj", "{112165E5-4E48-4E8D-8E61-3E6AB7939BB4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -139,6 +143,14 @@ Global
 		{21B70597-575C-4951-A1E0-7A69D19E9793}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21B70597-575C-4951-A1E0-7A69D19E9793}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21B70597-575C-4951-A1E0-7A69D19E9793}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C06D0518-FBA6-4799-8496-0620319A4AD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C06D0518-FBA6-4799-8496-0620319A4AD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C06D0518-FBA6-4799-8496-0620319A4AD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C06D0518-FBA6-4799-8496-0620319A4AD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{112165E5-4E48-4E8D-8E61-3E6AB7939BB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{112165E5-4E48-4E8D-8E61-3E6AB7939BB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{112165E5-4E48-4E8D-8E61-3E6AB7939BB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{112165E5-4E48-4E8D-8E61-3E6AB7939BB4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

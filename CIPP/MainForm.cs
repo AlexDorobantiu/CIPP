@@ -58,6 +58,7 @@ namespace CIPP
 
             TCPConnections = new List<TCPProxy>();
             loadConnectionsFromDisk();
+            updatePlugins_Click(this, null);
         }
 
         private void loadFile(string fileName)

@@ -68,6 +68,8 @@ namespace CIPP
 
     partial class CIPPForm
     {
+        private const int threadStackSize = 8 * (1 << 20);
+
         WorkManager workManager = null;
         private Thread[] threads = null;
 
@@ -375,7 +377,7 @@ namespace CIPP
                         threads = new Thread[numberOfThreads];
                         for (int i = 0; i < threads.Length; i++)
                         {
-                            threads[i] = new Thread(this.doWork);
+                            threads[i] = new Thread(this.doWork, threadStackSize);
                             threads[i].Name = "Local Thread " + i;
                             threads[i].IsBackground = true;
                             threads[i].Start();
@@ -387,7 +389,7 @@ namespace CIPP
                         {
                             if (threads[i].ThreadState == ThreadState.Stopped)
                             {
-                                threads[i] = new Thread(this.doWork);
+                                threads[i] = new Thread(this.doWork, threadStackSize);
                                 threads[i].Name = "Local Thread " + i;
                                 threads[i].IsBackground = true;
                                 threads[i].Start();

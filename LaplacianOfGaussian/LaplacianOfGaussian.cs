@@ -14,7 +14,6 @@ namespace Plugins.Filters.LaplacianOfGaussian
 
         static LaplacianOfGaussian()
         {
-            parameters.Add(new ParametersInt32(1, 16, 1, "Strength:", DisplayType.textBox));
         }
 
         public static List<IParameters> getParametersList()
@@ -22,11 +21,8 @@ namespace Plugins.Filters.LaplacianOfGaussian
             return parameters;
         }
 
-        private int strength;
-
-        public LaplacianOfGaussian(int strength)
+        public LaplacianOfGaussian()
         {
-            this.strength = strength;
         }
 
         #region IFilter Members
@@ -53,7 +49,7 @@ namespace Plugins.Filters.LaplacianOfGaussian
             f[4, 0] = f[4, 1] = f[4, 3] = f[4, 4] = 0;
             f[4, 2] = -1;
             ProcessingImage outputImage = inputImage.mirroredMarginConvolution(f);
-            outputImage.addWatermark("Low Pass Filter, strength: " + strength + " v1.0, Alex Dorobantiu");
+            outputImage.addWatermark("Laplacian of Gaussian Filter v1.0, Alex Dorobantiu");
             return outputImage;
         }
 

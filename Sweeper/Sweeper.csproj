@@ -59,7 +59,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetPath)" "$(SolutionDir)CIPP\bin\$(ConfigurationName)\plugins\motionrecognition\"</PostBuildEvent>
+    <PostBuildEvent>if not exist "$(SolutionDir)CIPP\bin\$(ConfigurationName)\plugins\" mkdir "$(SolutionDir)CIPP\bin\$(ConfigurationName)\plugins\"
+if not exist "$(SolutionDir)CIPP\bin\$(ConfigurationName)\plugins\motionrecognition\" mkdir "$(SolutionDir)CIPP\bin\$(ConfigurationName)\plugins\motionrecognition\"
+copy /Y "$(TargetPath)" "$(SolutionDir)CIPP\bin\$(ConfigurationName)\plugins\motionrecognition\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
