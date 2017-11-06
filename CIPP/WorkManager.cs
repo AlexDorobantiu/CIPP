@@ -12,7 +12,7 @@ using Plugins.MotionRecognition;
 
 namespace CIPP
 {
-    public delegate void addImageCallback(ProcessingImage processingImage, TaskType taskType);
+    public delegate void addImageCallback(ProcessingImage processingImage, TaskTypeEnum taskType);
     public delegate void numberChangedCallBack(int number, bool commandOrTask);
     public delegate void addMotionCallback(Motion motion);
     public delegate void jobFinishedCallback();
@@ -28,7 +28,7 @@ namespace CIPP
         public Queue<MaskCommand> maskRequests = new Queue<MaskCommand>();
         public Queue<MotionRecognitionCommand> motionRecognitionRequests = new Queue<MotionRecognitionCommand>();
 
-        public GranularityType granularityType;
+        public GranularityTypeEnum granularityType;
 
         private List<Task> taskList = new List<Task>();
         private List<Motion> motionList = new List<Motion>();
@@ -42,7 +42,7 @@ namespace CIPP
         private List<PluginInfo> maskPluginList;
         private List<PluginInfo> motionRecognitionPluginList;
 
-        public WorkManager(GranularityType granularityType, addImageCallback addImageResult, addMotionCallback addMotion, jobFinishedCallback jobDone, numberChangedCallBack numberChanged)
+        public WorkManager(GranularityTypeEnum granularityType, addImageCallback addImageResult, addMotionCallback addMotion, jobFinishedCallback jobDone, numberChangedCallBack numberChanged)
         {
             this.granularityType = granularityType;
             this.addImageResult = addImageResult;
@@ -120,14 +120,14 @@ namespace CIPP
                     f = filterRequests.Dequeue();
                     commandsNumber--;
                     numberChanged(commandsNumber, false);
-                    tempTask = new FilterTask(IDGenerator.getID(), f.pluginFullName, f.arguments, f.processingImage);
+                    tempTask = new FilterTask(IdGenerator.getID(), f.pluginFullName, f.arguments, f.processingImage);
 
                     lock (taskList)
                     {
                         taskList.Add(tempTask);
                         tasksNumber++;
                         tempTask.taken = true;
-                        if (granularityType == GranularityType.low)
+                        if (granularityType == GranularityTypeEnum.low)
                         {
                             numberChanged(tasksNumber, true);
                             return tempTask;
@@ -145,12 +145,19 @@ namespace CIPP
                             IFilter filter = (IFilter)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, tempTask.parameters, null, null);
 
                             int subParts = 0;
-                            if (granularityType == GranularityType.medium) subParts = Environment.ProcessorCount;
+                            if (granularityType == GranularityTypeEnum.medium) subParts = Environment.ProcessorCount;
                             else subParts = 2 * Environment.ProcessorCount;
 
-                            ProcessingImage[] images = ((FilterTask)tempTask).originalImage.split(filter.getImageDependencies(), subParts);
-                            if (images == null) return tempTask;
-
+                            ImageDependencies imageDependencies = filter.getImageDependencies();
+                            if (imageDependencies == null)
+                            {
+                                return tempTask;
+                            }
+                            ProcessingImage[] images = ((FilterTask)tempTask).originalImage.split(imageDependencies, subParts);
+                            if (images == null)
+                            {
+                                return tempTask;
+                            }
                             ((FilterTask)tempTask).result = ((FilterTask)tempTask).originalImage.blankClone();
                             ((FilterTask)tempTask).subParts = images.Length;
 
@@ -160,7 +167,7 @@ namespace CIPP
                             FilterTask ft = null;
                             foreach (ProcessingImage p in images)
                             {
-                                ft = new FilterTask(IDGenerator.getID(), tempTask.pluginFullName, tempTask.parameters, p);
+                                ft = new FilterTask(IdGenerator.getID(), tempTask.pluginFullName, tempTask.parameters, p);
                                 ft.parent = (FilterTask)tempTask;
                                 taskList.Add(ft);
                             }
@@ -179,7 +186,7 @@ namespace CIPP
                     commandsNumber--;
                     numberChanged(commandsNumber, false);
 
-                    tempTask = new MaskTask(IDGenerator.getID(), m.pluginFullName, m.arguments, m.processingImage);
+                    tempTask = new MaskTask(IdGenerator.getID(), m.pluginFullName, m.arguments, m.processingImage);
                     lock (taskList)
                     {
                         tasksNumber++;
@@ -197,7 +204,7 @@ namespace CIPP
                     commandsNumber--;
                     numberChanged(commandsNumber, false);
 
-                    Motion motion = new Motion(IDGenerator.getID(), (int)m.arguments[0], (int)m.arguments[1], m.processingImageList);
+                    Motion motion = new Motion(IdGenerator.getID(), (int)m.arguments[0], (int)m.arguments[1], m.processingImageList);
 
                     lock (motionList)
                     {
@@ -209,7 +216,7 @@ namespace CIPP
                         for (int i = 1; i < motion.imageNumber; i++)
                         {
                             tempTask = new MotionRecognitionTask(
-                                IDGenerator.getID(), motion.id, motion.blockSize,
+                                IdGenerator.getID(), motion.id, motion.blockSize,
                                 motion.searchDistance, m.pluginFullName, m.arguments,
                                 motion.imageList[i - 1], motion.imageList[i]);
 
@@ -217,11 +224,11 @@ namespace CIPP
                             taskList.Add(tempTask);
                             tasksNumber++;
 
-                            if (granularityType != GranularityType.low)
+                            if (granularityType != GranularityTypeEnum.low)
                             {
                                 tempTask.taken = true;
                                 int subParts = 0;
-                                if (granularityType == GranularityType.medium) subParts = Environment.ProcessorCount;
+                                if (granularityType == GranularityTypeEnum.medium) subParts = Environment.ProcessorCount;
                                 else subParts = 2 * Environment.ProcessorCount;
 
                                 ProcessingImage[] images1 = ((MotionRecognitionTask)tempTask).frame.split(new ImageDependencies(motion.searchDistance, motion.searchDistance, motion.searchDistance, motion.searchDistance), subParts);
@@ -235,7 +242,7 @@ namespace CIPP
 
                                 for (int j = 0; j < images1.Length; j++)
                                 {
-                                    mrt = new MotionRecognitionTask(IDGenerator.getID(), motion.id, motion.blockSize, motion.searchDistance, tempTask.pluginFullName, tempTask.parameters, images1[j], images2[j]);
+                                    mrt = new MotionRecognitionTask(IdGenerator.getID(), motion.id, motion.blockSize, motion.searchDistance, tempTask.pluginFullName, tempTask.parameters, images1[j], images2[j]);
                                     mrt.parent = (MotionRecognitionTask)tempTask;
                                     taskList.Add(mrt);
                                 }
@@ -243,7 +250,7 @@ namespace CIPP
                         }
                         numberChanged(tasksNumber, true);
 
-                        if (granularityType == GranularityType.low)
+                        if (granularityType == GranularityTypeEnum.low)
                         {
                             tempTask = taskList[taskList.Count - 1];
                             tempTask.taken = true;
@@ -270,7 +277,7 @@ namespace CIPP
 
             lock (taskList)
             {
-                if (task.taskType == TaskType.filter)
+                if (task.taskType == TaskTypeEnum.filter)
                 {
                     FilterTask f = (FilterTask)task;
                     if (f.parent != null)
@@ -280,19 +287,19 @@ namespace CIPP
                     }
                     else
                     {
-                        addImageResult(f.result, TaskType.filter);
+                        addImageResult(f.result, TaskTypeEnum.filter);
                     }
                 }
                 else
                 {
-                    if (task.taskType == TaskType.mask)
+                    if (task.taskType == TaskTypeEnum.mask)
                     {
                         MaskTask m = (MaskTask)task;
-                        addImageResult(m.originalImage.cloneAndSubstituteAlpha(m.result), TaskType.mask);
+                        addImageResult(m.originalImage.cloneAndSubstituteAlpha(m.result), TaskTypeEnum.mask);
                     }
                     else
                     {
-                        if (task.taskType == TaskType.motionRecognition)
+                        if (task.taskType == TaskTypeEnum.motionRecognition)
                         {
                             MotionRecognitionTask m = (MotionRecognitionTask)task;
                             if (m.parent != null)

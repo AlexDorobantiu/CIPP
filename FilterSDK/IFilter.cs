@@ -12,7 +12,7 @@ namespace Plugins.Filters
         //public static List<IParameters> getParametersList()
         //which will return the constructor parameters in the exact order
 
-        //if one cannot tell, return -1 on all fields
+        //if one cannot tell, return null
         ImageDependencies getImageDependencies();
 
         ProcessingImage filter(ProcessingImage inputImage);

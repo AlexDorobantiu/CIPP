@@ -52,7 +52,7 @@ namespace CIPP
                 tcpClient = new TcpClient(hostname, port);
                 networkStream = tcpClient.GetStream();
                 isConnected = true;
-                networkStream.WriteByte((byte)TrasmissionFlags.ClientName);
+                networkStream.WriteByte((byte)TrasmissionFlagsEnum.ClientName);
                 formatter.Serialize(networkStream, Environment.MachineName);
                 networkStream.Flush();
 
@@ -97,7 +97,7 @@ namespace CIPP
                 taskRequests = 0;
                 try
                 {
-                    networkStream.WriteByte((byte)TrasmissionFlags.Listening);
+                    networkStream.WriteByte((byte)TrasmissionFlagsEnum.Listening);
                     postMessage("Listening to " + hostname + ", " + port);
                 }
                 catch (Exception e)
@@ -117,7 +117,7 @@ namespace CIPP
             taskRequests--;
             try
             {
-                networkStream.WriteByte((byte)TrasmissionFlags.Task);
+                networkStream.WriteByte((byte)TrasmissionFlagsEnum.Task);
                 formatter.Serialize(networkStream, task);
                 postMessage("Task sent to " + hostname + " on port " + port);
                 sentSimulations.Add(task);
@@ -133,7 +133,7 @@ namespace CIPP
         {
             try
             {
-                networkStream.WriteByte((byte)TrasmissionFlags.AbortWork);
+                networkStream.WriteByte((byte)TrasmissionFlagsEnum.AbortWork);
                 postMessage("Abort request sent to: " + hostname + " on port: " + port);
                 taskRequests = 0;
                 listening = false;
@@ -154,14 +154,14 @@ namespace CIPP
                     if (header == -1) break;
                     switch (header)
                     {
-                        case (byte)TrasmissionFlags.TaskRequest:
+                        case (byte)TrasmissionFlagsEnum.TaskRequest:
                             {
                                 postWorker("Worker @: " + hostname, false);
                                 TaskRequestReceived(this, EventArgs.Empty);
                                 taskRequests++;
                                 postMessage("Received a task request from " + hostname + " on port " + port);
                             } break;
-                        case (byte)TrasmissionFlags.Result:
+                        case (byte)TrasmissionFlagsEnum.Result:
                             {
                                 ResultPackage resultPackage = (ResultPackage)formatter.Deserialize(networkStream);
                                 if (resultPackage != null)
@@ -181,13 +181,13 @@ namespace CIPP
                                             if (resultPackage.result != null)
                                             {
                                                 tempTask.state = true;
-                                                if (tempTask.taskType == TaskType.filter)
+                                                if (tempTask.taskType == TaskTypeEnum.filter)
                                                     ((FilterTask)tempTask).result = (ProcessingImage)resultPackage.result;
                                                 else
-                                                    if (tempTask.taskType == TaskType.mask)
+                                                    if (tempTask.taskType == TaskTypeEnum.mask)
                                                         ((MaskTask)tempTask).result = (byte[,])resultPackage.result;
                                                     else
-                                                        if (tempTask.taskType == TaskType.motionRecognition)
+                                                        if (tempTask.taskType == TaskTypeEnum.motionRecognition)
                                                             ((MotionRecognitionTask)tempTask).result = (MotionVectorBase[,])resultPackage.result;
 
                                                 sentSimulations.Remove(tempTask);

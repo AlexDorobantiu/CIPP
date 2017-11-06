@@ -107,7 +107,7 @@ namespace CIPP
         {
             switch (t.taskType)
             {
-                case TaskType.filter:
+                case TaskTypeEnum.filter:
                     {
                         FilterTask f = (FilterTask)t;
 
@@ -125,7 +125,7 @@ namespace CIPP
                         f.result = filter.filter(f.originalImage);
                         f.state = true;
                     } break;
-                case TaskType.mask:
+                case TaskTypeEnum.mask:
                     {
                         MaskTask m = (MaskTask)t;
 
@@ -142,7 +142,7 @@ namespace CIPP
                         m.result = mask.mask(m.originalImage);
                         m.state = true;
                     } break;
-                case TaskType.motionRecognition:
+                case TaskTypeEnum.motionRecognition:
                     {
                         MotionRecognitionTask m = (MotionRecognitionTask)t;
 
@@ -340,7 +340,7 @@ namespace CIPP
 
                 if (workManager == null)
                 {
-                    workManager = new WorkManager((GranularityType)localGranularityComboBox.SelectedIndex, addImage, addMotion, jobFinished, numberChanged);
+                    workManager = new WorkManager((GranularityTypeEnum)localGranularityComboBox.SelectedIndex, addImage, addMotion, jobFinished, numberChanged);
                     this.workersList.Items.Add("Manager");
                     workerControlTab.Enabled = false;
                     finishButton.Enabled = true;
@@ -507,7 +507,7 @@ namespace CIPP
             catch { }
         }
 
-        private void addImage(ProcessingImage processingImage, TaskType taskType)
+        private void addImage(ProcessingImage processingImage, TaskTypeEnum taskType)
         {
             try
             {
@@ -518,13 +518,13 @@ namespace CIPP
                 }
                 else
                 {
-                    if (taskType == TaskType.filter)
+                    if (taskType == TaskTypeEnum.filter)
                     {
                         processedImageList.Items.Add(processingImage.getName());
                         processedImageArrayList.Add(processingImage);
                     }
                     else
-                        if (taskType == TaskType.mask)
+                        if (taskType == TaskTypeEnum.mask)
                         {
                             maskedImageList.Items.Add(processingImage.getName());
                             maskedImageArrayList.Add(processingImage);

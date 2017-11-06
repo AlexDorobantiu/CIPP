@@ -80,7 +80,7 @@ namespace CIPPServer
                             object result = null;
                             try
                             {
-                                if (task.taskType == TaskType.filter)
+                                if (task.taskType == TaskTypeEnum.filter)
                                 {
                                     FilterTask f = (FilterTask)task;
 
@@ -96,7 +96,7 @@ namespace CIPPServer
                                     result = filter.filter(f.originalImage);
                                 }
                                 else
-                                    if (task.taskType == TaskType.mask)
+                                    if (task.taskType == TaskTypeEnum.mask)
                                     {
                                         MaskTask m = (MaskTask)task;
 
@@ -112,7 +112,7 @@ namespace CIPPServer
                                         result = mask.mask(m.originalImage);
                                     }
                                     else
-                                        if (task.taskType == TaskType.motionRecognition)
+                                        if (task.taskType == TaskTypeEnum.motionRecognition)
                                         {
                                             MotionRecognitionTask m = (MotionRecognitionTask)task;
 

@@ -60,15 +60,17 @@ namespace CIPPProtocols
                     {
                         if (interfaceType.Equals(searchedInterfaceType))
                         {
+                            List<IParameters> parameterList = null;
                             try
                             {
-                                List<IParameters> parameterList = (List<IParameters>)type.InvokeMember("getParametersList", BindingFlags.Default | BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null, null);
-                                pluginsList.Add(new PluginInfo(type.Name, type.FullName, currentAssembly, type, parameterList));
+                                parameterList = (List<IParameters>)type.InvokeMember("getParametersList", BindingFlags.Default | BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null, null);
                                 break;
                             }
                             catch
                             {
+                                // student care cup
                             }
+                            pluginsList.Add(new PluginInfo(type.Name, type.FullName, currentAssembly, type, parameterList));
                         }
                     }
                 }

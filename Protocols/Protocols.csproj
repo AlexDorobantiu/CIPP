@@ -40,9 +40,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommunicationProtocol.cs" />
+    <Compile Include="ResultPackage.cs" />
+    <Compile Include="FilterTask.cs" />
+    <Compile Include="GranularityTypeEnum.cs" />
+    <Compile Include="MaskTask.cs" />
+    <Compile Include="MotionRecognitionTask.cs" />
+    <Compile Include="Task.cs" />
+    <Compile Include="TaskTypeEnum.cs" />
+    <Compile Include="IdGenerator.cs" />
     <Compile Include="PluginHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TransmissionFlagsEnum.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FilterSDK\FilterSDK.csproj">

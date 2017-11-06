@@ -59,7 +59,7 @@ namespace CIPPServer
                 client = tcpListener.AcceptTcpClient();
                 ns = client.GetStream();
                 header = ns.ReadByte(); //Client Name Byte
-                if (header != (byte)TrasmissionFlags.ClientName)
+                if (header != (byte)TrasmissionFlagsEnum.ClientName)
                     throw new Exception();
 
                 client_name = (string)formatter.Deserialize(ns);
@@ -82,7 +82,7 @@ namespace CIPPServer
                     switch (header)
                     {
                         //Start sending requests
-                        case (byte)TrasmissionFlags.Listening:
+                        case (byte)TrasmissionFlagsEnum.Listening:
                             {
                                 Console.WriteLine("Hired by  " + client_name);
                                 for (int i = 0; i < nrWorkerThreads; i++)
@@ -92,7 +92,7 @@ namespace CIPPServer
                                 }
                             } break;
                         //Receive task
-                        case (byte)TrasmissionFlags.Task:
+                        case (byte)TrasmissionFlagsEnum.Task:
                             {
                                 Task tp = (Task)formatter.Deserialize(ns);
                                 lock (taskBuffer)
@@ -104,7 +104,7 @@ namespace CIPPServer
                                 Console.WriteLine("TaskPackage received from " + client_name);
                             } break;
                         //Stop Working (drop tasks)
-                        case (byte)TrasmissionFlags.AbortWork:
+                        case (byte)TrasmissionFlagsEnum.AbortWork:
                             {
                                 for (int i = 0; i < nrWorkerThreads; i++)
                                 {
@@ -137,7 +137,7 @@ namespace CIPPServer
                 ResultPackage rp = new ResultPackage(taskId, result);
                 try
                 {
-                    ns.WriteByte((byte)TrasmissionFlags.Result);
+                    ns.WriteByte((byte)TrasmissionFlagsEnum.Result);
                     formatter.Serialize(ns, rp);
                     Console.WriteLine("Result sent back to " + client_name);
                 }
@@ -154,7 +154,7 @@ namespace CIPPServer
             {
                 try
                 {
-                    ns.WriteByte((byte)TrasmissionFlags.TaskRequest);
+                    ns.WriteByte((byte)TrasmissionFlagsEnum.TaskRequest);
                     Console.WriteLine("Task request sent to " + client_name + ".");
                 }
                 catch (Exception e)
