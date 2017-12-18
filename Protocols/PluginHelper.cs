@@ -63,14 +63,14 @@ namespace CIPPProtocols
                             List<IParameters> parameterList = null;
                             try
                             {
-                                parameterList = (List<IParameters>)type.InvokeMember("getParametersList", BindingFlags.Default | BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null, null);
-                                break;
+                                parameterList = (List<IParameters>)type.InvokeMember("getParametersList", BindingFlags.Default | BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null, null);                                
                             }
                             catch
                             {
                                 // student care cup
                             }
                             pluginsList.Add(new PluginInfo(type.Name, type.FullName, currentAssembly, type, parameterList));
+                            break;
                         }
                     }
                 }
