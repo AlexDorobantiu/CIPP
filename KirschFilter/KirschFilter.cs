@@ -28,12 +28,15 @@ namespace KirschFilter
         private static int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
         private static int[] dy = { -1, -1, 0, 1, 1, 1, 0, -1 };
 
+        private static string[] stepEnumValues = { "Gauss", "Max Gradient", "Angles", "NMS", "Hyst Threshold" };
+
         public static List<IParameters> getParametersList()
         {
             List<IParameters> parameters = new List<IParameters>();
             parameters.Add(new ParametersFloat(0, 20, 1.4f, "Sigma:", DisplayType.textBox));
             parameters.Add(new ParametersInt32(0, 255, 0, "Threshold low:", DisplayType.textBox));
             parameters.Add(new ParametersInt32(0, 255, 32, "Threshold high:", DisplayType.textBox));
+            parameters.Add(new ParametersEnum("Up to step:", 4, stepEnumValues, DisplayType.listBox));
 
             return parameters;
         }
@@ -41,12 +44,14 @@ namespace KirschFilter
         private float sigma;
         private int thresholdHigh;
         private int thresholdLow;
+        int step;
 
-        public KirschFilter(float sigma, int thresholdLow, int thresholdHigh)
+        public KirschFilter(float sigma, int thresholdLow, int thresholdHigh, int step)
         {
             this.sigma = sigma;
             this.thresholdLow = thresholdLow;
             this.thresholdHigh = thresholdHigh;
+            this.step = step;
         }
 
         #region IFilter Members
@@ -89,22 +94,26 @@ namespace KirschFilter
         {
             ProcessingImage pi = new ProcessingImage();
             pi.initialize(Path.ChangeExtension(inputImage.getName(), ".png"), inputImage.getSizeX(), inputImage.getSizeY());
-            pi.addWatermark("Kirsch Filter sigma: " + sigma.ToString("0.0") + " TL: " + thresholdLow + " TH: " + thresholdHigh + " v1.0, Alexandru Dorobanțiu");
+            pi.addWatermark("Kirsch Filter sigma: " + sigma.ToString("0.0") + " TL: " + thresholdLow + " TH: " + thresholdHigh + " Step: " + stepEnumValues[step] + " v1.0, Alexandru Dorobanțiu");
 
             int imageSizeX = pi.getSizeX();
             int imageSizeY = pi.getSizeY();
             byte[,] inputGray = inputImage.getGray();
 
+            // 1. Gauss
             float[,] gaussConvolutionMatrix = generateNormalizedGaussConvolutionMatrix(sigma, 5);
             float[,] gaussResult = ProcessingImageUtils.mirroredMarginConvolution(inputGray, gaussConvolutionMatrix);
+
+            // 2.1 Gradient
             List<float[,]> results = new List<float[,]>(templates.Count);
             foreach (float[,] template in templates)
             {
                 results.Add(ProcessingImageUtils.mirroredMarginConvolution(gaussResult, template));
             }
 
+            // 2.2 + 3 Max Gradient + Angles
             float[,] amplitudeResult = new float[imageSizeY, imageSizeX];
-            int[,] angleResult = new int[imageSizeY, imageSizeX];
+            int[,] anglesResult = new int[imageSizeY, imageSizeX];
             for (int i = 0; i < imageSizeY; i++)
             {
                 for (int j = 0; j < imageSizeX; j++)
@@ -121,19 +130,21 @@ namespace KirschFilter
                         }
                     }
                     amplitudeResult[i, j] = maxValue;
-                    angleResult[i, j] = direction;
+                    anglesResult[i, j] = direction;
                 }
             }
 
+            // 4. Non maximal suppresion
             float[,] nmsResult = new float[imageSizeY, imageSizeX];
-            for (int i = 1; i < imageSizeY - 1; i++)
+            for (int i = 0; i < imageSizeY; i++)
             {
-                for (int j = 1; j < imageSizeX - 1; j++)
+                for (int j = 0; j < imageSizeX; j++)
                 {
-                    int angle = angleResult[i, j];
+                    int angle = anglesResult[i, j];
                     if (angle == 2 || angle == 6)
                     {
-                        if (amplitudeResult[i, j] > amplitudeResult[i - 1, j] && amplitudeResult[i, j] > amplitudeResult[i + 1, j])
+                        if ((i == 0 || amplitudeResult[i, j] >= amplitudeResult[i - 1, j]) &&
+                            (i == imageSizeY - 1 || amplitudeResult[i, j] > amplitudeResult[i + 1, j]))
                         {
                             nmsResult[i, j] = amplitudeResult[i, j];
                         }
@@ -142,7 +153,8 @@ namespace KirschFilter
                     {
                         if (angle == 1 || angle == 5)
                         {
-                            if (amplitudeResult[i, j] > amplitudeResult[i - 1, j + 1] && amplitudeResult[i, j] > amplitudeResult[i + 1, j - 1])
+                            if ((i == 0 || j == imageSizeX - 1 || amplitudeResult[i, j] >= amplitudeResult[i - 1, j + 1]) &&
+                                (i == imageSizeY - 1 || j == 0 || amplitudeResult[i, j] > amplitudeResult[i + 1, j - 1]))
                             {
                                 nmsResult[i, j] = amplitudeResult[i, j];
                             }
@@ -151,14 +163,16 @@ namespace KirschFilter
                         {
                             if (angle == 3 || angle == 7)
                             {
-                                if (amplitudeResult[i, j] > amplitudeResult[i - 1, j - 1] && amplitudeResult[i, j] > amplitudeResult[i + 1, j + 1])
+                                if ((i == 0 || j == 0 || amplitudeResult[i, j] >= amplitudeResult[i - 1, j - 1]) &&
+                                    (i == imageSizeY - 1 || j == imageSizeX - 1 || amplitudeResult[i, j] > amplitudeResult[i + 1, j + 1]))
                                 {
                                     nmsResult[i, j] = amplitudeResult[i, j];
                                 }
                             }
                             else
                             {
-                                if (amplitudeResult[i, j] > amplitudeResult[i, j - 1] && amplitudeResult[i, j] > amplitudeResult[i, j + 1])
+                                if ((j == 0 || amplitudeResult[i, j] >= amplitudeResult[i, j - 1]) &&
+                                    (j == imageSizeX - 1 || amplitudeResult[i, j] > amplitudeResult[i, j + 1]))
                                 {
                                     nmsResult[i, j] = amplitudeResult[i, j];
                                 }
@@ -168,7 +182,7 @@ namespace KirschFilter
                 }
             }
 
-            // Hysteresis thresolding
+            // 5. Hysteresis thresolding
             float[,] hysteresisResult = new float[imageSizeY, imageSizeX];
             bool[,] retainedPositions = applyHysteresisThreshold(nmsResult, imageSizeX, imageSizeY);
 
@@ -183,8 +197,27 @@ namespace KirschFilter
                 }
             }
 
-            byte[,] outputGray = ProcessingImageUtils.truncateToDisplay(hysteresisResult);
-            pi.setGray(outputGray);
+            // Setup image to show
+            switch (step)
+            {
+                case 0:
+                    pi.setGray(ProcessingImageUtils.truncateToDisplay(gaussResult));
+                    break;
+                case 1:
+                    pi.setGray(ProcessingImageUtils.truncateToDisplay(amplitudeResult));
+                    break;
+                case 2:
+                    pi.setGray(convertAnglesToBytesForPreview(imageSizeY, imageSizeX, anglesResult));
+                    break;
+                case 3:
+                    pi.setGray(ProcessingImageUtils.truncateToDisplay(nmsResult));
+                    break;
+                case 4:
+                    pi.setGray(ProcessingImageUtils.truncateToDisplay(hysteresisResult));
+                    break;
+                default:
+                    break;
+            }
 
             return pi;
         }
@@ -231,6 +264,20 @@ namespace KirschFilter
                 }
             }
             return retained;
+        }
+
+        private byte[,] convertAnglesToBytesForPreview(int newSizeY, int newSizeX, int[,] angles)
+        {
+            byte[,] result = new byte[newSizeY, newSizeX];
+            for (int i = 0; i < newSizeY; i++)
+            {
+                for (int j = 0; j < newSizeX; j++)
+                {
+                    result[i, j] = (byte)(Math.Min(angles[i, j] * 32, 255));
+                }
+            }
+
+            return result;
         }
 
         #endregion

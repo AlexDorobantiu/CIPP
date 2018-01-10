@@ -18,8 +18,8 @@ namespace CannyFilter
         private static string[] stepEnumValues = { "Gauss", "Gradient", "Angles", "NMS", "Hyst Threshold" };
         private static string[] gradientTypeEnumValues = { "Sobel", "Scharr" };
 
-        private static float[,] sobelX = new float[3, 3] { { 1 / 3.0f, 2 / 3.0f, 1 / 3.0f }, { 0, 0, 0 }, { -1 / 3.0f, -2 / 3.0f, -1 / 3.0f } };
-        private static float[,] sobelY = new float[3, 3] { { -1 / 3.0f, 0, 1 / 3.0f }, { -2 / 3.0f, 0, 2 / 3.0f }, { -1 / 3.0f, 0, 1 / 3.0f } };
+        private static float[,] sobelX = new float[3, 3] { { 1 / 4.0f, 2 / 4.0f, 1 / 4.0f }, { 0, 0, 0 }, { -1 / 4.0f, -2 / 4.0f, -1 / 4.0f } };
+        private static float[,] sobelY = new float[3, 3] { { -1 / 4.0f, 0, 1 / 4.0f }, { -2 / 4.0f, 0, 2 / 4.0f }, { -1 / 4.0f, 0, 1 / 4.0f } };
 
         private static float[,] scharrX = new float[3, 3] { { 3 / 16.0f, 10 / 16.0f, 3 / 16.0f }, { 0, 0, 0 }, { -3 / 16.0f, -10 / 16.0f, -3 / 16.0f } };
         private static float[,] scharrY = new float[3, 3] { { -3 / 16.0f, 0, 3 / 16.0f }, { -10 / 16.0f, 0, 10 / 16.0f }, { -3 / 16.0f, 0, 3 / 16.0f } };
@@ -135,14 +135,15 @@ namespace CannyFilter
 
             // 5. Non maximal suppresion
             float[,] nmsResult = new float[imageSizeY, imageSizeX];
-            for (int i = 1; i < imageSizeY - 1; i++)
+            for (int i = 0; i < imageSizeY; i++)
             {
-                for (int j = 1; j < imageSizeX - 1; j++)
+                for (int j = 0; j < imageSizeX; j++)
                 {
                     float angle = anglesResult[i, j];
                     if ((angle <= (5 * Math.PI) / 8 && angle > (3 * Math.PI) / 8) || (angle > -(5 * Math.PI) / 8 && angle <= -(3 * Math.PI) / 8))
                     {
-                        if (amplitudeResult[i, j] > amplitudeResult[i - 1, j] && amplitudeResult[i, j] > amplitudeResult[i + 1, j])
+                        if ((i == 0 || amplitudeResult[i, j] >= amplitudeResult[i - 1, j]) &&
+                            (i == imageSizeY - 1 || amplitudeResult[i, j] > amplitudeResult[i + 1, j]))
                         {
                             nmsResult[i, j] = amplitudeResult[i, j];
                         }
@@ -151,7 +152,8 @@ namespace CannyFilter
                     {
                         if (angle <= (3 * Math.PI) / 8 && angle > Math.PI / 8 || angle > -(7 * Math.PI) / 8 && angle <= -(5 * Math.PI) / 8)
                         {
-                            if (amplitudeResult[i, j] > amplitudeResult[i - 1, j + 1] && amplitudeResult[i, j] > amplitudeResult[i + 1, j - 1])
+                            if ((i == 0 || j == imageSizeX - 1 || amplitudeResult[i, j] >= amplitudeResult[i - 1, j + 1]) &&
+                                (i == imageSizeY - 1 || j == 0 || amplitudeResult[i, j] > amplitudeResult[i + 1, j - 1]))
                             {
                                 nmsResult[i, j] = amplitudeResult[i, j];
                             }
@@ -160,14 +162,16 @@ namespace CannyFilter
                         {
                             if (angle <= (7 * Math.PI / 8) && angle > (5 * Math.PI / 8) || angle > -(3 * Math.PI) / 8 && angle < -(Math.PI / 8))
                             {
-                                if (amplitudeResult[i, j] > amplitudeResult[i - 1, j - 1] && amplitudeResult[i, j] > amplitudeResult[i + 1, j + 1])
+                                if ((i == 0 || j == 0 || amplitudeResult[i, j] >= amplitudeResult[i - 1, j - 1]) &&
+                                    (i == imageSizeY - 1 || j == imageSizeX - 1 || amplitudeResult[i, j] > amplitudeResult[i + 1, j + 1]))
                                 {
                                     nmsResult[i, j] = amplitudeResult[i, j];
                                 }
                             }
                             else
                             {
-                                if (amplitudeResult[i, j] > amplitudeResult[i, j - 1] && amplitudeResult[i, j] > amplitudeResult[i, j + 1])
+                                if ((j == 0 || amplitudeResult[i, j] >= amplitudeResult[i, j - 1]) &&
+                                    (j == imageSizeX - 1 || amplitudeResult[i, j] > amplitudeResult[i, j + 1]))
                                 {
                                     nmsResult[i, j] = amplitudeResult[i, j];
                                 }
@@ -269,8 +273,7 @@ namespace CannyFilter
             {
                 for (int j = 0; j < newSizeX; j++)
                 {
-                    //result[seedY, seedX] = (byte)(((angles[seedY, seedX] + Math.PI / 2) * 255) / Math.PI + 0.5);
-                    result[i, j] = (byte)((Math.Abs(angles[i, j]) * 255) / (Math.PI / 2) + 0.5);
+                    result[i, j] = (byte)(((angles[i, j] + Math.PI / 2) / Math.PI * 255) + 0.5);
                 }
             }
 
