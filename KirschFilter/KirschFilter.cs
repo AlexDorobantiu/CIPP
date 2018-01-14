@@ -28,11 +28,14 @@ namespace KirschFilter
         private static int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
         private static int[] dy = { -1, -1, 0, 1, 1, 1, 0, -1 };
 
+        private static string[] yesNoEnumValues = { "Yes", "No" };
         private static string[] stepEnumValues = { "Gauss", "Max Gradient", "Angles", "NMS", "Hyst Threshold" };
 
         public static List<IParameters> getParametersList()
         {
             List<IParameters> parameters = new List<IParameters>();
+
+            parameters.Add(new ParametersEnum("Apply gauss:", 0, yesNoEnumValues, DisplayType.listBox));
             parameters.Add(new ParametersFloat(0, 20, 1.4f, "Sigma:", DisplayType.textBox));
             parameters.Add(new ParametersInt32(0, 255, 0, "Threshold low:", DisplayType.textBox));
             parameters.Add(new ParametersInt32(0, 255, 32, "Threshold high:", DisplayType.textBox));
@@ -41,13 +44,15 @@ namespace KirschFilter
             return parameters;
         }
 
+        private int applyGauss;
         private float sigma;
         private int thresholdHigh;
         private int thresholdLow;
-        int step;
+        private int step;
 
-        public KirschFilter(float sigma, int thresholdLow, int thresholdHigh, int step)
+        public KirschFilter(int applyGauss, float sigma, int thresholdLow, int thresholdHigh, int step)
         {
+            this.applyGauss = applyGauss;
             this.sigma = sigma;
             this.thresholdLow = thresholdLow;
             this.thresholdHigh = thresholdHigh;
@@ -101,8 +106,17 @@ namespace KirschFilter
             byte[,] inputGray = inputImage.getGray();
 
             // 1. Gauss
-            float[,] gaussConvolutionMatrix = generateNormalizedGaussConvolutionMatrix(sigma, 5);
-            float[,] gaussResult = ProcessingImageUtils.mirroredMarginConvolution(inputGray, gaussConvolutionMatrix);
+            float[,] gaussResult;
+            // Yes option is index 0
+            if (applyGauss == 0)
+            {
+                float[,] gaussConvolutionMatrix = generateNormalizedGaussConvolutionMatrix(sigma, 5);
+                gaussResult = ProcessingImageUtils.mirroredMarginConvolution(inputGray, gaussConvolutionMatrix);
+            }
+            else
+            {
+                gaussResult = ProcessingImageUtils.convertToFloat(inputGray);
+            }
 
             // 2.1 Gradient
             List<float[,]> results = new List<float[,]>(templates.Count);

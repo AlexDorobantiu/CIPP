@@ -9,12 +9,14 @@ namespace CannyFilter
 {
     public class CannyFilter : IFilter
     {
+        private int applyGauss;
         private float sigma;
         private int gradientType;
         private int thresholdHigh;
         private int thresholdLow;
         private int step;
 
+        private static string[] yesNoEnumValues = { "Yes", "No" };
         private static string[] stepEnumValues = { "Gauss", "Gradient", "Angles", "NMS", "Hyst Threshold" };
         private static string[] gradientTypeEnumValues = { "Sobel", "Scharr" };
 
@@ -31,6 +33,7 @@ namespace CannyFilter
         public static List<IParameters> getParametersList()
         {
             List<IParameters> parameters = new List<IParameters>();
+            parameters.Add(new ParametersEnum("Apply gauss:", 0, yesNoEnumValues, DisplayType.listBox));
             parameters.Add(new ParametersFloat(0, 20, 1.4f, "Sigma:", DisplayType.textBox));
             parameters.Add(new ParametersEnum("Gradient type:", 0, gradientTypeEnumValues, DisplayType.listBox));
             parameters.Add(new ParametersInt32(0, 255, 0, "Threshold low:", DisplayType.textBox));
@@ -40,8 +43,9 @@ namespace CannyFilter
             return parameters;
         }
 
-        public CannyFilter(float sigma, int gradientType, int thresholdLow, int thresholdHigh, int step)
+        public CannyFilter(int applyGauss, float sigma, int gradientType, int thresholdLow, int thresholdHigh, int step)
         {
+            this.applyGauss = applyGauss;
             this.sigma = sigma;
             this.gradientType = gradientType;
             this.thresholdLow = thresholdLow;
@@ -94,8 +98,17 @@ namespace CannyFilter
             byte[,] inputGray = inputImage.getGray();
 
             // 1. Gauss
-            float[,] gaussConvolutionMatrix = generateNormalizedGaussConvolutionMatrix(sigma, 5);
-            float[,] gaussResult = ProcessingImageUtils.mirroredMarginConvolution(inputGray, gaussConvolutionMatrix);
+            float[,] gaussResult;
+            // Yes option is index 0
+            if (applyGauss == 0)
+            {
+                float[,] gaussConvolutionMatrix = generateNormalizedGaussConvolutionMatrix(sigma, 5);
+                gaussResult = ProcessingImageUtils.mirroredMarginConvolution(inputGray, gaussConvolutionMatrix);
+            }
+            else
+            {
+                gaussResult = ProcessingImageUtils.convertToFloat(inputGray);
+            }
 
             // 2. Gradient
             float[,] gradientFilterX;

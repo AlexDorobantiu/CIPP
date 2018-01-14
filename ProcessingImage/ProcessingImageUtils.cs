@@ -329,5 +329,22 @@ namespace ProcessingImageSDK
             }
             return result;
         }
+
+        public static float[,] convertToFloat(byte[,] colorChannel)
+        {
+            int sizeX = colorChannel.GetLength(1);
+            int sizeY = colorChannel.GetLength(0);
+            float[,] result = new float[sizeY, sizeX];
+
+            for (int i = 0; i < sizeY; i++)
+            {
+                for (int j = 0; j < sizeX; j++)
+                {
+                    result[i, j] = colorChannel[i, j];
+                }
+            }
+
+            return result;
+        }
     }
 }
