@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 using ParametersSDK;
 using Plugins.Filters;
+using System.Globalization;
 
 namespace CIPP
 {
@@ -84,13 +85,16 @@ namespace CIPP
                             TextBox tb = new TextBox();
                             tb.Size = new Size(60, 20);
                             List<object> values = p.getValues();
-                            if (values.Count == 0) tb.Text = "" + p.defaultValue;
+                            if (values.Count == 0)
+                            {
+                                tb.Text = p.defaultValue.ToString(CultureInfo.InvariantCulture);
+                            }
                             else
                             {
                                 tb.Text = "";
                                 foreach (object o in values)
                                 {
-                                    tb.Text += (float)o + " ";
+                                    tb.Text += ((float)o).ToString(CultureInfo.InvariantCulture) + " ";
                                 }
                             }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Globalization;
 
 namespace ParametersSDK
 {
@@ -57,14 +58,14 @@ namespace ParametersSDK
                 if (newValue.GetType() == typeof(string))
                 {
                     string n = (string)newValue;
-                    string[] values = n.Split(" ".ToCharArray()); //split only for an empty space
+                    string[] values = n.Split(", ".ToCharArray()); //split for comma or empty space
                     foreach (string value in values)
                     {
                         try
                         {
                             if (!string.Empty.Equals(value))
                             {
-                                float val = float.Parse(value);
+                                float val = float.Parse(value, CultureInfo.InvariantCulture);
                                 if (val < minValue) val = minValue;
                                 if (val > maxValue) val = maxValue;
                                 valuesList.Add(val);
