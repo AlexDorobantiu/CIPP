@@ -79,7 +79,7 @@ namespace CIPP
                         motionRecognitionTask.result = motionRecognition.scan(motionRecognitionTask.frame, motionRecognitionTask.nextFrame);
                     } break;
             }
-            task.state = true;
+            task.finishedSuccessfully = true;
         }
 
         private void proxyRequestReceived(object sender, EventArgs e)
@@ -118,20 +118,20 @@ namespace CIPP
                     //original tab
                     case 0:
                         {
-                            selectedImageList = originalImageArrayList;
-                            selectedIndices = originalImageList.SelectedIndices;
+                            selectedImageList = originalImageList;
+                            selectedIndices = originalImageListBox.SelectedIndices;
                         } break;
                     //processed tab
                     case 1:
                         {
-                            selectedImageList = processedImageArrayList;
-                            selectedIndices = processedImageList.SelectedIndices;
+                            selectedImageList = processedImageList;
+                            selectedIndices = processedImageListBox.SelectedIndices;
                         } break;
                     //masked tab
                     case 2:
                         {
-                            selectedImageList = maskedImageArrayList;
-                            selectedIndices = maskedImageList.SelectedIndices;
+                            selectedImageList = maskedImageList;
+                            selectedIndices = maskedImageListBox.SelectedIndices;
                         } break;
                     //scaned tab
                     case 3:
@@ -190,30 +190,35 @@ namespace CIPP
                         List<IParameters> parameterList = plugInList[index].parameters;
                         int parametersNumber = parameterList.Count;
 
+                        // simple backtracking to compute all combinations of parameters
                         if (parametersNumber != 0)
                         {
                             List<object>[] values = new List<object>[parametersNumber];
 
                             int i;
-                            int[] vi = new int[parametersNumber];
+                            int[] valueIndex = new int[parametersNumber];
                             for (i = 0; i < parametersNumber; i++)
                             {
                                 values[i] = parameterList[i].getValues();
-                                vi[i] = -1;
+                                valueIndex[i] = -1;
                             }
 
                             i = 0;
                             while (i >= 0)
                             {
-                                vi[i]++;
-                                if (vi[i] == values[i].Count) i--;
+                                valueIndex[i]++;
+                                if (valueIndex[i] == values[i].Count)
+                                {
+                                    i--;
+                                }
                                 else
-                                    if (i == parametersNumber - 1) //una dintre solutii
+                                {
+                                    if (i == parametersNumber - 1) // one of the solutions
                                     {
                                         object[] combination = new object[parametersNumber];
                                         for (int k = 0; k < parametersNumber; k++)
                                         {
-                                            combination[k] = values[k][vi[k]];
+                                            combination[k] = values[k][valueIndex[k]];
                                         }
                                         switch (processingTab.SelectedIndex)
                                         {
@@ -242,7 +247,11 @@ namespace CIPP
                                                 } break;
                                         }
                                     }
-                                    else vi[++i] = -1;
+                                    else
+                                    {
+                                        valueIndex[++i] = -1;
+                                    }
+                                }
                             }
                         }
                         else
@@ -475,7 +484,7 @@ namespace CIPP
         {
             try
             {
-                if (this.processedImageList.InvokeRequired)
+                if (this.processedImageListBox.InvokeRequired)
                 {
                     addImageCallback d = new addImageCallback(addImage);
                     this.Invoke(d, new object[] { processingImage, taskType });
@@ -484,15 +493,17 @@ namespace CIPP
                 {
                     if (taskType == TaskTypeEnum.filter)
                     {
-                        processedImageList.Items.Add(processingImage.getName());
-                        processedImageArrayList.Add(processingImage);
+                        processedImageListBox.Items.Add(processingImage.getName());
+                        processedImageList.Add(processingImage);
                     }
                     else
+                    {
                         if (taskType == TaskTypeEnum.mask)
                         {
-                            maskedImageList.Items.Add(processingImage.getName());
-                            maskedImageArrayList.Add(processingImage);
+                            maskedImageListBox.Items.Add(processingImage.getName());
+                            maskedImageList.Add(processingImage);
                         }
+                    }
                 }
             }
             catch { }
@@ -502,15 +513,15 @@ namespace CIPP
         {
             try
             {
-                if (this.motionList.InvokeRequired)
+                if (this.motionListBox.InvokeRequired)
                 {
                     addMotionCallback d = new addMotionCallback(addMotion);
                     this.Invoke(d, new object[] { motion });
                 }
                 else
                 {
-                    motionList.Items.Add("Motion " + motion.id);
-                    motionArrayList.Add(motion);
+                    motionListBox.Items.Add("Motion " + motion.id);
+                    motionList.Add(motion);
                 }
             }
             catch { }
@@ -543,7 +554,7 @@ namespace CIPP
         {
             try
             {
-                if (this.processedImageList.InvokeRequired)
+                if (this.processedImageListBox.InvokeRequired)
                 {
                     numberChangedCallBack d = new numberChangedCallBack(numberChanged);
                     this.Invoke(d, new object[] { number, commandOrTask });

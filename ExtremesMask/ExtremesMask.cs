@@ -14,9 +14,9 @@ namespace Plugins.Masks.ExtremesMask
 
         static ExtremesMask()
         {
-            parameters.Add(new ParametersInt32(0, 128, 96, "Upper delta:", DisplayType.textBox));
-            parameters.Add(new ParametersInt32(0, 128, 96, "Lower delta:", DisplayType.textBox));
-            parameters.Add(new ParametersInt32(1, int.MaxValue, 32, "Minimum Area:", DisplayType.textBox));
+            parameters.Add(new ParametersInt32(0, 128, 96, "Upper delta:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersInt32(0, 128, 96, "Lower delta:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersInt32(1, int.MaxValue, 32, "Minimum Area:", ParameterDisplayTypeEnum.textBox));
         }
 
         public static List<IParameters> getParametersList()

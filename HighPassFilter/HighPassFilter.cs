@@ -14,7 +14,7 @@ namespace Plugins.Filters.HighPassFilter
 
         static HighPassFilter()
         {
-            parameters.Add(new ParametersInt32(1, 3, 2, "Strength:", DisplayType.textBox));
+            parameters.Add(new ParametersInt32(1, 3, 2, "Strength:", ParameterDisplayTypeEnum.textBox));
         }
 
         public static List<IParameters> getParametersList()

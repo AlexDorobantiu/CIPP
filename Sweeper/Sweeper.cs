@@ -5,19 +5,21 @@ using System.Text;
 using ProcessingImageSDK;
 using ParametersSDK;
 using Plugins.MotionRecognition;
+using ProcessingImageSDK.MotionVectors;
 
 namespace Plugins.MotionRecognition.Sweeper
 {
     public class Sweeper : IMotionRecognition
     {
         private static readonly List<IParameters> parameters = new List<IParameters>();
+
         static Sweeper()
         {
-            parameters.Add(new ParametersInt32(1, 128, 16, "Block Size:", DisplayType.textBox));
-            parameters.Add(new ParametersInt32(1, 128, 16, "Search Distance:", DisplayType.textBox));
-            string[] values = { "SAD", "SSD", "Corelatie" };
-            parameters.Add(new ParametersEnum("Compare Method:", 1, values, DisplayType.listBox));
-            parameters.Add(new ParametersFloat(-1, 1, 0.5f, "Minimum Corelation:", DisplayType.textBox));
+            parameters.Add(new ParametersInt32(1, 128, 16, "Block Size:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersInt32(1, 128, 16, "Search Distance:", ParameterDisplayTypeEnum.textBox));
+            string[] compareMethodValues = { "SumOfAbsoluteDifferences", "SumOfSquareDistances", "Correlation" };
+            parameters.Add(new ParametersEnum("Compare Method:", 1, compareMethodValues, ParameterDisplayTypeEnum.listBox));
+            parameters.Add(new ParametersFloat(-1, 1, 0.5f, "Minimum Correlation:", ParameterDisplayTypeEnum.textBox));
         }
 
         public static List<IParameters> getParametersList()
@@ -28,26 +30,29 @@ namespace Plugins.MotionRecognition.Sweeper
         int blockSize;
         int searchDistance;
         int compareMethod;
-        float minimumCorelation;
+        float minimumCorrelation;
 
-        public Sweeper(int blockSize, int searchDistance, int compareMethod, float minimumCorelation)
+        public Sweeper(int blockSize, int searchDistance, int compareMethod, float minimumCorrelation)
         {
             this.blockSize = blockSize;
             this.searchDistance = searchDistance;
             this.compareMethod = compareMethod;
-            this.minimumCorelation = minimumCorelation;
+            this.minimumCorrelation = minimumCorrelation;
         }
 
         #region IMotionRecognition Members
 
         public MotionVectorBase[,] scan(ProcessingImage frame, ProcessingImage nextFrame)
         {
-            MotionVectorBase[,] mv = MotionVectors.getMotionVectorArray(frame, blockSize, searchDistance);
+            MotionVectorBase[,] motionVectors = MotionVectorUtils.getMotionVectorArray(frame, blockSize, searchDistance);
 
             int frameSizeX = frame.getSizeX();
             int frameSizeY = frame.getSizeY();
 
-            if (nextFrame.getSizeX() != frameSizeX || nextFrame.getSizeY() != frameSizeY) return mv;
+            if (nextFrame.getSizeX() != frameSizeX || nextFrame.getSizeY() != frameSizeY)
+            {
+                return motionVectors;
+            }
 
             byte[,] image = frame.getGray();
             byte[,] nextImage = nextFrame.getGray();
@@ -63,8 +68,8 @@ namespace Plugins.MotionRecognition.Sweeper
                             int blockX = 0;
                             for (int firstX = searchDistance; firstX < frameSizeX - searchDistance - blockSize + 1; firstX += blockSize)
                             {
-                                int gasitX = 0;
-                                int gasitY = 0;
+                                int foundX = 0;
+                                int foundY = 0;
                                 long bestMatch = long.MaxValue;
                                 for (int i = -searchDistance; i <= searchDistance; i++)
                                 {
@@ -72,25 +77,32 @@ namespace Plugins.MotionRecognition.Sweeper
                                     {
                                         long sum = 0;
                                         for (int y = firstY; y < firstY + blockSize; y++)
+                                        {
                                             for (int x = firstX; x < firstX + blockSize; x++)
                                             {
-                                                int valoareOriginal = image[y, x];
-                                                int valoareCautat = nextImage[y + i, x + j];
+                                                int originalValue = image[y, x];
+                                                int searchValue = nextImage[y + i, x + j];
 
+                                                int difference = searchValue - originalValue;
                                                 if (compareMethod == 0)
-                                                    sum += Math.Abs(valoareCautat - valoareOriginal);
+                                                {
+                                                    sum += Math.Abs(difference);
+                                                }
                                                 else
-                                                    sum += ((valoareCautat - valoareOriginal) * (valoareCautat - valoareOriginal));
+                                                {
+                                                    sum += (difference * difference);
+                                                }
                                             }
+                                        }
                                         if (sum < bestMatch)
                                         {
                                             bestMatch = sum;
-                                            gasitX = j;
-                                            gasitY = i;
+                                            foundX = j;
+                                            foundY = i;
                                         }
                                     }
                                 }
-                                mv[blockY, blockX] = new SimpleMotionVector(gasitX, gasitY);
+                                motionVectors[blockY, blockX] = new SimpleMotionVector(foundX, foundY);
                                 blockX++;
                             }
                             blockY++;
@@ -98,69 +110,75 @@ namespace Plugins.MotionRecognition.Sweeper
                     } break;
                 case 2:
                     {
+                        int blockArea = blockSize * blockSize;
                         int blockY = 0;
                         for (int firstY = searchDistance; firstY < frameSizeY - searchDistance - blockSize + 1; firstY += blockSize)
                         {
                             int blockX = 0;
                             for (int firstX = searchDistance; firstX < frameSizeX - searchDistance - blockSize + 1; firstX += blockSize)
                             {
-
-                                int templateSize = blockSize * blockSize;
                                 int sum = 0;
-                                int sqrsum = 0;
-                                double prodsum = 0;
+                                int squaredSum = 0;
+                                double productSum = 0;
 
                                 for (int i = 0; i < blockSize; i++)
+                                {
                                     for (int j = 0; j < blockSize; j++)
                                     {
                                         int gray = image[firstY + i, firstX + j];
                                         sum += gray;
-                                        sqrsum += gray * gray;
+                                        squaredSum += gray * gray;
                                     }
+                                }
 
-                                double mean_template = (double)sum / templateSize;
-                                double var2template = (double)sqrsum - (((double)sum * sum) / templateSize);
+                                double meanOfOriginal = (double)sum / blockArea;
+                                double varianceOfOriginal = (double)squaredSum - (((double)sum * sum) / blockArea);
 
-                                double corelatieMaxima = double.MinValue;
+                                double maximumCorrelation = double.MinValue;
 
-                                int gasitX = 0;
-                                int gasitY = 0;
-
+                                int foundX = 0;
+                                int foundY = 0;
                                 for (int i = -searchDistance; i <= searchDistance; i++)
                                 {
                                     for (int j = -searchDistance; j <= searchDistance; j++)
                                     {
                                         sum = 0;
-                                        sqrsum = 0;
-                                        prodsum = 0;
+                                        squaredSum = 0;
+                                        productSum = 0;
                                         for (int y = firstY; y < firstY + blockSize; y++)
+                                        {
                                             for (int x = firstX; x < firstX + blockSize; x++)
                                             {
-                                                int cImage = nextImage[y + i, x + j];
-                                                int cTemplate = image[y, x];
+                                                int originalValue = image[y, x];
+                                                int searchValue = nextImage[y + i, x + j];
 
-                                                sum += cImage;
-                                                sqrsum += cImage * cImage;
-                                                prodsum += cImage * cTemplate;
-                                            }
-                                        double var2image = (double)sqrsum - (((double)sum * sum) / templateSize);
-                                        double radical = Math.Sqrt(var2image * var2template);
-                                        if (radical != 0)
-                                        {
-                                            double coeficientCorelatie = (prodsum - (mean_template * sum)) / radical;
-                                            if (coeficientCorelatie > corelatieMaxima)
-                                            {
-                                                corelatieMaxima = coeficientCorelatie;
-                                                gasitY = i;
-                                                gasitX = j;
+                                                sum += searchValue;
+                                                squaredSum += searchValue * searchValue;
+                                                productSum += searchValue * originalValue;
                                             }
                                         }
-                                    }                                   
+                                        double varianceOfSearch = (double)squaredSum - (((double)sum * sum) / blockArea);
+                                        double squareRootOfVariancesProduct = Math.Sqrt(varianceOfSearch * varianceOfOriginal);
+                                        if (squareRootOfVariancesProduct != 0)
+                                        {
+                                            double correlationCoeficient = (productSum - (meanOfOriginal * sum)) / squareRootOfVariancesProduct;
+                                            if (correlationCoeficient > maximumCorrelation)
+                                            {
+                                                maximumCorrelation = correlationCoeficient;
+                                                foundY = i;
+                                                foundX = j;
+                                            }
+                                        }
+                                    }
                                 }
-                                if (corelatieMaxima > minimumCorelation)                                
-                                    mv[blockY, blockX] = new SimpleMotionVector(gasitX, gasitY);                                
+                                if (maximumCorrelation > minimumCorrelation)
+                                {
+                                    motionVectors[blockY, blockX] = new SimpleMotionVector(foundX, foundY);
+                                }
                                 else
-                                    mv[blockY, blockX] = new SimpleMotionVector(0, 0);
+                                {
+                                    motionVectors[blockY, blockX] = new SimpleMotionVector(0, 0);
+                                }
                                 blockX++;
                             }
                             blockY++;
@@ -168,7 +186,7 @@ namespace Plugins.MotionRecognition.Sweeper
                     } break;
 
             }
-            return mv;
+            return motionVectors;
         }
 
         #endregion

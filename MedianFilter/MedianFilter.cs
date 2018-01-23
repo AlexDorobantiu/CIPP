@@ -14,7 +14,7 @@ namespace Plugins.Filters.MedianFilter
 
         static MedianFilter()
         {
-            parameters.Add(new ParametersInt32(1, 32, 1, "Order:", DisplayType.textBox));
+            parameters.Add(new ParametersInt32(1, 32, 1, "Order:", ParameterDisplayTypeEnum.textBox));
         }
 
         public static List<IParameters> getParametersList()

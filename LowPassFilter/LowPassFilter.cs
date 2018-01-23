@@ -14,7 +14,7 @@ namespace Plugins.Filters.LowPassFilter
 
         static LowPassFilter()
         {
-            parameters.Add(new ParametersInt32(1, 16, 1, "Strength:", DisplayType.textBox));
+            parameters.Add(new ParametersInt32(1, 16, 1, "Strength:", ParameterDisplayTypeEnum.textBox));
         }
 
         public static List<IParameters> getParametersList()

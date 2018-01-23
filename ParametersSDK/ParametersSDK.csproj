@@ -41,13 +41,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IParameters.cs" />
+    <Compile Include="ParameterDisplayTypeEnum.cs" />
     <Compile Include="ParametersEnum.cs" />
     <Compile Include="ParametersFloat.cs" />
     <Compile Include="ParametersInt32.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Parameters Class Diagram.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

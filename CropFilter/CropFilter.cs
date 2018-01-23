@@ -13,10 +13,10 @@ namespace Plugins.Filters.CropFilter
 
         static CropFilter()
         {
-            parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Left:", DisplayType.textBox));
-            parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Rigth:", DisplayType.textBox));
-            parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Top:", DisplayType.textBox));
-            parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Bottom:", DisplayType.textBox));
+            parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Left:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Rigth:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Top:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Bottom:", ParameterDisplayTypeEnum.textBox));
         }
 
         public static List<IParameters> getParametersList()

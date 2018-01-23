@@ -11,10 +11,10 @@ namespace ParametersSDK
         public readonly int defaultValue;
 
         private readonly string displayName;
-        private readonly DisplayType displayType;
+        private readonly ParameterDisplayTypeEnum displayType;
         private List<object> valuesList;
 
-        public ParametersInt32(int minValue, int maxValue, int defaultValue, string displayName, DisplayType displayType)
+        public ParametersInt32(int minValue, int maxValue, int defaultValue, string displayName, ParameterDisplayTypeEnum displayType)
         {
             this.minValue = minValue;
             this.maxValue = maxValue;
@@ -32,7 +32,7 @@ namespace ParametersSDK
             return displayName;
         }
 
-        public DisplayType getPreferredDisplayType()
+        public ParameterDisplayTypeEnum getPreferredDisplayType()
         {
             return displayType;
         }
@@ -54,10 +54,11 @@ namespace ParametersSDK
                 valuesList.Add(newValue);
             }
             else
+            {
                 if (newValue.GetType() == typeof(string))
                 {
                     string n = (string)newValue;
-                    string[] values = n.Split(" ".ToCharArray()); //split only for an empty space
+                    string[] values = n.Split(", ".ToCharArray()); // split for comma or empty space
                     foreach (string value in values)
                     {
                         try
@@ -65,14 +66,21 @@ namespace ParametersSDK
                             if (!string.Empty.Equals(value))
                             {
                                 int val = int.Parse(value);
-                                if (val < minValue) val = minValue;
-                                if (val > maxValue) val = maxValue;
+                                if (val < minValue)
+                                {
+                                    val = minValue;
+                                }
+                                if (val > maxValue)
+                                {
+                                    val = maxValue;
+                                }
                                 valuesList.Add(val);
                             }
                         }
                         catch { }
                     }
                 }
+            }
         }
         #endregion
     }

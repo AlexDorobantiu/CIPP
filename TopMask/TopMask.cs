@@ -14,8 +14,8 @@ namespace Plugins.Masks.TopMask
 
         static TopMask()
         {
-            parameters.Add(new ParametersInt32(0, 255, 128, "Upper delta:", DisplayType.textBox));
-            parameters.Add(new ParametersInt32(1, int.MaxValue, 32, "Minimum Area:", DisplayType.textBox));
+            parameters.Add(new ParametersInt32(0, 255, 128, "Upper delta:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersInt32(1, int.MaxValue, 32, "Minimum Area:", ParameterDisplayTypeEnum.textBox));
         }
 
         public static List<IParameters> getParametersList()

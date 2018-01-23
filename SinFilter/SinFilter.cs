@@ -15,9 +15,9 @@ namespace Plugins.Filters.SinFilter
 
         static SinFilter()
         {
-            parameters.Add(new ParametersInt32(3, 32, 5, "Size:", DisplayType.textBox));           
+            parameters.Add(new ParametersInt32(3, 32, 5, "Size:", ParameterDisplayTypeEnum.textBox));           
             
-            parameters.Add(new ParametersEnum("Direction:", 0, directionValues, DisplayType.listBox));
+            parameters.Add(new ParametersEnum("Direction:", 0, directionValues, ParameterDisplayTypeEnum.listBox));
         }
 
         public static List<IParameters> getParametersList()

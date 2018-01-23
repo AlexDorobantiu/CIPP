@@ -9,11 +9,11 @@ namespace ParametersSDK
         public readonly int defaultSelected;
         public readonly String[] displayValues;
         private readonly string displayName;
-        private readonly DisplayType displayType;
+        private readonly ParameterDisplayTypeEnum displayType;
 
         private List<object> valuesList;
 
-        public ParametersEnum(string displayName, int defaultSelected, String[] displayValues, DisplayType displayType)
+        public ParametersEnum(string displayName, int defaultSelected, String[] displayValues, ParameterDisplayTypeEnum displayType)
         {
             this.displayName = displayName;
             this.defaultSelected = defaultSelected;
@@ -30,7 +30,7 @@ namespace ParametersSDK
             return displayName;
         }
 
-        public DisplayType getPreferredDisplayType()
+        public ParameterDisplayTypeEnum getPreferredDisplayType()
         {
             return displayType;
         }
@@ -52,6 +52,7 @@ namespace ParametersSDK
                 valuesList.Add(newValue);
             }
             else
+            {
                 if (newValue.GetType() == typeof(int[]))
                 {
                     foreach (int i in (int[])newValue)
@@ -59,6 +60,7 @@ namespace ParametersSDK
                         valuesList.Add(i);
                     }
                 }
+            }
         }
 
         #endregion

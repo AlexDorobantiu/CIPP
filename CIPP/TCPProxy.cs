@@ -10,6 +10,7 @@ using System.Threading;
 using CIPPProtocols;
 using ProcessingImageSDK;
 using CIPPProtocols.Tasks;
+using ProcessingImageSDK.MotionVectors;
 
 namespace CIPP
 {
@@ -49,11 +50,11 @@ namespace CIPP
             {
                 tcpClient = new TcpClient(hostname, port);
                 networkStream = tcpClient.GetStream();
-                connected = true;
                 networkStream.WriteByte((byte)TrasmissionFlagsEnum.ClientName);
                 formatter.Serialize(networkStream, Environment.MachineName);
                 networkStream.Flush();
-
+                connected = true;
+                
                 postMessage("Connected to " + hostname + " on port " + port);
                 isConnectionThreadRunning = true;
                 listeningThread = new Thread(handleConnection);
@@ -175,42 +176,38 @@ namespace CIPP
                                     lock (sentSimulations)
                                     {
                                         foreach (Task task in sentSimulations)
+                                        {
                                             if (task.id == resultPackage.taskId)
                                             {
                                                 tempTask = task;
                                                 break;
                                             }
+                                        }
 
                                         if (tempTask != null)
                                         {
                                             if (resultPackage.result != null)
-                                            {
-                                                tempTask.state = true;
-                                                if (tempTask.taskType == TaskTypeEnum.filter)
+                                            {                                                
+                                                switch (tempTask.taskType)
                                                 {
-                                                    ((FilterTask)tempTask).result = (ProcessingImage)resultPackage.result;
-                                                }
-                                                else
-                                                {
-                                                    if (tempTask.taskType == TaskTypeEnum.mask)
-                                                    {
+                                                    case TaskTypeEnum.filter:
+                                                        ((FilterTask)tempTask).result = (ProcessingImage)resultPackage.result; 
+                                                        break;
+                                                    case TaskTypeEnum.mask:
                                                         ((MaskTask)tempTask).result = (byte[,])resultPackage.result;
-                                                    }
-                                                    else
-                                                    {
-                                                        if (tempTask.taskType == TaskTypeEnum.motionRecognition)
-                                                        {
-                                                            ((MotionRecognitionTask)tempTask).result = (MotionVectorBase[,])resultPackage.result;
-                                                        }
-                                                    }
+                                                        break;
+                                                    case TaskTypeEnum.motionRecognition:
+                                                        ((MotionRecognitionTask)tempTask).result = (MotionVectorBase[,])resultPackage.result;
+                                                        break;
                                                 }
+                                                tempTask.finishedSuccessfully = true;
                                                 sentSimulations.Remove(tempTask);
                                                 resultsReceivedEventHandler(this, new ResultReceivedEventArgs(tempTask));
                                                 postMessage("Received a result from " + hostname + " on port " + port + " ");
                                             }
                                             else
                                             {
-                                                tempTask.state = false;
+                                                tempTask.finishedSuccessfully = false;
                                                 sentSimulations.Remove(tempTask);
                                                 resultsReceivedEventHandler(this, new ResultReceivedEventArgs(tempTask));
                                                 postMessage("Task " + tempTask.id + " not completed succesfuly by " + hostname + " on port " + port + " ");

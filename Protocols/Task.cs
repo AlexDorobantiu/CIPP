@@ -13,6 +13,6 @@ namespace CIPPProtocols
         public object[] parameters;
 
         public bool taken;
-        public bool state;
+        public bool finishedSuccessfully;
     }
 }

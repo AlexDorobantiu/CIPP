@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using ProcessingImageSDK.MotionVectors;
 
 namespace ProcessingImageSDK
 {
@@ -28,16 +29,19 @@ namespace ProcessingImageSDK
         public void addMotionVectors(ProcessingImage image, MotionVectorBase[,] vectors)
         {
             for (int i = 0; i < imageNumber; i++)
+            {
                 if (image == imageList[i])
                 {
                     this.vectors[i] = vectors;
                     missingVectors--;
                     break;
                 }
+            }
         }
 
         public void save(string fileName)
         {
+            throw new NotImplementedException();
         }
     }
 }

@@ -46,16 +46,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ImageDependencies.cs" />
+    <Compile Include="MotionVectors\AdvancedMotionVector.cs" />
+    <Compile Include="MotionVectors\DepthMotionVector.cs" />
+    <Compile Include="MotionVectors\MotionVectorBase.cs" />
+    <Compile Include="MotionVectors\SimpleMotionVector.cs" />
+    <Compile Include="MotionVectorTypeEnum.cs" />
+    <Compile Include="PixelStructures\Pixel24Bpp.cs" />
+    <Compile Include="PixelStructures\Pixel32Bpp.cs" />
+    <Compile Include="PixelStructures\Pixel8Bpp.cs" />
     <Compile Include="ProcessingImageBitmapType.cs" />
     <Compile Include="Motion.cs" />
-    <Compile Include="MotionVectors.cs" />
+    <Compile Include="MotionVectorUtils.cs" />
     <Compile Include="ProcessingImage.cs" />
-    <Compile Include="ProcessingImagePixelStructures.cs" />
     <Compile Include="ProcessingImageUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Processing Image Class Diagram.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -24,7 +24,7 @@ namespace CIPPProtocols.Tasks
         {
             this.taskType = TaskTypeEnum.filter;
             this.taken = false;
-            this.state = false;
+            this.finishedSuccessfully = false;
             subParts = 0;
             parent = null;
 
@@ -42,7 +42,7 @@ namespace CIPPProtocols.Tasks
             subParts--;
             if (subParts == 0)
             {
-                state = true;
+                finishedSuccessfully = true;
             }
         }
     }

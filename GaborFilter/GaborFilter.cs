@@ -16,13 +16,13 @@ namespace Plugins.Filters.GaborFilter
 
         static GaborFilter()
         {
-            parameters.Add(new ParametersInt32(3, 100, 8, "Size:", DisplayType.textBox));
-            parameters.Add(new ParametersFloat(1, 100, 8, "Wavelength:", DisplayType.textBox));
-            parameters.Add(new ParametersFloat(0, 3.141592f, 0, "Orientation:", DisplayType.textBox));
-            parameters.Add(new ParametersFloat(0, 3.141592f, 1.5707f, "Phase:", DisplayType.textBox));
-            parameters.Add(new ParametersFloat(0, 100, 2, "Bandwidth:", DisplayType.textBox));
-            parameters.Add(new ParametersFloat(0, 100, 1, "Aspect Ratio:", DisplayType.textBox));
-            parameters.Add(new ParametersEnum("Interval:", 0, intervalEnumValues, DisplayType.comboBox));
+            parameters.Add(new ParametersInt32(3, 100, 8, "Size:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersFloat(1, 100, 8, "Wavelength:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersFloat(0, 3.141592f, 0, "Orientation:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersFloat(0, 3.141592f, 1.5707f, "Phase:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersFloat(0, 100, 2, "Bandwidth:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersFloat(0, 100, 1, "Aspect Ratio:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersEnum("Interval:", 0, intervalEnumValues, ParameterDisplayTypeEnum.comboBox));
         }
 
         public static List<IParameters> getParametersList()

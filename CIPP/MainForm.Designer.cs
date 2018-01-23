@@ -68,13 +68,13 @@ namespace CIPP
             this.previewPicture = new System.Windows.Forms.PictureBox();
             this.imageTab = new System.Windows.Forms.TabControl();
             this.originalImageTab = new System.Windows.Forms.TabPage();
-            this.originalImageList = new System.Windows.Forms.ListBox();
+            this.originalImageListBox = new System.Windows.Forms.ListBox();
             this.processedImageTab = new System.Windows.Forms.TabPage();
-            this.processedImageList = new System.Windows.Forms.ListBox();
+            this.processedImageListBox = new System.Windows.Forms.ListBox();
             this.maskedImageTab = new System.Windows.Forms.TabPage();
-            this.maskedImageList = new System.Windows.Forms.ListBox();
+            this.maskedImageListBox = new System.Windows.Forms.ListBox();
             this.scanedImageTab = new System.Windows.Forms.TabPage();
-            this.motionList = new System.Windows.Forms.ListBox();
+            this.motionListBox = new System.Windows.Forms.ListBox();
             this.workerControlAreaGroup = new System.Windows.Forms.GroupBox();
             this.workerControlTab = new System.Windows.Forms.TabControl();
             this.localTab = new System.Windows.Forms.TabPage();
@@ -574,7 +574,7 @@ namespace CIPP
             // 
             // originalImageTab
             // 
-            this.originalImageTab.Controls.Add(this.originalImageList);
+            this.originalImageTab.Controls.Add(this.originalImageListBox);
             this.originalImageTab.Location = new System.Drawing.Point(4, 25);
             this.originalImageTab.Margin = new System.Windows.Forms.Padding(0);
             this.originalImageTab.Name = "originalImageTab";
@@ -582,27 +582,27 @@ namespace CIPP
             this.originalImageTab.TabIndex = 0;
             this.originalImageTab.Text = "original";
             // 
-            // originalImageList
+            // originalImageListBox
             // 
-            this.originalImageList.AllowDrop = true;
-            this.originalImageList.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.originalImageList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.originalImageList.FormattingEnabled = true;
-            this.originalImageList.HorizontalScrollbar = true;
-            this.originalImageList.IntegralHeight = false;
-            this.originalImageList.Location = new System.Drawing.Point(0, 0);
-            this.originalImageList.Margin = new System.Windows.Forms.Padding(0);
-            this.originalImageList.Name = "originalImageList";
-            this.originalImageList.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.originalImageList.Size = new System.Drawing.Size(207, 206);
-            this.originalImageList.TabIndex = 0;
-            this.originalImageList.SelectedIndexChanged += new System.EventHandler(this.originalImageList_SelectedIndexChanged);
-            this.originalImageList.DragDrop += new System.Windows.Forms.DragEventHandler(this.originalImageList_DragDrop);
-            this.originalImageList.DragEnter += new System.Windows.Forms.DragEventHandler(this.originalImageList_DragEnter);
+            this.originalImageListBox.AllowDrop = true;
+            this.originalImageListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.originalImageListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.originalImageListBox.FormattingEnabled = true;
+            this.originalImageListBox.HorizontalScrollbar = true;
+            this.originalImageListBox.IntegralHeight = false;
+            this.originalImageListBox.Location = new System.Drawing.Point(0, 0);
+            this.originalImageListBox.Margin = new System.Windows.Forms.Padding(0);
+            this.originalImageListBox.Name = "originalImageListBox";
+            this.originalImageListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.originalImageListBox.Size = new System.Drawing.Size(207, 206);
+            this.originalImageListBox.TabIndex = 0;
+            this.originalImageListBox.SelectedIndexChanged += new System.EventHandler(this.originalImageList_SelectedIndexChanged);
+            this.originalImageListBox.DragDrop += new System.Windows.Forms.DragEventHandler(this.originalImageList_DragDrop);
+            this.originalImageListBox.DragEnter += new System.Windows.Forms.DragEventHandler(this.originalImageList_DragEnter);
             // 
             // processedImageTab
             // 
-            this.processedImageTab.Controls.Add(this.processedImageList);
+            this.processedImageTab.Controls.Add(this.processedImageListBox);
             this.processedImageTab.Location = new System.Drawing.Point(4, 25);
             this.processedImageTab.Margin = new System.Windows.Forms.Padding(0);
             this.processedImageTab.Name = "processedImageTab";
@@ -610,63 +610,63 @@ namespace CIPP
             this.processedImageTab.TabIndex = 1;
             this.processedImageTab.Text = "processed";
             // 
-            // processedImageList
+            // processedImageListBox
             // 
-            this.processedImageList.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.processedImageList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.processedImageList.FormattingEnabled = true;
-            this.processedImageList.IntegralHeight = false;
-            this.processedImageList.Location = new System.Drawing.Point(0, 0);
-            this.processedImageList.Margin = new System.Windows.Forms.Padding(0);
-            this.processedImageList.Name = "processedImageList";
-            this.processedImageList.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.processedImageList.Size = new System.Drawing.Size(207, 206);
-            this.processedImageList.TabIndex = 1;
-            this.processedImageList.SelectedIndexChanged += new System.EventHandler(this.originalImageList_SelectedIndexChanged);
+            this.processedImageListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.processedImageListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.processedImageListBox.FormattingEnabled = true;
+            this.processedImageListBox.IntegralHeight = false;
+            this.processedImageListBox.Location = new System.Drawing.Point(0, 0);
+            this.processedImageListBox.Margin = new System.Windows.Forms.Padding(0);
+            this.processedImageListBox.Name = "processedImageListBox";
+            this.processedImageListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.processedImageListBox.Size = new System.Drawing.Size(207, 206);
+            this.processedImageListBox.TabIndex = 1;
+            this.processedImageListBox.SelectedIndexChanged += new System.EventHandler(this.originalImageList_SelectedIndexChanged);
             // 
             // maskedImageTab
             // 
-            this.maskedImageTab.Controls.Add(this.maskedImageList);
+            this.maskedImageTab.Controls.Add(this.maskedImageListBox);
             this.maskedImageTab.Location = new System.Drawing.Point(4, 25);
             this.maskedImageTab.Name = "maskedImageTab";
             this.maskedImageTab.Size = new System.Drawing.Size(207, 206);
             this.maskedImageTab.TabIndex = 2;
             this.maskedImageTab.Text = "masked";
             // 
-            // maskedImageList
+            // maskedImageListBox
             // 
-            this.maskedImageList.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.maskedImageList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.maskedImageList.FormattingEnabled = true;
-            this.maskedImageList.IntegralHeight = false;
-            this.maskedImageList.Location = new System.Drawing.Point(0, 0);
-            this.maskedImageList.Name = "maskedImageList";
-            this.maskedImageList.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.maskedImageList.Size = new System.Drawing.Size(207, 206);
-            this.maskedImageList.TabIndex = 1;
-            this.maskedImageList.SelectedIndexChanged += new System.EventHandler(this.originalImageList_SelectedIndexChanged);
+            this.maskedImageListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.maskedImageListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.maskedImageListBox.FormattingEnabled = true;
+            this.maskedImageListBox.IntegralHeight = false;
+            this.maskedImageListBox.Location = new System.Drawing.Point(0, 0);
+            this.maskedImageListBox.Name = "maskedImageListBox";
+            this.maskedImageListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.maskedImageListBox.Size = new System.Drawing.Size(207, 206);
+            this.maskedImageListBox.TabIndex = 1;
+            this.maskedImageListBox.SelectedIndexChanged += new System.EventHandler(this.originalImageList_SelectedIndexChanged);
             // 
             // scanedImageTab
             // 
-            this.scanedImageTab.Controls.Add(this.motionList);
+            this.scanedImageTab.Controls.Add(this.motionListBox);
             this.scanedImageTab.Location = new System.Drawing.Point(4, 25);
             this.scanedImageTab.Name = "scanedImageTab";
             this.scanedImageTab.Size = new System.Drawing.Size(207, 206);
             this.scanedImageTab.TabIndex = 3;
             this.scanedImageTab.Text = "scaned";
             // 
-            // motionList
+            // motionListBox
             // 
-            this.motionList.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.motionList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.motionList.FormattingEnabled = true;
-            this.motionList.IntegralHeight = false;
-            this.motionList.Location = new System.Drawing.Point(0, 0);
-            this.motionList.Margin = new System.Windows.Forms.Padding(0);
-            this.motionList.Name = "motionList";
-            this.motionList.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.motionList.Size = new System.Drawing.Size(207, 206);
-            this.motionList.TabIndex = 1;
+            this.motionListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.motionListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.motionListBox.FormattingEnabled = true;
+            this.motionListBox.IntegralHeight = false;
+            this.motionListBox.Location = new System.Drawing.Point(0, 0);
+            this.motionListBox.Margin = new System.Windows.Forms.Padding(0);
+            this.motionListBox.Name = "motionListBox";
+            this.motionListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.motionListBox.Size = new System.Drawing.Size(207, 206);
+            this.motionListBox.TabIndex = 1;
             // 
             // workerControlAreaGroup
             // 
@@ -770,7 +770,7 @@ namespace CIPP
             this.disconnectTCPConnectionButton.Name = "disconnectTCPConnectionButton";
             this.disconnectTCPConnectionButton.Size = new System.Drawing.Size(75, 23);
             this.disconnectTCPConnectionButton.TabIndex = 4;
-            this.disconnectTCPConnectionButton.Text = "disconnect";
+            this.disconnectTCPConnectionButton.Text = "Disconnect";
             this.disconnectTCPConnectionButton.UseVisualStyleBackColor = true;
             this.disconnectTCPConnectionButton.Click += new System.EventHandler(this.disconnectTCPConnectionButton_Click);
             // 
@@ -1132,10 +1132,10 @@ namespace CIPP
         private System.Windows.Forms.Label widthLabel;
         private System.Windows.Forms.Label heightValueLabel;
         private System.Windows.Forms.Label widthValueLabel;
-        private System.Windows.Forms.ListBox originalImageList;
-        private System.Windows.Forms.ListBox processedImageList;
-        private System.Windows.Forms.ListBox maskedImageList;
-        private System.Windows.Forms.ListBox motionList;
+        private System.Windows.Forms.ListBox originalImageListBox;
+        private System.Windows.Forms.ListBox processedImageListBox;
+        private System.Windows.Forms.ListBox maskedImageListBox;
+        private System.Windows.Forms.ListBox motionListBox;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelFilterPlugins;
         private System.Windows.Forms.Label localGranularityLabel;
         private System.Windows.Forms.Label localNumberOfWorkersLabel;

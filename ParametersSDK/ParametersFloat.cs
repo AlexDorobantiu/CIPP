@@ -12,10 +12,10 @@ namespace ParametersSDK
         public readonly float defaultValue;
 
         private readonly string displayName;
-        private readonly DisplayType displayType;
+        private readonly ParameterDisplayTypeEnum displayType;
         private List<object> valuesList;
 
-        public ParametersFloat(float minValue, float maxValue, float defaultValue, string displayName, DisplayType displayType)
+        public ParametersFloat(float minValue, float maxValue, float defaultValue, string displayName, ParameterDisplayTypeEnum displayType)
         {
             this.minValue = minValue;
             this.maxValue = maxValue;
@@ -33,7 +33,7 @@ namespace ParametersSDK
             return displayName;
         }
 
-        public DisplayType getPreferredDisplayType()
+        public ParameterDisplayTypeEnum getPreferredDisplayType()
         {
             return displayType;
         }
@@ -55,10 +55,11 @@ namespace ParametersSDK
                 valuesList.Add(newValue);
             }
             else
+            {
                 if (newValue.GetType() == typeof(string))
                 {
                     string n = (string)newValue;
-                    string[] values = n.Split(", ".ToCharArray()); //split for comma or empty space
+                    string[] values = n.Split(", ".ToCharArray()); // split for comma or empty space
                     foreach (string value in values)
                     {
                         try
@@ -74,6 +75,7 @@ namespace ParametersSDK
                         catch { }
                     }
                 }
+            }
         }
         #endregion
     }

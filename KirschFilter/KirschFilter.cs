@@ -35,11 +35,11 @@ namespace KirschFilter
         {
             List<IParameters> parameters = new List<IParameters>();
 
-            parameters.Add(new ParametersEnum("Apply gauss:", 0, yesNoEnumValues, DisplayType.listBox));
-            parameters.Add(new ParametersFloat(0, 20, 1.4f, "Sigma:", DisplayType.textBox));
-            parameters.Add(new ParametersInt32(0, 255, 0, "Threshold low:", DisplayType.textBox));
-            parameters.Add(new ParametersInt32(0, 255, 32, "Threshold high:", DisplayType.textBox));
-            parameters.Add(new ParametersEnum("Up to step:", 4, stepEnumValues, DisplayType.listBox));
+            parameters.Add(new ParametersEnum("Apply gauss:", 0, yesNoEnumValues, ParameterDisplayTypeEnum.listBox));
+            parameters.Add(new ParametersFloat(0, 20, 1.4f, "Sigma:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersInt32(0, 255, 0, "Threshold low:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersInt32(0, 255, 32, "Threshold high:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersEnum("Up to step:", 4, stepEnumValues, ParameterDisplayTypeEnum.listBox));
 
             return parameters;
         }

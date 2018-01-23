@@ -14,8 +14,8 @@ namespace Plugins.Filters.GaussFilter
 
         static GaussFilter()
         {
-            parameters.Add(new ParametersInt32(3, 32, 5, "Size:", DisplayType.textBox));
-            parameters.Add(new ParametersFloat(0.01f, 32, 1, "Sigma:", DisplayType.textBox));
+            parameters.Add(new ParametersInt32(3, 32, 5, "Size:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersFloat(0.01f, 32, 1, "Sigma:", ParameterDisplayTypeEnum.textBox));
         }
 
         public static List<IParameters> getParametersList()

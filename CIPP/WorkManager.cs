@@ -248,7 +248,7 @@ namespace CIPP
                                     return tempTask;
                                 }
 
-                                ((MotionRecognitionTask)tempTask).result = MotionVectors.getMotionVectorArray(((MotionRecognitionTask)tempTask).frame, motion.blockSize, motion.searchDistance);
+                                ((MotionRecognitionTask)tempTask).result = MotionVectorUtils.getMotionVectorArray(((MotionRecognitionTask)tempTask).frame, motion.blockSize, motion.searchDistance);
                                 ((MotionRecognitionTask)tempTask).subParts = images1.Length;
 
                                 tasksNumber += images1.Length;
@@ -282,7 +282,7 @@ namespace CIPP
 
         public void taskFinished(Task task)
         {
-            if (!task.state)
+            if (!task.finishedSuccessfully)
             {
                 task.taken = false;
                 return;
@@ -296,7 +296,7 @@ namespace CIPP
                     if (filterTask.parent != null)
                     {
                         filterTask.parent.join(filterTask);
-                        if (filterTask.parent.state)
+                        if (filterTask.parent.finishedSuccessfully)
                         {
                             taskFinished(filterTask.parent);
                         }
@@ -321,7 +321,7 @@ namespace CIPP
                             if (motionRecognitionTask.parent != null)
                             {
                                 motionRecognitionTask.parent.join(motionRecognitionTask);
-                                if (motionRecognitionTask.parent.state)
+                                if (motionRecognitionTask.parent.finishedSuccessfully)
                                 {
                                     taskFinished(motionRecognitionTask.parent);
                                 }

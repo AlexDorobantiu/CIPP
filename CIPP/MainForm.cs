@@ -23,10 +23,10 @@ namespace CIPP
 
         ProcessingImage visibleImage;
 
-        private List<ProcessingImage> originalImageArrayList = new List<ProcessingImage>();
-        private List<ProcessingImage> processedImageArrayList = new List<ProcessingImage>();
-        private List<ProcessingImage> maskedImageArrayList = new List<ProcessingImage>();
-        private List<Motion> motionArrayList = new List<Motion>();
+        private List<ProcessingImage> originalImageList = new List<ProcessingImage>();
+        private List<ProcessingImage> processedImageList = new List<ProcessingImage>();
+        private List<ProcessingImage> maskedImageList = new List<ProcessingImage>();
+        private List<Motion> motionList = new List<Motion>();
 
         private PluginFinder pluginFinder;
         private List<PluginInfo> filterPluginList = new List<PluginInfo>();
@@ -64,8 +64,8 @@ namespace CIPP
                 {
                     ProcessingImage pi = new ProcessingImage();
                     pi.loadImage(fileName);
-                    originalImageArrayList.Add(pi);
-                    originalImageList.Items.Add(fi.Name);
+                    originalImageList.Add(pi);
+                    originalImageListBox.Items.Add(fi.Name);
                 }
             }
             catch (Exception exception)
@@ -82,6 +82,35 @@ namespace CIPP
                 {
                     loadFile(fileName);
                 }
+            }
+        }
+
+        private void getVisibleLists(ref List<ProcessingImage> visibleImagesList, ref ListBox visibleListBox)
+        {
+            switch (imageTab.SelectedIndex)
+            {
+                //original image tab
+                case 0:
+                    {
+                        visibleImagesList = originalImageList;
+                        visibleListBox = originalImageListBox;
+                    } break;
+                //processed image tab
+                case 1:
+                    {
+                        visibleImagesList = processedImageList;
+                        visibleListBox = processedImageListBox;
+                    } break;
+                //masked image tab
+                case 2:
+                    {
+                        visibleImagesList = maskedImageList;
+                        visibleListBox = maskedImageListBox;
+                    } break;
+                //scaned image tab
+                case 3:
+                    {
+                    } break;
             }
         }
 
@@ -114,37 +143,13 @@ namespace CIPP
             grayscaleValueLabel.Text = null;
             maskedValueLabel.Text = null;
 
-            switch (imageTab.SelectedIndex)
-            {
-                //original image tab
-                case 0:
-                    {
-                        if (originalImageList.SelectedItems.Count == 1)
-                        {
-                            visibleImage = (ProcessingImage)originalImageArrayList[originalImageList.SelectedIndex];
-                        }
-                    } break;
-                //processed image tab
-                case 1:
-                    {
-                        if (processedImageList.SelectedItems.Count == 1)
-                        {
-                            visibleImage = (ProcessingImage)processedImageArrayList[processedImageList.SelectedIndex];
-                        }
-                    } break;
-                //masked image tab
-                case 2:
-                    {
-                        if (maskedImageList.SelectedItems.Count == 1)
-                        {
-                            visibleImage = (ProcessingImage)maskedImageArrayList[maskedImageList.SelectedIndex];
-                        }
-                    } break;
-                //scaned image tab
-                case 3:
-                    {
+            List<ProcessingImage> visibleImagesList = null;
+            ListBox visibleListBox = null;
+            getVisibleLists(ref visibleImagesList, ref visibleListBox);
 
-                    } break;
+            if (visibleImagesList != null && visibleListBox != null && visibleListBox.SelectedItems.Count == 1)
+            {
+                visibleImage = (ProcessingImage)visibleImagesList[visibleListBox.SelectedIndex];
             }
             updateVisibleImage();
         }
@@ -156,37 +161,37 @@ namespace CIPP
                 //original image tab
                 case 0:
                     {
-                        while (originalImageList.SelectedItems.Count > 0)
+                        while (originalImageListBox.SelectedItems.Count > 0)
                         {
-                            originalImageArrayList.RemoveAt(originalImageList.SelectedIndices[0]);
-                            originalImageList.Items.RemoveAt(originalImageList.SelectedIndices[0]);
+                            originalImageList.RemoveAt(originalImageListBox.SelectedIndices[0]);
+                            originalImageListBox.Items.RemoveAt(originalImageListBox.SelectedIndices[0]);
                         }
                     } break;
                 //processed image tab
                 case 1:
                     {
-                        while (processedImageList.SelectedItems.Count > 0)
+                        while (processedImageListBox.SelectedItems.Count > 0)
                         {
-                            processedImageArrayList.RemoveAt(processedImageList.SelectedIndices[0]);
-                            processedImageList.Items.RemoveAt(processedImageList.SelectedIndices[0]);
+                            processedImageList.RemoveAt(processedImageListBox.SelectedIndices[0]);
+                            processedImageListBox.Items.RemoveAt(processedImageListBox.SelectedIndices[0]);
                         }
                     } break;
                 //masked image tab
                 case 2:
                     {
-                        while (maskedImageList.SelectedItems.Count > 0)
+                        while (maskedImageListBox.SelectedItems.Count > 0)
                         {
-                            maskedImageArrayList.RemoveAt(maskedImageList.SelectedIndices[0]);
-                            maskedImageList.Items.RemoveAt(maskedImageList.SelectedIndices[0]);
+                            maskedImageList.RemoveAt(maskedImageListBox.SelectedIndices[0]);
+                            maskedImageListBox.Items.RemoveAt(maskedImageListBox.SelectedIndices[0]);
                         }
                     } break;
                 //scaned image tab
                 case 3:
                     {
-                        while (motionList.SelectedItems.Count > 0)
+                        while (motionListBox.SelectedItems.Count > 0)
                         {
-                            motionArrayList.RemoveAt(motionList.SelectedIndices[0]);
-                            motionList.Items.RemoveAt(motionList.SelectedIndices[0]);
+                            motionList.RemoveAt(motionListBox.SelectedIndices[0]);
+                            motionListBox.Items.RemoveAt(motionListBox.SelectedIndices[0]);
                         }
                     } break;
             }
@@ -195,144 +200,57 @@ namespace CIPP
 
         private void moveUpButton_Click(object sender, EventArgs e)
         {
-            switch (imageTab.SelectedIndex)
+            List<ProcessingImage> visibleImagesList = null;
+            ListBox visibleListBox = null;
+            getVisibleLists(ref visibleImagesList, ref visibleListBox);
+
+            if (visibleImagesList == null || visibleListBox == null || visibleListBox.SelectedIndices.Count == 0 || visibleListBox.SelectedIndices[0] == 0)
             {
-                //original image tab
-                case 0:
-                    {
-                        if (originalImageList.SelectedIndices.Count == 0) return;
-                        if (originalImageList.SelectedIndices[0] == 0) return;
-                        for (int i = 0; i < originalImageList.SelectedIndices.Count; i++)
-                        {
-                            int currentSelected = originalImageList.SelectedIndices[i];
-                            ProcessingImage temp = (ProcessingImage)originalImageList.Items[currentSelected - 1];
-                            originalImageList.Items[currentSelected - 1] = originalImageList.Items[currentSelected];
-                            originalImageList.Items[currentSelected] = temp;
+                return;
+            }
 
-                            temp = originalImageArrayList[currentSelected - 1];
-                            originalImageArrayList[currentSelected - 1] = originalImageArrayList[currentSelected];
-                            originalImageArrayList[currentSelected] = temp;
+            for (int i = 0; i < visibleListBox.SelectedIndices.Count; i++)
+            {
+                int currentSelected = visibleListBox.SelectedIndices[i];
+                object tempObject = visibleListBox.Items[currentSelected - 1];
+                visibleListBox.Items[currentSelected - 1] = visibleListBox.Items[currentSelected];
+                visibleListBox.Items[currentSelected] = tempObject;
 
-                            originalImageList.SetSelected(currentSelected, false);
-                            originalImageList.SetSelected(currentSelected - 1, true);
-                        }
-                    } break;
-                //processed image tab
-                case 1:
-                    {
-                        if (processedImageList.SelectedIndices.Count == 0) return;
-                        if (processedImageList.SelectedIndices[0] == 0) return;
-                        for (int i = 0; i < processedImageList.SelectedIndices.Count; i++)
-                        {
-                            int currentSelected = processedImageList.SelectedIndices[i];
-                            ProcessingImage temp = (ProcessingImage)processedImageList.Items[currentSelected - 1];
-                            processedImageList.Items[currentSelected - 1] = processedImageList.Items[currentSelected];
-                            processedImageList.Items[currentSelected] = temp;
+                ProcessingImage temp = visibleImagesList[currentSelected - 1];
+                visibleImagesList[currentSelected - 1] = visibleImagesList[currentSelected];
+                visibleImagesList[currentSelected] = temp;
 
-                            temp = processedImageArrayList[currentSelected - 1];
-                            processedImageArrayList[currentSelected - 1] = processedImageArrayList[currentSelected];
-                            processedImageArrayList[currentSelected] = temp;
-
-                            processedImageList.SetSelected(currentSelected, false);
-                            processedImageList.SetSelected(currentSelected - 1, true);
-                        }
-                    } break;
-                //masked image tab
-                case 2:
-                    {
-                        if (maskedImageList.SelectedIndices.Count == 0) return;
-                        if (maskedImageList.SelectedIndices[0] == 0) return;
-                        for (int i = 0; i < maskedImageList.SelectedIndices.Count; i++)
-                        {
-                            int currentSelected = maskedImageList.SelectedIndices[i];
-                            ProcessingImage temp = (ProcessingImage)maskedImageList.Items[currentSelected - 1];
-                            maskedImageList.Items[currentSelected - 1] = maskedImageList.Items[currentSelected];
-                            maskedImageList.Items[currentSelected] = temp;
-
-                            temp = maskedImageArrayList[currentSelected - 1];
-                            maskedImageArrayList[currentSelected - 1] = maskedImageArrayList[currentSelected];
-                            maskedImageArrayList[currentSelected] = temp;
-
-                            maskedImageList.SetSelected(currentSelected, false);
-                            maskedImageList.SetSelected(currentSelected - 1, true);
-                        }
-                    } break;
-                //scaned image tab
-                case 3:
-                    {
-
-                    } break;
+                visibleListBox.SetSelected(currentSelected, false);
+                visibleListBox.SetSelected(currentSelected - 1, true);
             }
         }
 
+
         private void moveDownButton_Click(object sender, EventArgs e)
         {
-            switch (imageTab.SelectedIndex)
+            List<ProcessingImage> visibleImagesList = null;
+            ListBox visibleListBox = null;
+            getVisibleLists(ref visibleImagesList, ref visibleListBox);
+
+            if (visibleImagesList == null || visibleListBox == null || visibleListBox.SelectedIndices.Count == 0 || 
+                visibleListBox.SelectedIndices[originalImageListBox.SelectedIndices.Count - 1] == originalImageListBox.Items.Count - 1)
             {
-                //original image tab
-                case 0:
-                    {
-                        if (originalImageList.SelectedIndices.Count == 0) return;
-                        if (originalImageList.SelectedIndices[originalImageList.SelectedIndices.Count - 1] == originalImageList.Items.Count - 1) return;
-                        for (int i = originalImageList.SelectedIndices.Count - 1; i >= 0; i--)
-                        {
-                            int currentSelected = originalImageList.SelectedIndices[i];
-                            ProcessingImage temp = (ProcessingImage)originalImageList.Items[currentSelected];
-                            originalImageList.Items[currentSelected] = originalImageList.Items[currentSelected + 1];
-                            originalImageList.Items[currentSelected + 1] = temp;
+                return;
+            }
 
-                            temp = originalImageArrayList[currentSelected];
-                            originalImageArrayList[currentSelected] = originalImageArrayList[currentSelected + 1];
-                            originalImageArrayList[currentSelected + 1] = temp;
+            for (int i = visibleListBox.SelectedIndices.Count - 1; i >= 0; i--)
+            {
+                int currentSelected = visibleListBox.SelectedIndices[i];
+                object tempObj = visibleListBox.Items[currentSelected];
+                visibleListBox.Items[currentSelected] = visibleListBox.Items[currentSelected + 1];
+                visibleListBox.Items[currentSelected + 1] = tempObj;
 
-                            originalImageList.SetSelected(currentSelected, false);
-                            originalImageList.SetSelected(currentSelected + 1, true);
-                        }
-                    } break;
-                //processed image tab
-                case 1:
-                    {
-                        if (processedImageList.SelectedIndices.Count == 0) return;
-                        if (processedImageList.SelectedIndices[processedImageList.SelectedIndices.Count - 1] == processedImageList.Items.Count - 1) return;
-                        for (int i = processedImageList.SelectedIndices.Count - 1; i >= 0; i--)
-                        {
-                            int currentSelected = processedImageList.SelectedIndices[i];
-                            ProcessingImage temp = (ProcessingImage)processedImageList.Items[currentSelected];
-                            processedImageList.Items[currentSelected] = processedImageList.Items[currentSelected + 1];
-                            processedImageList.Items[currentSelected + 1] = temp;
+                ProcessingImage temp = visibleImagesList[currentSelected];
+                visibleImagesList[currentSelected] = visibleImagesList[currentSelected + 1];
+                visibleImagesList[currentSelected + 1] = temp;
 
-                            temp = processedImageArrayList[currentSelected];
-                            processedImageArrayList[currentSelected] = processedImageArrayList[currentSelected + 1];
-                            processedImageArrayList[currentSelected + 1] = temp;
-
-                            processedImageList.SetSelected(currentSelected, false);
-                            processedImageList.SetSelected(currentSelected + 1, true);
-                        }
-                    } break;
-                //masked image tab
-                case 2:
-                    {
-                        if (maskedImageList.SelectedIndices.Count == 0) return;
-                        if (maskedImageList.SelectedIndices[maskedImageList.SelectedIndices.Count - 1] == maskedImageList.Items.Count - 1) return;
-                        for (int i = maskedImageList.SelectedIndices.Count - 1; i >= 0; i--)
-                        {
-                            int currentSelected = maskedImageList.SelectedIndices[i];
-                            ProcessingImage temp = (ProcessingImage)maskedImageList.Items[currentSelected];
-                            maskedImageList.Items[currentSelected] = maskedImageList.Items[currentSelected + 1];
-                            maskedImageList.Items[currentSelected + 1] = temp;
-
-                            temp = maskedImageArrayList[currentSelected];
-                            maskedImageArrayList[currentSelected] = maskedImageArrayList[currentSelected + 1];
-                            maskedImageArrayList[currentSelected + 1] = temp;
-
-                            maskedImageList.SetSelected(currentSelected, false);
-                            maskedImageList.SetSelected(currentSelected + 1, true);
-                        }
-                    } break;
-                //scaned image tab
-                case 3:
-                    {
-                    } break;
+                originalImageListBox.SetSelected(currentSelected, false);
+                originalImageListBox.SetSelected(currentSelected + 1, true);
             }
         }
 
@@ -343,35 +261,11 @@ namespace CIPP
                 saveFileDialog.AddExtension = true;
                 saveFileDialog.Filter = "PNG(*.png)|*.png|Bitmap(*.bmp)|*.bmp|JPEG|*.jpg|GIF|*.gif|ICO|*.ico|EMF|*.emf|EXIF|*.exif|TIFF|*.tiff|WMF|*.wmf|All files (*.*)|*.*";
 
+                List<ProcessingImage> visibleImagesList = null;
                 ListBox visibleListBox = null;
-                List<ProcessingImage> selectedArrayList = null;
+                getVisibleLists(ref visibleImagesList, ref visibleListBox);
 
-                switch (imageTab.SelectedIndex)
-                {
-                    //original image tab
-                    case 0:
-                        {
-                            visibleListBox = originalImageList;
-                            selectedArrayList = originalImageArrayList;
-                        } break;
-                    //processed image tab
-                    case 1:
-                        {
-                            visibleListBox = processedImageList;
-                            selectedArrayList = processedImageArrayList;
-                        } break;
-                    //masked image tab
-                    case 2:
-                        {
-                            visibleListBox = maskedImageList;
-                            selectedArrayList = maskedImageArrayList;
-                        } break;
-                    //scaned image tab
-                    case 3:
-                        {
-                        } break;
-                }
-                if (visibleListBox == null || selectedArrayList == null)
+                if (visibleListBox == null || visibleImagesList == null)
                 {
                     return;
                 }
@@ -381,7 +275,7 @@ namespace CIPP
                     saveFileDialog.FileName = visibleListBox.Items[visibleListBox.SelectedIndices[0]].ToString();
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        ProcessingImage pi = selectedArrayList[visibleListBox.SelectedIndices[0]];
+                        ProcessingImage pi = visibleImagesList[visibleListBox.SelectedIndices[0]];
                         pi.saveImage(saveFileDialog.FileName);
                     }
                 }
@@ -391,7 +285,7 @@ namespace CIPP
                     {
                         for (int i = 0; i < visibleListBox.SelectedIndices.Count; i++)
                         {
-                            ProcessingImage pi = selectedArrayList[visibleListBox.SelectedIndices[i]];
+                            ProcessingImage pi = visibleImagesList[visibleListBox.SelectedIndices[i]];
                             String newPath = Path.Combine(folderBrowserDialog.SelectedPath, visibleListBox.Items[visibleListBox.SelectedIndices[i]].ToString());
                             pi.saveImage(newPath);
                         }
@@ -406,73 +300,31 @@ namespace CIPP
 
         private void sortButton_Click(object sender, EventArgs e)
         {
-            switch (imageTab.SelectedIndex)
+            List<ProcessingImage> visibleImagesList = null;
+            ListBox visibleListBox = null;
+            getVisibleLists(ref visibleImagesList, ref visibleListBox);
+
+            if (visibleListBox == null || visibleImagesList == null)
             {
-                //original image tab
-                case 0:
-                    {
-                        int i = 0;
-                        for (; i < originalImageList.Items.Count; i++)
-                        {
-                            for (int j = i + 1; j < originalImageList.Items.Count; j++)
-                                if (originalImageList.Items[i].ToString().CompareTo(originalImageList.Items[j].ToString()) > 0)
-                                {
-                                    ProcessingImage temp = (ProcessingImage)originalImageList.Items[i];
-                                    originalImageList.Items[i] = originalImageList.Items[j];
-                                    originalImageList.Items[j] = temp;
+                return;
+            }
 
-                                    temp = originalImageArrayList[i];
-                                    originalImageArrayList[i] = originalImageArrayList[j];
-                                    originalImageArrayList[j] = temp;
-                                }
-                            originalImageList.SetSelected(i, false);
-                        }
-                    } break;
-                //processed image tab
-                case 1:
+            for (int i = 0; i < visibleListBox.Items.Count; i++)
+            {
+                for (int j = i + 1; j < visibleListBox.Items.Count; j++)
+                {
+                    if (visibleListBox.Items[i].ToString().CompareTo(visibleListBox.Items[j].ToString()) > 0)
                     {
-                        int i = 0;
-                        for (; i < processedImageList.Items.Count; i++)
-                        {
-                            for (int j = i + 1; j < processedImageList.Items.Count; j++)
-                                if (processedImageList.Items[i].ToString().CompareTo(processedImageList.Items[j].ToString()) > 0)
-                                {
-                                    ProcessingImage temp = (ProcessingImage)processedImageList.Items[i];
-                                    processedImageList.Items[i] = processedImageList.Items[j];
-                                    processedImageList.Items[j] = temp;
+                        object tempObj = visibleListBox.Items[i];
+                        visibleListBox.Items[i] = visibleListBox.Items[j];
+                        visibleListBox.Items[j] = tempObj;
 
-                                    temp = processedImageArrayList[i];
-                                    processedImageArrayList[i] = processedImageArrayList[j];
-                                    processedImageArrayList[j] = temp;
-                                }
-                            processedImageList.SetSelected(i, false);
-                        }
-                    } break;
-                //masked image tab
-                case 2:
-                    {
-                        int i = 0;
-                        for (; i < maskedImageList.Items.Count; i++)
-                        {
-                            for (int j = i + 1; j < maskedImageList.Items.Count; j++)
-                                if (maskedImageList.Items[i].ToString().CompareTo(maskedImageList.Items[j].ToString()) > 0)
-                                {
-                                    ProcessingImage temp = (ProcessingImage)maskedImageList.Items[i];
-                                    maskedImageList.Items[i] = maskedImageList.Items[j];
-                                    maskedImageList.Items[j] = temp;
-
-                                    temp = maskedImageArrayList[i];
-                                    maskedImageArrayList[i] = maskedImageArrayList[j];
-                                    maskedImageArrayList[j] = temp;
-                                }
-                            maskedImageList.SetSelected(i, false);
-                        }
-                    } break;
-                //scaned image tab
-                case 3:
-                    {
-
-                    } break;
+                        ProcessingImage temp = visibleImagesList[i];
+                        visibleImagesList[i] = visibleImagesList[j];
+                        visibleImagesList[j] = temp;
+                    }
+                }
+                visibleListBox.SetSelected(i, false);
             }
         }
 
@@ -515,42 +367,20 @@ namespace CIPP
 
         private void viewImageButton_Click(object sender, EventArgs e)
         {
-            Form f;
-            switch (imageTab.SelectedIndex)
+            List<ProcessingImage> visibleImagesList = null;
+            ListBox visibleListBox = null;
+            getVisibleLists(ref visibleImagesList, ref visibleListBox);
+
+            if (visibleListBox == null || visibleImagesList == null || visibleListBox.SelectedIndices.Count == 0)
             {
-                //original image tab
-                case 0:
-                    {
-                        if (originalImageList.SelectedIndices.Count == 0) return;
-                        for (int i = 0; i < originalImageList.SelectedIndices.Count; i++)
-                        {
-                            f = new ViewImageForm((ProcessingImage)(originalImageArrayList[originalImageList.SelectedIndices[i]]));
-                            f.Show();
-                            f.Focus();
-                        }
-                    } break;
-                //processed image tab
-                case 1:
-                    {
-                        if (processedImageList.SelectedIndices.Count == 0) return;
-                        for (int i = 0; i < processedImageList.SelectedIndices.Count; i++)
-                        {
-                            f = new ViewImageForm((ProcessingImage)(processedImageArrayList[processedImageList.SelectedIndices[i]]));
-                            f.Show();
-                            f.Focus();
-                        }
-                    } break;
-                //masked image tab
-                case 2:
-                    {
-                        if (maskedImageList.SelectedIndices.Count == 0) return;
-                        for (int i = 0; i < maskedImageList.SelectedIndices.Count; i++)
-                        {
-                            f = new ViewImageForm((ProcessingImage)(maskedImageArrayList[maskedImageList.SelectedIndices[i]]));
-                            f.Show();
-                            f.Focus();
-                        }
-                    } break;
+                return;
+            }
+
+            for (int i = 0; i < visibleListBox.SelectedIndices.Count; i++)
+            {
+                Form form = new ViewImageForm((ProcessingImage)(visibleImagesList[visibleListBox.SelectedIndices[i]]));
+                form.Show();
+                form.Focus();
             }
         }
 
@@ -561,8 +391,8 @@ namespace CIPP
 
         private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            AboutBox a = new AboutBox();
-            a.ShowDialog();
+            AboutBox aboutBox = new AboutBox();
+            aboutBox.ShowDialog();
         }
 
         private void originalImageList_DragEnter(object sender, DragEventArgs e)
@@ -601,11 +431,11 @@ namespace CIPP
 
         private void previewMotionButton_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < motionList.SelectedIndices.Count; i++)
+            for (int i = 0; i < motionListBox.SelectedIndices.Count; i++)
             {
-                Form f = new ViewMotionForm((Motion)(motionArrayList[motionList.SelectedIndices[i]]));
-                f.Show();
-                f.Focus();
+                Form form = new ViewMotionForm((Motion)(motionList[motionListBox.SelectedIndices[i]]));
+                form.Show();
+                form.Focus();
             }
         }
 

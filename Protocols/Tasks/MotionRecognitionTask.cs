@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using ProcessingImageSDK;
+using ProcessingImageSDK.MotionVectors;
 
 namespace CIPPProtocols.Tasks
 {
@@ -48,17 +49,17 @@ namespace CIPPProtocols.Tasks
             int imagePosition = subTask.frame.getPositionX();
             if (imagePosition == 0)
             {
-                MotionVectors.blendMotionVectors(result, subTask.result, 0);
+                MotionVectorUtils.blendMotionVectors(result, subTask.result, 0);
             }
             else
             {
-                MotionVectors.blendMotionVectors(result, subTask.result, (imagePosition - searchDistance) / blockSize);
+                MotionVectorUtils.blendMotionVectors(result, subTask.result, (imagePosition - searchDistance) / blockSize);
             }
 
             subParts--;
             if (subParts == 0)
             {
-                state = true;
+                finishedSuccessfully = true;
             }
         }
     }

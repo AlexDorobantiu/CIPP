@@ -16,7 +16,7 @@ namespace CIPPProtocols.Tasks
         {
             this.taskType = TaskTypeEnum.mask;
             this.taken = false;
-            this.state = false;
+            this.finishedSuccessfully = false;
 
             this.id = id;
             this.pluginFullName = pluginFullName;

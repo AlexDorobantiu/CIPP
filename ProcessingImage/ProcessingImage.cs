@@ -5,41 +5,43 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.Serialization;
 using System.IO;
+using ProcessingImageSDK.PixelStructures;
 
 namespace ProcessingImageSDK
 {
     /// <summary>
-    ///  ProcessingImageSDK.ProcessingImage is an object used for work with images inside CIPP, designed to provide basic functionality image processing
+    /// ProcessingImageSDK.ProcessingImage is an object used for work with images inside CIPP, designed to provide basic functionality image processing
     /// </summary>
     [Serializable]
     public class ProcessingImage
     {
         private static List<string> knownExtensionsList = new List<string>() { ".PNG", ".JPG", ".JPEG", ".BMP", ".GIF", ".ICO", ".EMF", ".EXIF", ".TIFF", ".TIF", ".WMF" };
 
-        public bool grayscale;
-        public bool masked;
-
         private int sizeX;
         private int sizeY;
 
-        //position in the original image (if this is a subpart)
-        private int positionX;
-        private int positionY;
-        private ImageDependencies imageDependencies;
+        private byte[,] alpha;   // alpha value for masking (if any)
+        private byte[,] red;       // red component
+        private byte[,] green;       // green component
+        private byte[,] blue;       // blue component
+        private byte[,] gray;    // gray component (if any)
 
-        private byte[,] alpha;   //alpha value for masking (if any)
-        private byte[,] r;       //red component
-        private byte[,] g;       //green component
-        private byte[,] b;       //blue component
-        private byte[,] gray;    //gray component (if any)
+        public bool grayscale;
+        public bool masked;
 
         [NonSerialized]
-        private byte[,] luminance;       //luminance component
+        private byte[,] luminance;       // luminance component
 
         private string path;
         private string name;
 
         private List<string> watermaks = new List<string>();
+
+        // position in the original image (if this is a subpart)
+        private int positionX;
+        private int positionY;
+
+        private ImageDependencies imageDependencies;
 
         /// <summary>
         /// Base image processing class for CIPP
@@ -76,9 +78,9 @@ namespace ProcessingImageSDK
             return name;
         }
 
-        public void setName(string newName)
+        public void setName(string name)
         {
-            name = newName;
+            this.name = name;
         }
 
         public int getSizeX()
@@ -103,17 +105,17 @@ namespace ProcessingImageSDK
 
         public byte[,] getRed()
         {
-            return r;
+            return red;
         }
 
         public byte[,] getGreen()
         {
-            return g;
+            return green;
         }
 
         public byte[,] getBlue()
         {
-            return b;
+            return blue;
         }
 
         public byte[,] getAlpha()
@@ -147,7 +149,7 @@ namespace ProcessingImageSDK
                 {
                     return Color.FromArgb(alpha[y, x], gray[y, x], gray[y, x], gray[y, x]);
                 }
-                return Color.FromArgb(alpha[y, x], r[y, x], g[y, x], b[y, x]);
+                return Color.FromArgb(alpha[y, x], red[y, x], green[y, x], blue[y, x]);
             }
             catch
             {
@@ -167,17 +169,17 @@ namespace ProcessingImageSDK
 
         public void setRed(byte[,] red)
         {
-            this.r = red;
+            this.red = red;
         }
 
         public void setGreen(byte[,] green)
         {
-            this.g = green;
+            this.green = green;
         }
 
         public void setBlue(byte[,] blue)
         {
-            this.b = blue;
+            this.blue = blue;
         }
 
         public void setAlpha(byte[,] alpha)
@@ -193,9 +195,9 @@ namespace ProcessingImageSDK
         {
             this.gray = gray;
             this.grayscale = true;
-            this.r = null;
-            this.g = null;
-            this.b = null;
+            this.red = null;
+            this.green = null;
+            this.blue = null;
             this.luminance = null;
         }
 
@@ -215,9 +217,9 @@ namespace ProcessingImageSDK
                     {
                         BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, sizeX, sizeY), ImageLockMode.ReadOnly, bitmap.PixelFormat);
                         alpha = new byte[sizeY, sizeX];
-                        r = new byte[sizeY, sizeX];
-                        g = new byte[sizeY, sizeX];
-                        b = new byte[sizeY, sizeX];
+                        red = new byte[sizeY, sizeX];
+                        green = new byte[sizeY, sizeX];
+                        blue = new byte[sizeY, sizeX];
 
                         unsafe
                         {
@@ -227,12 +229,18 @@ namespace ProcessingImageSDK
                                 for (int j = 0; j < sizeX; j++)
                                 {
                                     alpha[i, j] = pBase->alpha;
-                                    r[i, j] = pBase->red;
-                                    g[i, j] = pBase->green;
-                                    b[i, j] = pBase->blue;
+                                    red[i, j] = pBase->red;
+                                    green[i, j] = pBase->green;
+                                    blue[i, j] = pBase->blue;
 
-                                    if (pBase->alpha != 255) masked = true;
-                                    if ((pBase->red != pBase->green) || (pBase->green != pBase->blue) || (pBase->red != pBase->blue)) grayscale = false;
+                                    if (pBase->alpha != 255)
+                                    {
+                                        masked = true;
+                                    }
+                                    if ((pBase->red != pBase->green) || (pBase->green != pBase->blue) || (pBase->red != pBase->blue))
+                                    {
+                                        grayscale = false;
+                                    }
 
                                     pBase++;
                                 }
@@ -243,11 +251,11 @@ namespace ProcessingImageSDK
                 case PixelFormat.Format24bppRgb:
                     {
                         BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, sizeX, sizeY), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-                        int remainder = bitmapData.Stride - sizeX * 3; //aliniament la byte
+                        int remainder = bitmapData.Stride - sizeX * 3; // byte alligned
                         alpha = new byte[sizeY, sizeX];
-                        r = new byte[sizeY, sizeX];
-                        g = new byte[sizeY, sizeX];
-                        b = new byte[sizeY, sizeX];
+                        red = new byte[sizeY, sizeX];
+                        green = new byte[sizeY, sizeX];
+                        blue = new byte[sizeY, sizeX];
                         unsafe
                         {
                             byte* pBase = (byte*)bitmapData.Scan0;
@@ -256,14 +264,16 @@ namespace ProcessingImageSDK
                                 for (int j = 0; j < sizeX; j++)
                                 {
                                     alpha[i, j] = 255;
-                                    r[i, j] = ((Pixel24Bpp*)pBase)->red;
-                                    g[i, j] = ((Pixel24Bpp*)pBase)->green;
-                                    b[i, j] = ((Pixel24Bpp*)pBase)->blue;
+                                    red[i, j] = ((Pixel24Bpp*)pBase)->red;
+                                    green[i, j] = ((Pixel24Bpp*)pBase)->green;
+                                    blue[i, j] = ((Pixel24Bpp*)pBase)->blue;
 
                                     if ((((Pixel24Bpp*)pBase)->red != ((Pixel24Bpp*)pBase)->green) ||
                                         (((Pixel24Bpp*)pBase)->green != ((Pixel24Bpp*)pBase)->blue) ||
                                         (((Pixel24Bpp*)pBase)->red != ((Pixel24Bpp*)pBase)->blue))
+                                    {
                                         grayscale = false;
+                                    }
 
                                     pBase += 3;
                                 }
@@ -279,7 +289,7 @@ namespace ProcessingImageSDK
                         if (bitmap.Palette.Flags == 2) // grayscale: PaletteFlags.GrayScale = 2
                         {
                             alpha = new byte[sizeY, sizeX];
-                            r = new byte[sizeY, sizeX];
+                            red = new byte[sizeY, sizeX];
                             unsafe
                             {
                                 Pixel8Bpp* pBase = (Pixel8Bpp*)bitmapData.Scan0;
@@ -288,7 +298,7 @@ namespace ProcessingImageSDK
                                     for (int j = 0; j < sizeX; j++)
                                     {
                                         alpha[i, j] = 255;
-                                        r[i, j] = pBase->gray;
+                                        red[i, j] = pBase->gray;
                                         pBase++;
                                     }
                                     pBase += remainder;
@@ -298,9 +308,9 @@ namespace ProcessingImageSDK
                         else
                         {
                             alpha = new byte[sizeY, sizeX];
-                            r = new byte[sizeY, sizeX];
-                            g = new byte[sizeY, sizeX];
-                            b = new byte[sizeY, sizeX];
+                            red = new byte[sizeY, sizeX];
+                            green = new byte[sizeY, sizeX];
+                            blue = new byte[sizeY, sizeX];
 
                             Color[] paleta = bitmap.Palette.Entries;
                             unsafe
@@ -312,9 +322,9 @@ namespace ProcessingImageSDK
                                     {
                                         byte index = pBase->gray;
                                         alpha[i, j] = paleta[index].A;
-                                        r[i, j] = paleta[index].R;
-                                        g[i, j] = paleta[index].G;
-                                        b[i, j] = paleta[index].B;
+                                        red[i, j] = paleta[index].R;
+                                        green[i, j] = paleta[index].G;
+                                        blue[i, j] = paleta[index].B;
                                         pBase++;
                                     }
                                     pBase += remainder;
@@ -327,14 +337,14 @@ namespace ProcessingImageSDK
                 case PixelFormat.Format1bppIndexed:
                     {
                         alpha = new byte[sizeY, sizeX];
-                        r = new byte[sizeY, sizeX];
+                        red = new byte[sizeY, sizeX];
                         for (int i = 0; i < sizeY; i++)
                         {
                             for (int j = 0; j < sizeX; j++)
                             {
                                 Color c = bitmap.GetPixel(j, i);
                                 alpha[i, j] = c.A;
-                                r[i, j] = c.R;
+                                red[i, j] = c.R;
                             }
                         }
                     } break;
@@ -343,23 +353,23 @@ namespace ProcessingImageSDK
                         if (bitmap.Palette.Flags == 2) // grayscale: PaletteFlags.GrayScale = 2
                         {
                             alpha = new byte[sizeY, sizeX];
-                            r = new byte[sizeY, sizeX];
+                            red = new byte[sizeY, sizeX];
                             for (int i = 0; i < sizeY; i++)
                             {
                                 for (int j = 0; j < sizeX; j++)
                                 {
                                     Color c = bitmap.GetPixel(j, i);
                                     alpha[i, j] = c.A;
-                                    r[i, j] = c.R;
+                                    red[i, j] = c.R;
                                 }
                             }
                         }
                         else
                         {
                             alpha = new byte[sizeY, sizeX];
-                            r = new byte[sizeY, sizeX];
-                            g = new byte[sizeY, sizeX];
-                            b = new byte[sizeY, sizeX];
+                            red = new byte[sizeY, sizeX];
+                            green = new byte[sizeY, sizeX];
+                            blue = new byte[sizeY, sizeX];
                             grayscale = false;
 
                             for (int i = 0; i < sizeY; i++)
@@ -368,9 +378,9 @@ namespace ProcessingImageSDK
                                 {
                                     Color c = bitmap.GetPixel(j, i);
                                     alpha[i, j] = c.A;
-                                    r[i, j] = c.R;
-                                    g[i, j] = c.G;
-                                    b[i, j] = c.B;
+                                    red[i, j] = c.R;
+                                    green[i, j] = c.G;
+                                    blue[i, j] = c.B;
                                 }
                             }
                         }
@@ -380,10 +390,10 @@ namespace ProcessingImageSDK
 
             if (grayscale)
             {
-                this.gray = this.r;
-                this.r = null;
-                this.g = null;
-                this.b = null;
+                this.gray = this.red;
+                this.red = null;
+                this.green = null;
+                this.blue = null;
             }
         }
 
@@ -393,8 +403,8 @@ namespace ProcessingImageSDK
         /// <param name="fileName">Full path of the file to be loaded</param>
         public void loadImage(string fileName)
         {
-            Bitmap b = new Bitmap(fileName);
-            loadImage(b);
+            Bitmap bitmap = new Bitmap(fileName);
+            loadImage(bitmap);
             this.path = fileName;
             this.name = Path.GetFileName(fileName);
         }
@@ -405,7 +415,7 @@ namespace ProcessingImageSDK
         /// <param name="fileName">Full path of the file to be loaded</param>
         public void saveImage(string fileName)
         {
-            Bitmap b = grayscale ? getBitmap(ProcessingImageBitmapType.AlphaGray) : getBitmap(ProcessingImageBitmapType.AlphaColor);
+            Bitmap bitmap = grayscale ? getBitmap(ProcessingImageBitmapType.AlphaGray) : getBitmap(ProcessingImageBitmapType.AlphaColor);
             String extension = Path.GetExtension(fileName);
             if (extension == null || string.Empty.Equals(extension))
             {
@@ -413,22 +423,21 @@ namespace ProcessingImageSDK
             }
             switch (extension.ToLower())
             {
-                case ".png": b.Save(fileName, ImageFormat.Png); break;
-                case ".jpg": b.Save(fileName, ImageFormat.Jpeg); break;
-                case ".bmp": b.Save(fileName, ImageFormat.Bmp); break;
-                case ".gif": b.Save(fileName, ImageFormat.Gif); break;
-                case ".ico": b.Save(fileName, ImageFormat.Icon); break;
-                case ".emf": b.Save(fileName, ImageFormat.Emf); break;
-                case ".exif": b.Save(fileName, ImageFormat.Exif); break;
-                case ".tiff": b.Save(fileName, ImageFormat.Tiff); break;
-                case ".wmf": b.Save(fileName, ImageFormat.Wmf); break;
-                default: b.Save(fileName, ImageFormat.Png); break;
+                case ".png": bitmap.Save(fileName, ImageFormat.Png); break;
+                case ".jpg": bitmap.Save(fileName, ImageFormat.Jpeg); break;
+                case ".bmp": bitmap.Save(fileName, ImageFormat.Bmp); break;
+                case ".gif": bitmap.Save(fileName, ImageFormat.Gif); break;
+                case ".ico": bitmap.Save(fileName, ImageFormat.Icon); break;
+                case ".emf": bitmap.Save(fileName, ImageFormat.Emf); break;
+                case ".exif": bitmap.Save(fileName, ImageFormat.Exif); break;
+                case ".tiff": bitmap.Save(fileName, ImageFormat.Tiff); break;
+                case ".wmf": bitmap.Save(fileName, ImageFormat.Wmf); break;
+                default: bitmap.Save(fileName, ImageFormat.Png); break;
             }
         }
 
         public void computeGray()
         {
-
             if (gray == null)
             {
                 gray = new byte[sizeY, sizeX];
@@ -437,7 +446,7 @@ namespace ProcessingImageSDK
             {
                 for (int j = 0; j < sizeX; j++)
                 {
-                    gray[i, j] = (byte)((r[i, j] + g[i, j] + b[i, j]) / 3);
+                    gray[i, j] = (byte)((red[i, j] + green[i, j] + blue[i, j]) / 3);
                 }
             }
         }
@@ -454,7 +463,7 @@ namespace ProcessingImageSDK
                 {
                     for (int j = 0; j < sizeX; j++)
                     {
-                        luminance[i, j] = (byte)(r[i, j] * 0.3f + g[i, j] * 0.59f + b[i, j] * 0.11f);
+                        luminance[i, j] = (byte)(red[i, j] * 0.3f + green[i, j] * 0.59f + blue[i, j] * 0.11f);
                     }
                 }
             }
@@ -504,9 +513,9 @@ namespace ProcessingImageSDK
                                     for (int j = 0; j < sizeX; j++)
                                     {
                                         pBase->alpha = alpha[i, j];
-                                        pBase->red = r[i, j];
-                                        pBase->green = g[i, j];
-                                        pBase->blue = b[i, j];
+                                        pBase->red = red[i, j];
+                                        pBase->green = green[i, j];
+                                        pBase->blue = blue[i, j];
                                         pBase++;
                                     }
                                 }
@@ -520,7 +529,7 @@ namespace ProcessingImageSDK
                                     for (int j = 0; j < sizeX; j++)
                                     {
                                         pBase->alpha = alpha[i, j];
-                                        pBase->red = r[i, j];
+                                        pBase->red = red[i, j];
                                         pBase->green = 0;
                                         pBase->blue = 0;
                                         pBase++;
@@ -537,7 +546,7 @@ namespace ProcessingImageSDK
                                     {
                                         pBase->alpha = alpha[i, j];
                                         pBase->red = 0;
-                                        pBase->green = g[i, j];
+                                        pBase->green = green[i, j];
                                         pBase->blue = 0;
                                         pBase++;
                                     }
@@ -554,7 +563,7 @@ namespace ProcessingImageSDK
                                         pBase->alpha = alpha[i, j];
                                         pBase->red = 0;
                                         pBase->green = 0;
-                                        pBase->blue = b[i, j];
+                                        pBase->blue = blue[i, j];
                                         pBase++;
                                     }
                                 }
@@ -568,8 +577,8 @@ namespace ProcessingImageSDK
                                     for (int j = 0; j < sizeX; j++)
                                     {
                                         pBase->alpha = alpha[i, j];
-                                        pBase->red = r[i, j];
-                                        pBase->green = g[i, j];
+                                        pBase->red = red[i, j];
+                                        pBase->green = green[i, j];
                                         pBase->blue = 0;
                                         pBase++;
                                     }
@@ -584,9 +593,9 @@ namespace ProcessingImageSDK
                                     for (int j = 0; j < sizeX; j++)
                                     {
                                         pBase->alpha = alpha[i, j];
-                                        pBase->red = r[i, j];
+                                        pBase->red = red[i, j];
                                         pBase->green = 0;
-                                        pBase->blue = b[i, j];
+                                        pBase->blue = blue[i, j];
                                         pBase++;
                                     }
                                 }
@@ -601,8 +610,8 @@ namespace ProcessingImageSDK
                                     {
                                         pBase->alpha = alpha[i, j];
                                         pBase->red = 0;
-                                        pBase->green = g[i, j];
-                                        pBase->blue = b[i, j];
+                                        pBase->green = green[i, j];
+                                        pBase->blue = blue[i, j];
                                         pBase++;
                                     }
                                 }
@@ -616,7 +625,7 @@ namespace ProcessingImageSDK
                                     for (int j = 0; j < sizeX; j++)
                                     {
                                         pBase->alpha = 255;
-                                        pBase->red = r[i, j];
+                                        pBase->red = red[i, j];
                                         pBase->green = 0;
                                         pBase->blue = 0;
                                         pBase++;
@@ -633,7 +642,7 @@ namespace ProcessingImageSDK
                                     {
                                         pBase->alpha = 255;
                                         pBase->red = 0;
-                                        pBase->green = g[i, j];
+                                        pBase->green = green[i, j];
                                         pBase->blue = 0;
                                         pBase++;
                                     }
@@ -650,7 +659,7 @@ namespace ProcessingImageSDK
                                         pBase->alpha = 255;
                                         pBase->red = 0;
                                         pBase->green = 0;
-                                        pBase->blue = b[i, j];
+                                        pBase->blue = blue[i, j];
                                         pBase++;
                                     }
                                 }
@@ -664,8 +673,8 @@ namespace ProcessingImageSDK
                                     for (int j = 0; j < sizeX; j++)
                                     {
                                         pBase->alpha = 255;
-                                        pBase->red = r[i, j];
-                                        pBase->green = g[i, j];
+                                        pBase->red = red[i, j];
+                                        pBase->green = green[i, j];
                                         pBase->blue = 0;
                                         pBase++;
                                     }
@@ -680,9 +689,9 @@ namespace ProcessingImageSDK
                                     for (int j = 0; j < sizeX; j++)
                                     {
                                         pBase->alpha = 255;
-                                        pBase->red = r[i, j];
+                                        pBase->red = red[i, j];
                                         pBase->green = 0;
-                                        pBase->blue = b[i, j];
+                                        pBase->blue = blue[i, j];
                                         pBase++;
                                     }
                                 }
@@ -697,8 +706,8 @@ namespace ProcessingImageSDK
                                     {
                                         pBase->alpha = 255;
                                         pBase->red = 0;
-                                        pBase->green = g[i, j];
-                                        pBase->blue = b[i, j];
+                                        pBase->green = green[i, j];
+                                        pBase->blue = blue[i, j];
                                         pBase++;
                                     }
                                 }
@@ -793,38 +802,40 @@ namespace ProcessingImageSDK
                                 }
                             } break;
                         default:
-                            if (grayscale)
                             {
-                                unsafe
+                                if (grayscale)
                                 {
-                                    Pixel32Bpp* pBase = (Pixel32Bpp*)bitmapData.Scan0;
-                                    for (int i = 0; i < sizeY; i++)
+                                    unsafe
                                     {
-                                        for (int j = 0; j < sizeX; j++)
+                                        Pixel32Bpp* pBase = (Pixel32Bpp*)bitmapData.Scan0;
+                                        for (int i = 0; i < sizeY; i++)
                                         {
-                                            pBase->alpha = 255;
-                                            pBase->red = gray[i, j];
-                                            pBase->green = gray[i, j];
-                                            pBase->blue = gray[i, j];
-                                            pBase++;
+                                            for (int j = 0; j < sizeX; j++)
+                                            {
+                                                pBase->alpha = 255;
+                                                pBase->red = gray[i, j];
+                                                pBase->green = gray[i, j];
+                                                pBase->blue = gray[i, j];
+                                                pBase++;
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            else
-                            {
-                                unsafe
+                                else
                                 {
-                                    Pixel32Bpp* pBase = (Pixel32Bpp*)bitmapData.Scan0;
-                                    for (int i = 0; i < sizeY; i++)
+                                    unsafe
                                     {
-                                        for (int j = 0; j < sizeX; j++)
+                                        Pixel32Bpp* pBase = (Pixel32Bpp*)bitmapData.Scan0;
+                                        for (int i = 0; i < sizeY; i++)
                                         {
-                                            pBase->alpha = 255;
-                                            pBase->red = r[i, j];
-                                            pBase->green = g[i, j];
-                                            pBase->blue = b[i, j];
-                                            pBase++;
+                                            for (int j = 0; j < sizeX; j++)
+                                            {
+                                                pBase->alpha = 255;
+                                                pBase->red = red[i, j];
+                                                pBase->green = green[i, j];
+                                                pBase->blue = blue[i, j];
+                                                pBase++;
+                                            }
                                         }
                                     }
                                 }
@@ -853,7 +864,10 @@ namespace ProcessingImageSDK
                             } break;
                         case ProcessingImageBitmapType.AlphaGray:
                             {
-                                if (gray == null) this.computeGray();
+                                if (gray == null)
+                                {
+                                    this.computeGray();
+                                }
                                 unsafe
                                 {
                                     Pixel32Bpp* pBase = (Pixel32Bpp*)bitmapData.Scan0;
@@ -872,7 +886,10 @@ namespace ProcessingImageSDK
                             } break;
                         default:
                             {
-                                if (gray == null) this.computeGray();
+                                if (gray == null)
+                                {
+                                    this.computeGray();
+                                }
                                 unsafe
                                 {
                                     Pixel32Bpp* pBase = (Pixel32Bpp*)bitmapData.Scan0;
@@ -926,9 +943,9 @@ namespace ProcessingImageSDK
                             for (int j = 0; j < newSizeX; j++)
                             {
                                 pBase->alpha = alpha[(int)currentY, (int)currentX];
-                                pBase->red = r[(int)currentY, (int)currentX];
-                                pBase->green = g[(int)currentY, (int)currentX];
-                                pBase->blue = b[(int)currentY, (int)currentX];
+                                pBase->red = red[(int)currentY, (int)currentX];
+                                pBase->green = green[(int)currentY, (int)currentX];
+                                pBase->blue = blue[(int)currentY, (int)currentX];
 
                                 currentX += delta;
                                 pBase++;
@@ -1013,142 +1030,142 @@ namespace ProcessingImageSDK
 
         public ProcessingImage clone(bool cloneAlpha = true)
         {
-            ProcessingImage pi = new ProcessingImage();
-            copyAttributes(this, pi, cloneAlpha);
+            ProcessingImage processingImage = new ProcessingImage();
+            copyAttributes(this, processingImage, cloneAlpha);
             if (!grayscale)
             {
-                pi.r = (byte[,])this.r.Clone();
-                pi.g = (byte[,])this.g.Clone();
-                pi.b = (byte[,])this.b.Clone();
+                processingImage.red = (byte[,])this.red.Clone();
+                processingImage.green = (byte[,])this.green.Clone();
+                processingImage.blue = (byte[,])this.blue.Clone();
             }
             else
             {
-                pi.grayscale = true;
-                pi.gray = (byte[,])this.gray.Clone();
+                processingImage.grayscale = true;
+                processingImage.gray = (byte[,])this.gray.Clone();
             }
-            return pi;
+            return processingImage;
         }
 
         public ProcessingImage cloneAndSubstituteAlpha(byte[,] alphaChannel)
         {
-            ProcessingImage pi = this.clone(false);
-            pi.alpha = alphaChannel;
-            return pi;
+            ProcessingImage processingImage = this.clone(false);
+            processingImage.alpha = alphaChannel;
+            return processingImage;
         }
 
         public ProcessingImage blankClone()
         {
-            ProcessingImage pi = new ProcessingImage();
-            copyAttributes(this, pi, false);
+            ProcessingImage processingImage = new ProcessingImage();
+            copyAttributes(this, processingImage, false);
 
-            pi.alpha = new byte[sizeY, sizeX];
+            processingImage.alpha = new byte[sizeY, sizeX];
             for (int i = 0; i < sizeY; i++)
             {
                 for (int j = 0; j < sizeX; j++)
                 {
-                    pi.alpha[i, j] = 255;
+                    processingImage.alpha[i, j] = 255;
                 }
             }
             if (!grayscale)
             {
-                pi.r = new byte[sizeY, sizeX];
-                pi.g = new byte[sizeY, sizeX];
-                pi.b = new byte[sizeY, sizeX];
+                processingImage.red = new byte[sizeY, sizeX];
+                processingImage.green = new byte[sizeY, sizeX];
+                processingImage.blue = new byte[sizeY, sizeX];
             }
             else
             {
-                pi.grayscale = true;
-                pi.gray = new byte[sizeY, sizeX];
+                processingImage.grayscale = true;
+                processingImage.gray = new byte[sizeY, sizeX];
             }
-            return pi;
+            return processingImage;
         }
 
         public ProcessingImage convolution(int[,] matrix)
         {
-            ProcessingImage pi = new ProcessingImage();
-            pi.copyAttributesAndAlpha(this);
+            ProcessingImage processingImage = new ProcessingImage();
+            processingImage.copyAttributesAndAlpha(this);
 
             if (grayscale)
             {
                 int[,] convolvedGray = ProcessingImageUtils.delayedConvolution(gray, matrix);
-                pi.gray = ProcessingImageUtils.truncateToDisplay(convolvedGray);
+                processingImage.gray = ProcessingImageUtils.truncateToDisplay(convolvedGray);
             }
             else
             {
-                int[,] convolvedRed = ProcessingImageUtils.delayedConvolution(r, matrix);
-                int[,] convolvedGreen = ProcessingImageUtils.delayedConvolution(g, matrix);
-                int[,] convolvedBlue = ProcessingImageUtils.delayedConvolution(b, matrix);
-                pi.r = ProcessingImageUtils.truncateToDisplay(convolvedRed);
-                pi.g = ProcessingImageUtils.truncateToDisplay(convolvedGreen);
-                pi.b = ProcessingImageUtils.truncateToDisplay(convolvedBlue);
+                int[,] convolvedRed = ProcessingImageUtils.delayedConvolution(red, matrix);
+                int[,] convolvedGreen = ProcessingImageUtils.delayedConvolution(green, matrix);
+                int[,] convolvedBlue = ProcessingImageUtils.delayedConvolution(blue, matrix);
+                processingImage.red = ProcessingImageUtils.truncateToDisplay(convolvedRed);
+                processingImage.green = ProcessingImageUtils.truncateToDisplay(convolvedGreen);
+                processingImage.blue = ProcessingImageUtils.truncateToDisplay(convolvedBlue);
             }
 
-            return pi;
+            return processingImage;
         }
 
         public ProcessingImage convolution(float[,] matrix)
         {
-            ProcessingImage pi = new ProcessingImage();
-            pi.copyAttributesAndAlpha(this);
+            ProcessingImage processingImage = new ProcessingImage();
+            processingImage.copyAttributesAndAlpha(this);
 
             if (grayscale)
             {
                 float[,] convolvedGray = ProcessingImageUtils.delayedConvolution(gray, matrix);
-                pi.gray = ProcessingImageUtils.truncateToDisplay(convolvedGray);
+                processingImage.gray = ProcessingImageUtils.truncateToDisplay(convolvedGray);
             }
             else
             {
-                float[,] convolvedRed = ProcessingImageUtils.delayedConvolution(r, matrix);
-                float[,] convolvedGreen = ProcessingImageUtils.delayedConvolution(g, matrix);
-                float[,] convolvedBlue = ProcessingImageUtils.delayedConvolution(b, matrix);
-                pi.r = ProcessingImageUtils.truncateToDisplay(convolvedRed);
-                pi.g = ProcessingImageUtils.truncateToDisplay(convolvedGreen);
-                pi.b = ProcessingImageUtils.truncateToDisplay(convolvedBlue);
+                float[,] convolvedRed = ProcessingImageUtils.delayedConvolution(red, matrix);
+                float[,] convolvedGreen = ProcessingImageUtils.delayedConvolution(green, matrix);
+                float[,] convolvedBlue = ProcessingImageUtils.delayedConvolution(blue, matrix);
+                processingImage.red = ProcessingImageUtils.truncateToDisplay(convolvedRed);
+                processingImage.green = ProcessingImageUtils.truncateToDisplay(convolvedGreen);
+                processingImage.blue = ProcessingImageUtils.truncateToDisplay(convolvedBlue);
             }
 
-            return pi;
+            return processingImage;
         }
 
         public ProcessingImage mirroredMarginConvolution(float[,] matrix)
         {
-            ProcessingImage pi = new ProcessingImage();
-            pi.copyAttributesAndAlpha(this);
+            ProcessingImage processingImage = new ProcessingImage();
+            processingImage.copyAttributesAndAlpha(this);
             if (grayscale)
             {
                 float[,] convolvedGray = ProcessingImageUtils.mirroredMarginConvolution(gray, matrix);
-                pi.gray = ProcessingImageUtils.truncateToDisplay(convolvedGray);
+                processingImage.gray = ProcessingImageUtils.truncateToDisplay(convolvedGray);
             }
             else
             {
-                float[,] convolvedRed = ProcessingImageUtils.mirroredMarginConvolution(r, matrix);
-                float[,] convolvedGreen = ProcessingImageUtils.mirroredMarginConvolution(g, matrix);
-                float[,] convolvedBlue = ProcessingImageUtils.mirroredMarginConvolution(b, matrix);
-                pi.r = ProcessingImageUtils.truncateToDisplay(convolvedRed);
-                pi.g = ProcessingImageUtils.truncateToDisplay(convolvedGreen);
-                pi.b = ProcessingImageUtils.truncateToDisplay(convolvedBlue);
+                float[,] convolvedRed = ProcessingImageUtils.mirroredMarginConvolution(red, matrix);
+                float[,] convolvedGreen = ProcessingImageUtils.mirroredMarginConvolution(green, matrix);
+                float[,] convolvedBlue = ProcessingImageUtils.mirroredMarginConvolution(blue, matrix);
+                processingImage.red = ProcessingImageUtils.truncateToDisplay(convolvedRed);
+                processingImage.green = ProcessingImageUtils.truncateToDisplay(convolvedGreen);
+                processingImage.blue = ProcessingImageUtils.truncateToDisplay(convolvedBlue);
             }
-            return pi;
+            return processingImage;
         }
 
         public ProcessingImage mirroredMarginConvolution(int[,] matrix)
         {
-            ProcessingImage pi = new ProcessingImage();
-            pi.copyAttributesAndAlpha(this);
+            ProcessingImage processingImage = new ProcessingImage();
+            processingImage.copyAttributesAndAlpha(this);
             if (grayscale)
             {
                 int[,] convolvedGray = ProcessingImageUtils.mirroredMarginConvolution(gray, matrix);
-                pi.gray = ProcessingImageUtils.truncateToDisplay(convolvedGray);
+                processingImage.gray = ProcessingImageUtils.truncateToDisplay(convolvedGray);
             }
             else
             {
-                int[,] convolvedRed = ProcessingImageUtils.mirroredMarginConvolution(r, matrix);
-                int[,] convolvedGreen = ProcessingImageUtils.mirroredMarginConvolution(g, matrix);
-                int[,] convolvedBlue = ProcessingImageUtils.mirroredMarginConvolution(b, matrix);
-                pi.r = ProcessingImageUtils.truncateToDisplay(convolvedRed);
-                pi.g = ProcessingImageUtils.truncateToDisplay(convolvedGreen);
-                pi.b = ProcessingImageUtils.truncateToDisplay(convolvedBlue);
+                int[,] convolvedRed = ProcessingImageUtils.mirroredMarginConvolution(red, matrix);
+                int[,] convolvedGreen = ProcessingImageUtils.mirroredMarginConvolution(green, matrix);
+                int[,] convolvedBlue = ProcessingImageUtils.mirroredMarginConvolution(blue, matrix);
+                processingImage.red = ProcessingImageUtils.truncateToDisplay(convolvedRed);
+                processingImage.green = ProcessingImageUtils.truncateToDisplay(convolvedGreen);
+                processingImage.blue = ProcessingImageUtils.truncateToDisplay(convolvedBlue);
             }
-            return pi;
+            return processingImage;
         }
 
         public static List<string> getKnownExtensions()
@@ -1177,10 +1194,10 @@ namespace ProcessingImageSDK
                 return null;
             }
 
-            ProcessingImage[] pi = new ProcessingImage[subParts];
+            ProcessingImage[] processingImage = new ProcessingImage[subParts];
             for (int i = 0; i < subParts; i++)
             {
-                pi[i] = new ProcessingImage();
+                processingImage[i] = new ProcessingImage();
             }
 
             int stepSize = sizeX / subParts;
@@ -1189,32 +1206,33 @@ namespace ProcessingImageSDK
 
             for (int i = 0; i < subParts; i++)
             {
-                pi[i].imageDependencies = imageDependencies;
-                pi[i].positionX = start;
-                pi[i].positionY = 0;
+                processingImage[i].imageDependencies = imageDependencies;
+                processingImage[i].positionX = start;
+                processingImage[i].positionY = 0;
                 if (i == 0)
                 {
-                    pi[i].sizeX = stepSize + imageDependencies.right;
+                    processingImage[i].sizeX = stepSize + imageDependencies.right;
                 }
                 else
+                {
                     if (i == subParts - 1)
                     {
-                        pi[i].sizeX = sizeX - (subParts - 1) * stepSize + imageDependencies.left;
+                        processingImage[i].sizeX = sizeX - (subParts - 1) * stepSize + imageDependencies.left;
                     }
                     else
                     {
-                        pi[i].sizeX = size;
+                        processingImage[i].sizeX = size;
                     }
+                }
+                processingImage[i].sizeY = sizeY;
 
-                pi[i].sizeY = sizeY;
 
-
-                byte[,] al = new byte[pi[i].sizeY, pi[i].sizeX];
+                byte[,] al = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
                 if (i == 0)
                 {
-                    for (int y = 0; y < pi[i].sizeY; y++)
+                    for (int y = 0; y < processingImage[i].sizeY; y++)
                     {
-                        for (int x = 0; x < pi[i].sizeX; x++)
+                        for (int x = 0; x < processingImage[i].sizeX; x++)
                         {
                             al[y, x] = alpha[y, x];
                         }
@@ -1222,26 +1240,26 @@ namespace ProcessingImageSDK
                 }
                 else
                 {
-                    for (int y = 0; y < pi[i].sizeY; y++)
+                    for (int y = 0; y < processingImage[i].sizeY; y++)
                     {
-                        for (int x = 0; x < pi[i].sizeX; x++)
+                        for (int x = 0; x < processingImage[i].sizeX; x++)
                         {
                             al[y, x] = alpha[y, x - imageDependencies.left + start];
                         }
                     }
                 }
 
-                pi[i].alpha = al;
+                processingImage[i].alpha = al;
 
                 if (grayscale)
                 {
-                    pi[i].grayscale = true;
-                    byte[,] gr = new byte[pi[i].sizeY, pi[i].sizeX];
+                    processingImage[i].grayscale = true;
+                    byte[,] gr = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
                     if (i == 0)
                     {
-                        for (int y = 0; y < pi[i].sizeY; y++)
+                        for (int y = 0; y < processingImage[i].sizeY; y++)
                         {
-                            for (int x = 0; x < pi[i].sizeX; x++)
+                            for (int x = 0; x < processingImage[i].sizeX; x++)
                             {
                                 gr[y, x] = gray[y, x];
                             }
@@ -1249,54 +1267,54 @@ namespace ProcessingImageSDK
                     }
                     else
                     {
-                        for (int y = 0; y < pi[i].sizeY; y++)
+                        for (int y = 0; y < processingImage[i].sizeY; y++)
                         {
-                            for (int x = 0; x < pi[i].sizeX; x++)
+                            for (int x = 0; x < processingImage[i].sizeX; x++)
                             {
                                 gr[y, x] = gray[y, x - imageDependencies.left + start];
                             }
                         }
                     }
-                    pi[i].gray = gr;
+                    processingImage[i].gray = gr;
                 }
                 else
                 {
-                    byte[,] red = new byte[pi[i].sizeY, pi[i].sizeX];
-                    byte[,] green = new byte[pi[i].sizeY, pi[i].sizeX];
-                    byte[,] blue = new byte[pi[i].sizeY, pi[i].sizeX];
+                    byte[,] red = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
+                    byte[,] green = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
+                    byte[,] blue = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
 
                     if (i == 0)
                     {
-                        for (int y = 0; y < pi[i].sizeY; y++)
+                        for (int y = 0; y < processingImage[i].sizeY; y++)
                         {
-                            for (int x = 0; x < pi[i].sizeX; x++)
+                            for (int x = 0; x < processingImage[i].sizeX; x++)
                             {
-                                red[y, x] = r[y, x];
-                                green[y, x] = g[y, x];
-                                blue[y, x] = b[y, x];
+                                red[y, x] = red[y, x];
+                                green[y, x] = green[y, x];
+                                blue[y, x] = blue[y, x];
                             }
                         }
                     }
                     else
                     {
-                        for (int y = 0; y < pi[i].sizeY; y++)
+                        for (int y = 0; y < processingImage[i].sizeY; y++)
                         {
-                            for (int x = 0; x < pi[i].sizeX; x++)
+                            for (int x = 0; x < processingImage[i].sizeX; x++)
                             {
-                                red[y, x] = r[y, x - imageDependencies.left + start];
-                                green[y, x] = g[y, x - imageDependencies.left + start];
-                                blue[y, x] = b[y, x - imageDependencies.left + start];
+                                red[y, x] = red[y, x - imageDependencies.left + start];
+                                green[y, x] = green[y, x - imageDependencies.left + start];
+                                blue[y, x] = blue[y, x - imageDependencies.left + start];
                             }
                         }
                     }
-                    pi[i].r = red;
-                    pi[i].g = green;
-                    pi[i].b = blue;
+                    processingImage[i].red = red;
+                    processingImage[i].green = green;
+                    processingImage[i].blue = blue;
                 }
 
                 start += stepSize;
             }
-            return pi;
+            return processingImage;
         }
 
         public void join(ProcessingImage subPart)
@@ -1329,9 +1347,9 @@ namespace ProcessingImageSDK
                 {
                     if (!grayscale)
                     {
-                        r = null;
-                        g = null;
-                        b = null;
+                        red = null;
+                        green = null;
+                        blue = null;
                         gray = new byte[this.sizeY, this.sizeX];
                         grayscale = true;
                     }
@@ -1361,9 +1379,9 @@ namespace ProcessingImageSDK
                     if (grayscale)
                     {
                         gray = null;
-                        r = new byte[this.sizeY, this.sizeX];
-                        g = new byte[this.sizeY, this.sizeX];
-                        b = new byte[this.sizeY, this.sizeX];
+                        red = new byte[this.sizeY, this.sizeX];
+                        green = new byte[this.sizeY, this.sizeX];
+                        blue = new byte[this.sizeY, this.sizeX];
                         grayscale = false;
                     }
                     if (subPart.positionX == 0)
@@ -1372,9 +1390,9 @@ namespace ProcessingImageSDK
                         {
                             for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
                             {
-                                r[i + subPart.positionY, j + subPart.positionX] = subPart.r[i, j];
-                                g[i + subPart.positionY, j + subPart.positionX] = subPart.g[i, j];
-                                b[i + subPart.positionY, j + subPart.positionX] = subPart.b[i, j];
+                                red[i + subPart.positionY, j + subPart.positionX] = subPart.red[i, j];
+                                green[i + subPart.positionY, j + subPart.positionX] = subPart.green[i, j];
+                                blue[i + subPart.positionY, j + subPart.positionX] = subPart.blue[i, j];
                             }
                         }
                     }
@@ -1384,9 +1402,9 @@ namespace ProcessingImageSDK
                         {
                             for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
                             {
-                                r[i + subPart.positionY, j + subPart.positionX - subPart.imageDependencies.left] = subPart.r[i, j];
-                                g[i + subPart.positionY, j + subPart.positionX - subPart.imageDependencies.left] = subPart.g[i, j];
-                                b[i + subPart.positionY, j + subPart.positionX - subPart.imageDependencies.left] = subPart.b[i, j];
+                                red[i + subPart.positionY, j + subPart.positionX - subPart.imageDependencies.left] = subPart.red[i, j];
+                                green[i + subPart.positionY, j + subPart.positionX - subPart.imageDependencies.left] = subPart.green[i, j];
+                                blue[i + subPart.positionY, j + subPart.positionX - subPart.imageDependencies.left] = subPart.blue[i, j];
                             }
                         }
                     }
