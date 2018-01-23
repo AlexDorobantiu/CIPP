@@ -16,49 +16,43 @@ using Plugins.MotionRecognition;
 
 namespace CIPP
 {
-    //interfata grafica
     public partial class CIPPForm : Form
     {
         int totalTime;
         int time;
 
-        public ArrayList originalImageArrayList;
-        public ArrayList processedImageArrayList;
-        public ArrayList maskedImageArrayList;
-        public ArrayList motionArrayList;
+        ProcessingImage visibleImage;
 
-        public List<PluginInfo> filterPluginList;
-        public List<PluginInfo> maskPluginList;
-        public List<PluginInfo> motionRecognitionPluginList;
+        private List<ProcessingImage> originalImageArrayList = new List<ProcessingImage>();
+        private List<ProcessingImage> processedImageArrayList = new List<ProcessingImage>();
+        private List<ProcessingImage> maskedImageArrayList = new List<ProcessingImage>();
+        private List<Motion> motionArrayList = new List<Motion>();
 
-        public List<CheckBox> filterPluginsCheckBoxList;
-        public List<CheckBox> maskPluginsCheckBoxList;
-        public List<CheckBox> motionRecognitionPluginsCheckBoxList;
+        private PluginFinder pluginFinder;
+        private List<PluginInfo> filterPluginList = new List<PluginInfo>();
+        private List<PluginInfo> maskPluginList = new List<PluginInfo>();
+        private List<PluginInfo> motionRecognitionPluginList = new List<PluginInfo>();
 
-        public List<TCPProxy> TCPConnections = new List<TCPProxy>();
+        private List<CheckBox> filterPluginsCheckBoxList = new List<CheckBox>();
+        private List<CheckBox> maskPluginsCheckBoxList = new List<CheckBox>();
+        private List<CheckBox> motionRecognitionPluginsCheckBoxList = new List<CheckBox>();
 
+        private List<TCPProxy> TCPConnections = new List<TCPProxy>();
+
+        /// <summary>
+        /// Main application form
+        /// </summary>
         public CIPPForm()
         {
             InitializeComponent();
             localNumberOfWorkers.Value = Environment.ProcessorCount;
             localGranularityComboBox.SelectedIndex = 0;
 
-            originalImageArrayList = new ArrayList();
-            processedImageArrayList = new ArrayList();
-            maskedImageArrayList = new ArrayList();
-            motionArrayList = new ArrayList();
-
-            filterPluginList = new List<PluginInfo>();
-            maskPluginList = new List<PluginInfo>();
-            motionRecognitionPluginList = new List<PluginInfo>();
-
-            filterPluginsCheckBoxList = new List<CheckBox>();
-            maskPluginsCheckBoxList = new List<CheckBox>();
-            motionRecognitionPluginsCheckBoxList = new List<CheckBox>();
-
             TCPConnections = new List<TCPProxy>();
             loadConnectionsFromDisk();
-            updatePlugins_Click(this, null);
+
+            pluginFinder = new PluginFinder(filterPluginList, maskPluginList, motionRecognitionPluginList);
+            updatePlugins_Click(this, null);           
         }
 
         private void loadFile(string fileName)
@@ -91,10 +85,30 @@ namespace CIPP
             }
         }
 
+        private void updateVisibleImage()
+        {
+            if (visibleImage != null)
+            {
+                previewPicture.Image = visibleImage.getPreviewBitmap(previewPicture.Size.Width, previewPicture.Size.Height);
+                widthValueLabel.Text = "" + visibleImage.getSizeX();
+                heightValueLabel.Text = "" + visibleImage.getSizeY();
+                grayscaleValueLabel.Text = visibleImage.grayscale.ToString();
+                maskedValueLabel.Text = visibleImage.masked.ToString();
+
+                watermarkListBox.Items.Clear();
+                List<string> list = visibleImage.getWatermarks();
+                foreach (string s in list)
+                {
+                    watermarkListBox.Items.Add(s);
+                }
+            }
+            GC.Collect();
+        }
+
         private void originalImageList_SelectedIndexChanged(object sender, EventArgs e)
         {
+            visibleImage = null;
             previewPicture.Image = null;
-            ProcessingImage pi = null;
             widthValueLabel.Text = null;
             heightValueLabel.Text = null;
             grayscaleValueLabel.Text = null;
@@ -106,19 +120,25 @@ namespace CIPP
                 case 0:
                     {
                         if (originalImageList.SelectedItems.Count == 1)
-                            pi = (ProcessingImage)originalImageArrayList[originalImageList.SelectedIndex];
+                        {
+                            visibleImage = (ProcessingImage)originalImageArrayList[originalImageList.SelectedIndex];
+                        }
                     } break;
                 //processed image tab
                 case 1:
                     {
                         if (processedImageList.SelectedItems.Count == 1)
-                            pi = (ProcessingImage)processedImageArrayList[processedImageList.SelectedIndex];
+                        {
+                            visibleImage = (ProcessingImage)processedImageArrayList[processedImageList.SelectedIndex];
+                        }
                     } break;
                 //masked image tab
                 case 2:
                     {
                         if (maskedImageList.SelectedItems.Count == 1)
-                            pi = (ProcessingImage)maskedImageArrayList[maskedImageList.SelectedIndex];
+                        {
+                            visibleImage = (ProcessingImage)maskedImageArrayList[maskedImageList.SelectedIndex];
+                        }
                     } break;
                 //scaned image tab
                 case 3:
@@ -126,20 +146,7 @@ namespace CIPP
 
                     } break;
             }
-            if (pi != null)
-            {
-                previewPicture.Image = pi.getPreviewBitmap(previewPicture.Size.Width, previewPicture.Size.Height);
-                widthValueLabel.Text = "" + pi.getSizeX();
-                heightValueLabel.Text = "" + pi.getSizeY();
-                grayscaleValueLabel.Text = pi.grayscale.ToString();
-                maskedValueLabel.Text = pi.masked.ToString();
-
-                watermarkListBox.Items.Clear();
-                List<string> list = pi.getWatermarks();
-                foreach (string s in list)
-                    watermarkListBox.Items.Add(s);
-            }
-            GC.Collect();
+            updateVisibleImage();
         }
 
         private void removeImageButton_Click(object sender, EventArgs e)
@@ -198,7 +205,7 @@ namespace CIPP
                         for (int i = 0; i < originalImageList.SelectedIndices.Count; i++)
                         {
                             int currentSelected = originalImageList.SelectedIndices[i];
-                            Object temp = originalImageList.Items[currentSelected - 1];
+                            ProcessingImage temp = (ProcessingImage)originalImageList.Items[currentSelected - 1];
                             originalImageList.Items[currentSelected - 1] = originalImageList.Items[currentSelected];
                             originalImageList.Items[currentSelected] = temp;
 
@@ -218,7 +225,7 @@ namespace CIPP
                         for (int i = 0; i < processedImageList.SelectedIndices.Count; i++)
                         {
                             int currentSelected = processedImageList.SelectedIndices[i];
-                            Object temp = processedImageList.Items[currentSelected - 1];
+                            ProcessingImage temp = (ProcessingImage)processedImageList.Items[currentSelected - 1];
                             processedImageList.Items[currentSelected - 1] = processedImageList.Items[currentSelected];
                             processedImageList.Items[currentSelected] = temp;
 
@@ -238,7 +245,7 @@ namespace CIPP
                         for (int i = 0; i < maskedImageList.SelectedIndices.Count; i++)
                         {
                             int currentSelected = maskedImageList.SelectedIndices[i];
-                            Object temp = maskedImageList.Items[currentSelected - 1];
+                            ProcessingImage temp = (ProcessingImage)maskedImageList.Items[currentSelected - 1];
                             maskedImageList.Items[currentSelected - 1] = maskedImageList.Items[currentSelected];
                             maskedImageList.Items[currentSelected] = temp;
 
@@ -270,7 +277,7 @@ namespace CIPP
                         for (int i = originalImageList.SelectedIndices.Count - 1; i >= 0; i--)
                         {
                             int currentSelected = originalImageList.SelectedIndices[i];
-                            Object temp = originalImageList.Items[currentSelected];
+                            ProcessingImage temp = (ProcessingImage)originalImageList.Items[currentSelected];
                             originalImageList.Items[currentSelected] = originalImageList.Items[currentSelected + 1];
                             originalImageList.Items[currentSelected + 1] = temp;
 
@@ -290,7 +297,7 @@ namespace CIPP
                         for (int i = processedImageList.SelectedIndices.Count - 1; i >= 0; i--)
                         {
                             int currentSelected = processedImageList.SelectedIndices[i];
-                            Object temp = processedImageList.Items[currentSelected];
+                            ProcessingImage temp = (ProcessingImage)processedImageList.Items[currentSelected];
                             processedImageList.Items[currentSelected] = processedImageList.Items[currentSelected + 1];
                             processedImageList.Items[currentSelected + 1] = temp;
 
@@ -310,7 +317,7 @@ namespace CIPP
                         for (int i = maskedImageList.SelectedIndices.Count - 1; i >= 0; i--)
                         {
                             int currentSelected = maskedImageList.SelectedIndices[i];
-                            Object temp = maskedImageList.Items[currentSelected];
+                            ProcessingImage temp = (ProcessingImage)maskedImageList.Items[currentSelected];
                             maskedImageList.Items[currentSelected] = maskedImageList.Items[currentSelected + 1];
                             maskedImageList.Items[currentSelected + 1] = temp;
 
@@ -326,7 +333,7 @@ namespace CIPP
                 case 3:
                     {
                     } break;
-            }            
+            }
         }
 
         private void saveImageButton_Click(object sender, EventArgs e)
@@ -337,7 +344,7 @@ namespace CIPP
                 saveFileDialog.Filter = "PNG(*.png)|*.png|Bitmap(*.bmp)|*.bmp|JPEG|*.jpg|GIF|*.gif|ICO|*.ico|EMF|*.emf|EXIF|*.exif|TIFF|*.tiff|WMF|*.wmf|All files (*.*)|*.*";
 
                 ListBox visibleListBox = null;
-                ArrayList selectedArrayList = null;
+                List<ProcessingImage> selectedArrayList = null;
 
                 switch (imageTab.SelectedIndex)
                 {
@@ -374,7 +381,7 @@ namespace CIPP
                     saveFileDialog.FileName = visibleListBox.Items[visibleListBox.SelectedIndices[0]].ToString();
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        ProcessingImage pi = (ProcessingImage)selectedArrayList[visibleListBox.SelectedIndices[0]];
+                        ProcessingImage pi = selectedArrayList[visibleListBox.SelectedIndices[0]];
                         pi.saveImage(saveFileDialog.FileName);
                     }
                 }
@@ -384,7 +391,7 @@ namespace CIPP
                     {
                         for (int i = 0; i < visibleListBox.SelectedIndices.Count; i++)
                         {
-                            ProcessingImage pi = (ProcessingImage)selectedArrayList[visibleListBox.SelectedIndices[i]];
+                            ProcessingImage pi = selectedArrayList[visibleListBox.SelectedIndices[i]];
                             String newPath = Path.Combine(folderBrowserDialog.SelectedPath, visibleListBox.Items[visibleListBox.SelectedIndices[i]].ToString());
                             pi.saveImage(newPath);
                         }
@@ -410,7 +417,7 @@ namespace CIPP
                             for (int j = i + 1; j < originalImageList.Items.Count; j++)
                                 if (originalImageList.Items[i].ToString().CompareTo(originalImageList.Items[j].ToString()) > 0)
                                 {
-                                    Object temp = originalImageList.Items[i];
+                                    ProcessingImage temp = (ProcessingImage)originalImageList.Items[i];
                                     originalImageList.Items[i] = originalImageList.Items[j];
                                     originalImageList.Items[j] = temp;
 
@@ -430,7 +437,7 @@ namespace CIPP
                             for (int j = i + 1; j < processedImageList.Items.Count; j++)
                                 if (processedImageList.Items[i].ToString().CompareTo(processedImageList.Items[j].ToString()) > 0)
                                 {
-                                    Object temp = processedImageList.Items[i];
+                                    ProcessingImage temp = (ProcessingImage)processedImageList.Items[i];
                                     processedImageList.Items[i] = processedImageList.Items[j];
                                     processedImageList.Items[j] = temp;
 
@@ -450,7 +457,7 @@ namespace CIPP
                             for (int j = i + 1; j < maskedImageList.Items.Count; j++)
                                 if (maskedImageList.Items[i].ToString().CompareTo(maskedImageList.Items[j].ToString()) > 0)
                                 {
-                                    Object temp = maskedImageList.Items[i];
+                                    ProcessingImage temp = (ProcessingImage)maskedImageList.Items[i];
                                     maskedImageList.Items[i] = maskedImageList.Items[j];
                                     maskedImageList.Items[j] = temp;
 
@@ -466,7 +473,7 @@ namespace CIPP
                     {
 
                     } break;
-            }            
+            }
         }
 
         private void imageTab_SelectedIndexChanged(object sender, EventArgs e)
@@ -503,6 +510,7 @@ namespace CIPP
                         previewMotionButton.Enabled = true;
                     } break;
             }
+            originalImageList_SelectedIndexChanged(sender, e);
         }
 
         private void viewImageButton_Click(object sender, EventArgs e)
@@ -519,7 +527,7 @@ namespace CIPP
                             f = new ViewImageForm((ProcessingImage)(originalImageArrayList[originalImageList.SelectedIndices[i]]));
                             f.Show();
                             f.Focus();
-                        }                        
+                        }
                     } break;
                 //processed image tab
                 case 1:
@@ -543,7 +551,7 @@ namespace CIPP
                             f.Focus();
                         }
                     } break;
-            }            
+            }
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -567,15 +575,17 @@ namespace CIPP
 
         private void originalImageList_DragDrop(object sender, DragEventArgs e)
         {
-            String[] files=(string[])e.Data.GetData(DataFormats.FileDrop);
+            String[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (string fileName in files)
             {
-                DirectoryInfo di= new DirectoryInfo(fileName);
-                if (di.Exists) 
+                DirectoryInfo di = new DirectoryInfo(fileName);
+                if (di.Exists)
                 {
                     FileInfo[] directoryFiles = di.GetFiles("*.*", SearchOption.AllDirectories);
                     foreach (FileInfo f in directoryFiles)
+                    {
                         loadFile(f.FullName);
+                    }
                 }
                 else
                 {
@@ -619,6 +629,11 @@ namespace CIPP
                 System.Diagnostics.Process.Start("http://www.dorobantiu.ro");
             }
             catch { }
+        }
+
+        private void previewPicture_SizeChanged(object sender, EventArgs e)
+        {
+            updateVisibleImage();
         }
     }
 }

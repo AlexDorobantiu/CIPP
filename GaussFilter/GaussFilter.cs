@@ -48,23 +48,15 @@ namespace Plugins.Filters.GaussFilter
             int min = size / 2;
             int max = size / 2 + size % 2;
 
-            float sum = 0;
             for (int y = -min; y < max; y++)
             {
                 for (int x = -min; x < max; x++)
                 {
-                    sum += gaussConvolutionMatrix[y + min, x + min] = coef1 * (float)Math.Exp(coef2 * (x * x + y * y));
+                    gaussConvolutionMatrix[y + min, x + min] = coef1 * (float)Math.Exp(coef2 * (x * x + y * y));
                 }
             }
 
-            // normalize
-            for (int y = 0; y < size; y++)
-            {
-                for (int x = 0; x < size; x++)
-                {
-                    gaussConvolutionMatrix[y, x] /= sum;
-                }
-            }
+            ProcessingImageUtils.normalize(gaussConvolutionMatrix);
 
             ProcessingImage outputImage = inputImage.mirroredMarginConvolution(gaussConvolutionMatrix);
             outputImage.addWatermark("Gauss Filter, size: " + size + ", sigma: " + sigma + " v1.0, Alex Dorobantiu");

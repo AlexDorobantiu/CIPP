@@ -61,7 +61,10 @@
   <PropertyGroup>
     <PostBuildEvent>if not exist "$(SolutionDir)CIPP\bin\$(ConfigurationName)\plugins\" mkdir "$(SolutionDir)CIPP\bin\$(ConfigurationName)\plugins\"
 if not exist "$(SolutionDir)CIPP\bin\$(ConfigurationName)\plugins\masks\" mkdir "$(SolutionDir)CIPP\bin\$(ConfigurationName)\plugins\masks\"
-copy /Y "$(TargetPath)" "$(SolutionDir)CIPP\bin\$(ConfigurationName)\plugins\masks\"</PostBuildEvent>
+copy /Y "$(TargetPath)" "$(SolutionDir)CIPP\bin\$(ConfigurationName)\plugins\masks\"
+if not exist "$(SolutionDir)CIPPServer\bin\$(ConfigurationName)\plugins\" mkdir "$(SolutionDir)CIPPServer\bin\$(ConfigurationName)\plugins\"
+if not exist "$(SolutionDir)CIPPServer\bin\$(ConfigurationName)\plugins\masks\" mkdir "$(SolutionDir)CIPPServer\bin\$(ConfigurationName)\plugins\masks\"
+copy /Y "$(TargetPath)" "$(SolutionDir)CIPPServer\bin\$(ConfigurationName)\plugins\masks\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -7,14 +7,14 @@ using ProcessingImageSDK;
 
 namespace Plugins.Filters.SecondDerivativeEdgeDetect
 {
-    public class SecondDerivativeEdgeDetect : IFilter
+    public class SecondDerivativeEdgeDetectFilter : IFilter
     {
         public static List<IParameters> getParametersList()
         {
             return new List<IParameters>();
         }
 
-        public SecondDerivativeEdgeDetect()
+        public SecondDerivativeEdgeDetectFilter()
         {
         }
 
@@ -81,7 +81,7 @@ namespace Plugins.Filters.SecondDerivativeEdgeDetect
                             outputGray[i, j] = 0;
                         }
                     }
-                    else if (convolutedResult[i, j] >= 0)
+                    else
                     {
                         if ((convolutedResult[i - 1, j] < 0) || (convolutedResult[i + 1, j] < 0) || (convolutedResult[i, j + 1] < 0) || (convolutedResult[i, j - 1] < 0) ||
                             (convolutedResult[i - 1, j - 1] < 0) || (convolutedResult[i + 1, j - 1] < 0) || (convolutedResult[i - 1, j + 1] < 0) || (convolutedResult[i + 1, j + 1] < 0))

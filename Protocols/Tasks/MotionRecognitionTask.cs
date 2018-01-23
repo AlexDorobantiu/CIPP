@@ -4,7 +4,7 @@ using System.Text;
 
 using ProcessingImageSDK;
 
-namespace CIPPProtocols
+namespace CIPPProtocols.Tasks
 {
     [Serializable]
     public class MotionRecognitionTask : Task
@@ -56,7 +56,10 @@ namespace CIPPProtocols
             }
 
             subParts--;
-            if (subParts == 0) state = true;
+            if (subParts == 0)
+            {
+                state = true;
+            }
         }
     }
 }

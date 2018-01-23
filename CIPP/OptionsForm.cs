@@ -157,10 +157,15 @@ namespace CIPP
             foreach (IParameters param in list)
             {
                 if (param.getPreferredDisplayType() == DisplayType.textBox)
+                {
                     param.updateProperty(((TextBox)flowLayoutPanel.Controls[i]).Text);
+                }
                 else
+                {
                     if (param.getPreferredDisplayType() == DisplayType.trackBar)
+                    {
                         param.updateProperty(((TrackBar)flowLayoutPanel.Controls[i]).Value);
+                    }
                     else
                         if (param.getPreferredDisplayType() == DisplayType.listBox)
                         {
@@ -170,7 +175,10 @@ namespace CIPP
                         }
                         else
                             if (param.getPreferredDisplayType() == DisplayType.comboBox)
+                            {
                                 param.updateProperty(((ComboBox)flowLayoutPanel.Controls[i]).SelectedIndex);
+                            }
+                }
                 i += 2;
             }
             this.Close();

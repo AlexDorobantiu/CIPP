@@ -88,7 +88,6 @@ namespace CIPP
             this.removeTCPConnectionButton = new System.Windows.Forms.Button();
             this.addTCPConnectionButton = new System.Windows.Forms.Button();
             this.TCPConnectionsListBox = new System.Windows.Forms.ListBox();
-            this.wanTab = new System.Windows.Forms.TabPage();
             this.workerAreaGroup = new System.Windows.Forms.GroupBox();
             this.clearMessagesListButton = new System.Windows.Forms.Button();
             this.workersListLabel = new System.Windows.Forms.Label();
@@ -187,6 +186,8 @@ namespace CIPP
             // 
             // processingAreaGroup
             // 
+            this.processingAreaGroup.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.processingAreaGroup.Controls.Add(this.updatePlugins);
             this.processingAreaGroup.Controls.Add(this.processingTab);
             this.processingAreaGroup.Location = new System.Drawing.Point(2, 26);
@@ -199,11 +200,12 @@ namespace CIPP
             // 
             // updatePlugins
             // 
+            this.updatePlugins.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.updatePlugins.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.updatePlugins.Location = new System.Drawing.Point(3, 342);
+            this.updatePlugins.Location = new System.Drawing.Point(4, 341);
             this.updatePlugins.Margin = new System.Windows.Forms.Padding(0);
             this.updatePlugins.Name = "updatePlugins";
-            this.updatePlugins.Size = new System.Drawing.Size(289, 23);
+            this.updatePlugins.Size = new System.Drawing.Size(286, 23);
             this.updatePlugins.TabIndex = 1;
             this.updatePlugins.Text = "Update Plugins List";
             this.updatePlugins.UseVisualStyleBackColor = true;
@@ -211,11 +213,12 @@ namespace CIPP
             // 
             // processingTab
             // 
+            this.processingTab.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.processingTab.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
             this.processingTab.Controls.Add(this.filteringTab);
             this.processingTab.Controls.Add(this.maskingTab);
             this.processingTab.Controls.Add(this.motionRecognitionTab);
-            this.processingTab.Dock = System.Windows.Forms.DockStyle.Top;
             this.processingTab.Location = new System.Drawing.Point(3, 16);
             this.processingTab.Margin = new System.Windows.Forms.Padding(0);
             this.processingTab.Name = "processingTab";
@@ -231,7 +234,6 @@ namespace CIPP
             this.filteringTab.Size = new System.Drawing.Size(281, 296);
             this.filteringTab.TabIndex = 0;
             this.filteringTab.Text = "Filtering";
-            this.filteringTab.UseVisualStyleBackColor = true;
             // 
             // flowLayoutPanelFilterPlugins
             // 
@@ -252,7 +254,6 @@ namespace CIPP
             this.maskingTab.Size = new System.Drawing.Size(281, 296);
             this.maskingTab.TabIndex = 1;
             this.maskingTab.Text = "Masking";
-            this.maskingTab.UseVisualStyleBackColor = true;
             // 
             // flowLayoutPanelMaskPlugins
             // 
@@ -273,7 +274,6 @@ namespace CIPP
             this.motionRecognitionTab.Size = new System.Drawing.Size(281, 296);
             this.motionRecognitionTab.TabIndex = 2;
             this.motionRecognitionTab.Text = "Motion Recognition";
-            this.motionRecognitionTab.UseVisualStyleBackColor = true;
             // 
             // flowLayoutPanelMotionRecognitionPlugins
             // 
@@ -288,6 +288,9 @@ namespace CIPP
             // 
             // imageAreaGroup
             // 
+            this.imageAreaGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.imageAreaGroup.Controls.Add(this.previewPictureLabel);
             this.imageAreaGroup.Controls.Add(this.imagePropertiesGroup);
             this.imageAreaGroup.Controls.Add(this.previewMotionButton);
@@ -320,6 +323,8 @@ namespace CIPP
             // 
             // imagePropertiesGroup
             // 
+            this.imagePropertiesGroup.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.imagePropertiesGroup.Controls.Add(this.watermarkListBox);
             this.imagePropertiesGroup.Controls.Add(this.maskedValueLabel);
             this.imagePropertiesGroup.Controls.Add(this.maskedLabel);
@@ -338,11 +343,13 @@ namespace CIPP
             // 
             // watermarkListBox
             // 
+            this.watermarkListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.watermarkListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.watermarkListBox.FormattingEnabled = true;
             this.watermarkListBox.HorizontalScrollbar = true;
             this.watermarkListBox.IntegralHeight = false;
-            this.watermarkListBox.Location = new System.Drawing.Point(166, 9);
+            this.watermarkListBox.Location = new System.Drawing.Point(166, 8);
             this.watermarkListBox.Margin = new System.Windows.Forms.Padding(0);
             this.watermarkListBox.Name = "watermarkListBox";
             this.watermarkListBox.SelectionMode = System.Windows.Forms.SelectionMode.None;
@@ -420,6 +427,7 @@ namespace CIPP
             // 
             // previewMotionButton
             // 
+            this.previewMotionButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.previewMotionButton.Enabled = false;
             this.previewMotionButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.previewMotionButton.Location = new System.Drawing.Point(383, 276);
@@ -433,6 +441,7 @@ namespace CIPP
             // 
             // viewImageButton
             // 
+            this.viewImageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.viewImageButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.viewImageButton.Location = new System.Drawing.Point(222, 276);
             this.viewImageButton.Name = "viewImageButton";
@@ -445,6 +454,7 @@ namespace CIPP
             // 
             // sortButton
             // 
+            this.sortButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.sortButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.sortButton.Location = new System.Drawing.Point(151, 276);
             this.sortButton.Margin = new System.Windows.Forms.Padding(1);
@@ -458,6 +468,7 @@ namespace CIPP
             // 
             // removeImageButton
             // 
+            this.removeImageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.removeImageButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.removeImageButton.Location = new System.Drawing.Point(3, 276);
             this.removeImageButton.Margin = new System.Windows.Forms.Padding(1);
@@ -471,6 +482,7 @@ namespace CIPP
             // 
             // moveDownButton
             // 
+            this.moveDownButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.moveDownButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.moveDownButton.Location = new System.Drawing.Point(73, 276);
             this.moveDownButton.Margin = new System.Windows.Forms.Padding(1);
@@ -484,6 +496,7 @@ namespace CIPP
             // 
             // addImageButton
             // 
+            this.addImageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.addImageButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.addImageButton.Location = new System.Drawing.Point(3, 251);
             this.addImageButton.Margin = new System.Windows.Forms.Padding(1);
@@ -497,6 +510,7 @@ namespace CIPP
             // 
             // saveImageButton
             // 
+            this.saveImageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.saveImageButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.saveImageButton.Location = new System.Drawing.Point(151, 251);
             this.saveImageButton.Margin = new System.Windows.Forms.Padding(1);
@@ -510,6 +524,7 @@ namespace CIPP
             // 
             // moveUpButton
             // 
+            this.moveUpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.moveUpButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.moveUpButton.Location = new System.Drawing.Point(73, 251);
             this.moveUpButton.Margin = new System.Windows.Forms.Padding(1);
@@ -523,6 +538,9 @@ namespace CIPP
             // 
             // previewPicture
             // 
+            this.previewPicture.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.previewPicture.BackColor = System.Drawing.SystemColors.Control;
             this.previewPicture.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.previewPicture.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -533,9 +551,12 @@ namespace CIPP
             this.previewPicture.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.previewPicture.TabIndex = 1;
             this.previewPicture.TabStop = false;
+            this.previewPicture.SizeChanged += new System.EventHandler(this.previewPicture_SizeChanged);
             // 
             // imageTab
             // 
+            this.imageTab.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.imageTab.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
             this.imageTab.Controls.Add(this.originalImageTab);
             this.imageTab.Controls.Add(this.processedImageTab);
@@ -560,7 +581,6 @@ namespace CIPP
             this.originalImageTab.Size = new System.Drawing.Size(207, 206);
             this.originalImageTab.TabIndex = 0;
             this.originalImageTab.Text = "original";
-            this.originalImageTab.UseVisualStyleBackColor = true;
             // 
             // originalImageList
             // 
@@ -589,7 +609,6 @@ namespace CIPP
             this.processedImageTab.Size = new System.Drawing.Size(207, 206);
             this.processedImageTab.TabIndex = 1;
             this.processedImageTab.Text = "processed";
-            this.processedImageTab.UseVisualStyleBackColor = true;
             // 
             // processedImageList
             // 
@@ -613,7 +632,6 @@ namespace CIPP
             this.maskedImageTab.Size = new System.Drawing.Size(207, 206);
             this.maskedImageTab.TabIndex = 2;
             this.maskedImageTab.Text = "masked";
-            this.maskedImageTab.UseVisualStyleBackColor = true;
             // 
             // maskedImageList
             // 
@@ -636,7 +654,6 @@ namespace CIPP
             this.scanedImageTab.Size = new System.Drawing.Size(207, 206);
             this.scanedImageTab.TabIndex = 3;
             this.scanedImageTab.Text = "scaned";
-            this.scanedImageTab.UseVisualStyleBackColor = true;
             // 
             // motionList
             // 
@@ -653,10 +670,11 @@ namespace CIPP
             // 
             // workerControlAreaGroup
             // 
+            this.workerControlAreaGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.workerControlAreaGroup.Controls.Add(this.workerControlTab);
             this.workerControlAreaGroup.Location = new System.Drawing.Point(2, 394);
             this.workerControlAreaGroup.Name = "workerControlAreaGroup";
-            this.workerControlAreaGroup.Size = new System.Drawing.Size(295, 142);
+            this.workerControlAreaGroup.Size = new System.Drawing.Size(295, 145);
             this.workerControlAreaGroup.TabIndex = 2;
             this.workerControlAreaGroup.TabStop = false;
             this.workerControlAreaGroup.Text = "Worker Control Area";
@@ -666,12 +684,11 @@ namespace CIPP
             this.workerControlTab.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
             this.workerControlTab.Controls.Add(this.localTab);
             this.workerControlTab.Controls.Add(this.lanTab);
-            this.workerControlTab.Controls.Add(this.wanTab);
             this.workerControlTab.Dock = System.Windows.Forms.DockStyle.Fill;
             this.workerControlTab.Location = new System.Drawing.Point(3, 16);
             this.workerControlTab.Name = "workerControlTab";
             this.workerControlTab.SelectedIndex = 0;
-            this.workerControlTab.Size = new System.Drawing.Size(289, 123);
+            this.workerControlTab.Size = new System.Drawing.Size(289, 126);
             this.workerControlTab.TabIndex = 1;
             // 
             // localTab
@@ -683,10 +700,9 @@ namespace CIPP
             this.localTab.Location = new System.Drawing.Point(4, 25);
             this.localTab.Name = "localTab";
             this.localTab.Padding = new System.Windows.Forms.Padding(3);
-            this.localTab.Size = new System.Drawing.Size(281, 94);
+            this.localTab.Size = new System.Drawing.Size(281, 97);
             this.localTab.TabIndex = 0;
             this.localTab.Text = "Local Config.";
-            this.localTab.UseVisualStyleBackColor = true;
             // 
             // localGranularityComboBox
             // 
@@ -742,20 +758,19 @@ namespace CIPP
             this.lanTab.Location = new System.Drawing.Point(4, 25);
             this.lanTab.Margin = new System.Windows.Forms.Padding(0);
             this.lanTab.Name = "lanTab";
-            this.lanTab.Size = new System.Drawing.Size(281, 94);
+            this.lanTab.Size = new System.Drawing.Size(281, 97);
             this.lanTab.TabIndex = 1;
             this.lanTab.Text = "LAN Config.";
-            this.lanTab.UseVisualStyleBackColor = true;
             // 
             // disconnectTCPConnectionButton
             // 
             this.disconnectTCPConnectionButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.disconnectTCPConnectionButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.disconnectTCPConnectionButton.Location = new System.Drawing.Point(206, 71);
+            this.disconnectTCPConnectionButton.Location = new System.Drawing.Point(205, 73);
             this.disconnectTCPConnectionButton.Name = "disconnectTCPConnectionButton";
             this.disconnectTCPConnectionButton.Size = new System.Drawing.Size(75, 23);
             this.disconnectTCPConnectionButton.TabIndex = 4;
-            this.disconnectTCPConnectionButton.Text = "Disconnect";
+            this.disconnectTCPConnectionButton.Text = "disconnect";
             this.disconnectTCPConnectionButton.UseVisualStyleBackColor = true;
             this.disconnectTCPConnectionButton.Click += new System.EventHandler(this.disconnectTCPConnectionButton_Click);
             // 
@@ -763,7 +778,7 @@ namespace CIPP
             // 
             this.connectTCPConnectionButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.connectTCPConnectionButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.connectTCPConnectionButton.Location = new System.Drawing.Point(206, 47);
+            this.connectTCPConnectionButton.Location = new System.Drawing.Point(205, 49);
             this.connectTCPConnectionButton.Name = "connectTCPConnectionButton";
             this.connectTCPConnectionButton.Size = new System.Drawing.Size(75, 23);
             this.connectTCPConnectionButton.TabIndex = 3;
@@ -775,7 +790,7 @@ namespace CIPP
             // 
             this.removeTCPConnectionButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.removeTCPConnectionButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.removeTCPConnectionButton.Location = new System.Drawing.Point(206, 23);
+            this.removeTCPConnectionButton.Location = new System.Drawing.Point(205, 25);
             this.removeTCPConnectionButton.Name = "removeTCPConnectionButton";
             this.removeTCPConnectionButton.Size = new System.Drawing.Size(75, 23);
             this.removeTCPConnectionButton.TabIndex = 2;
@@ -787,7 +802,7 @@ namespace CIPP
             // 
             this.addTCPConnectionButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.addTCPConnectionButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.addTCPConnectionButton.Location = new System.Drawing.Point(206, -1);
+            this.addTCPConnectionButton.Location = new System.Drawing.Point(205, 1);
             this.addTCPConnectionButton.Name = "addTCPConnectionButton";
             this.addTCPConnectionButton.Size = new System.Drawing.Size(75, 23);
             this.addTCPConnectionButton.TabIndex = 1;
@@ -806,20 +821,13 @@ namespace CIPP
             this.TCPConnectionsListBox.Margin = new System.Windows.Forms.Padding(0);
             this.TCPConnectionsListBox.Name = "TCPConnectionsListBox";
             this.TCPConnectionsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.TCPConnectionsListBox.Size = new System.Drawing.Size(205, 94);
+            this.TCPConnectionsListBox.Size = new System.Drawing.Size(203, 97);
             this.TCPConnectionsListBox.TabIndex = 0;
-            // 
-            // wanTab
-            // 
-            this.wanTab.Location = new System.Drawing.Point(4, 25);
-            this.wanTab.Name = "wanTab";
-            this.wanTab.Size = new System.Drawing.Size(281, 94);
-            this.wanTab.TabIndex = 2;
-            this.wanTab.Text = "WAN Config.";
-            this.wanTab.UseVisualStyleBackColor = true;
             // 
             // workerAreaGroup
             // 
+            this.workerAreaGroup.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.workerAreaGroup.Controls.Add(this.clearMessagesListButton);
             this.workerAreaGroup.Controls.Add(this.workersListLabel);
             this.workerAreaGroup.Controls.Add(this.messagesListLabel);
@@ -834,6 +842,8 @@ namespace CIPP
             // 
             // clearMessagesListButton
             // 
+            this.clearMessagesListButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.clearMessagesListButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.clearMessagesListButton.Location = new System.Drawing.Point(210, 162);
             this.clearMessagesListButton.Margin = new System.Windows.Forms.Padding(0);
@@ -867,6 +877,8 @@ namespace CIPP
             // 
             // messagesList
             // 
+            this.messagesList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.messagesList.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.messagesList.FormattingEnabled = true;
             this.messagesList.HorizontalScrollbar = true;
@@ -895,6 +907,7 @@ namespace CIPP
             // 
             // startButton
             // 
+            this.startButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.startButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.startButton.Location = new System.Drawing.Point(2, 559);
             this.startButton.Name = "startButton";
@@ -973,6 +986,7 @@ namespace CIPP
             // 
             // finishButton
             // 
+            this.finishButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.finishButton.Enabled = false;
             this.finishButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.finishButton.Location = new System.Drawing.Point(150, 559);
@@ -986,6 +1000,7 @@ namespace CIPP
             // 
             // allertFinishCheckBox
             // 
+            this.allertFinishCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.allertFinishCheckBox.AutoSize = true;
             this.allertFinishCheckBox.Location = new System.Drawing.Point(3, 539);
             this.allertFinishCheckBox.Name = "allertFinishCheckBox";
@@ -1030,10 +1045,9 @@ namespace CIPP
             this.Controls.Add(this.processingAreaGroup);
             this.Controls.Add(this.topMenu);
             this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.topMenu;
-            this.MaximizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(861, 633);
             this.Name = "CIPPForm";
             this.Text = "CIPP - Compact Image Processing Platform";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CIPPForm_FormClosing);
@@ -1094,7 +1108,6 @@ namespace CIPP
         private System.Windows.Forms.TabControl workerControlTab;
         private System.Windows.Forms.TabPage localTab;
         private System.Windows.Forms.TabPage lanTab;
-        private System.Windows.Forms.TabPage wanTab;
         private System.Windows.Forms.PictureBox previewPicture;
         private System.Windows.Forms.TabControl imageTab;
         private System.Windows.Forms.TabPage originalImageTab;

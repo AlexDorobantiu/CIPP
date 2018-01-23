@@ -9,15 +9,17 @@ using ParametersSDK;
 using Plugins.Filters;
 using Plugins.Masks;
 using Plugins.MotionRecognition;
+using CIPPProtocols.Tasks;
+using CIPPProtocols.Commands;
 
 namespace CIPP
 {
-    public delegate void addImageCallback(ProcessingImage processingImage, TaskTypeEnum taskType);
-    public delegate void numberChangedCallBack(int number, bool commandOrTask);
-    public delegate void addMotionCallback(Motion motion);
-    public delegate void jobFinishedCallback();
+    delegate void addImageCallback(ProcessingImage processingImage, TaskTypeEnum taskType);
+    delegate void numberChangedCallBack(int number, bool commandOrTask);
+    delegate void addMotionCallback(Motion motion);
+    delegate void jobFinishedCallback();
 
-    public class WorkManager
+    class WorkManager
     {
         public static object locker = new object();
 
@@ -38,10 +40,8 @@ namespace CIPP
         private jobFinishedCallback jobDone;
         private numberChangedCallBack numberChanged;
 
-        private List<PluginInfo> filterPluginList;
-        private List<PluginInfo> maskPluginList;
-        private List<PluginInfo> motionRecognitionPluginList;
-
+        PluginFinder pluginFinder;
+        
         public WorkManager(GranularityTypeEnum granularityType, addImageCallback addImageResult, addMotionCallback addMotion, jobFinishedCallback jobDone, numberChangedCallBack numberChanged)
         {
             this.granularityType = granularityType;
@@ -53,9 +53,7 @@ namespace CIPP
 
         public void updateLists(List<PluginInfo> filterPluginList, List<PluginInfo> maskPluginList, List<PluginInfo> motionRecognitionPluginList)
         {
-            this.filterPluginList = filterPluginList;
-            this.maskPluginList = maskPluginList;
-            this.motionRecognitionPluginList = motionRecognitionPluginList;
+            pluginFinder = new PluginFinder(filterPluginList, maskPluginList, motionRecognitionPluginList);
         }
 
         public void updateCommandQueue(List<FilterCommand> filterRequests)
@@ -63,7 +61,9 @@ namespace CIPP
             lock (this.filterRequests)
             {
                 foreach (FilterCommand command in filterRequests)
+                {
                     this.filterRequests.Enqueue(command);
+                }
                 commandsNumber += filterRequests.Count;
                 numberChanged(commandsNumber, false);
             }
@@ -74,7 +74,9 @@ namespace CIPP
             lock (this.maskRequests)
             {
                 foreach (MaskCommand command in maskRequests)
+                {
                     this.maskRequests.Enqueue(command);
+                }
                 commandsNumber += maskRequests.Count;
                 numberChanged(commandsNumber, false);
             }
@@ -85,7 +87,9 @@ namespace CIPP
             lock (this.motionRecognitionRequests)
             {
                 foreach (MotionRecognitionCommand command in motionDetectionRequests)
+                {
                     this.motionRecognitionRequests.Enqueue(command);
+                }
                 commandsNumber += motionDetectionRequests.Count;
                 numberChanged(commandsNumber, false);
             }
@@ -95,32 +99,35 @@ namespace CIPP
         {
             lock (taskList)
             {
-                foreach (Task tt in taskList)
+                foreach (Task task in taskList)
                 {
-                    if (!tt.taken)
+                    if (!task.taken)
                     {
-                        tt.taken = true;
-                        return tt;
+                        task.taken = true;
+                        return task;
                     }
                 }
             }
             return null;
         }
 
-        public Task getTask(RequestType requestType)
+        public Task getTask(RequestTypeEnum requestType)
         {
             lock (locker)
             {
                 Task tempTask = extractFreeTask();
-                if (tempTask != null) return tempTask;
+                if (tempTask != null)
+                {
+                    return tempTask;
+                }
 
                 if (filterRequests.Count > 0)
                 {
-                    FilterCommand f;
-                    f = filterRequests.Dequeue();
+                    FilterCommand filterCommand;
+                    filterCommand = filterRequests.Dequeue();
                     commandsNumber--;
                     numberChanged(commandsNumber, false);
-                    tempTask = new FilterTask(IdGenerator.getID(), f.pluginFullName, f.arguments, f.processingImage);
+                    tempTask = new FilterTask(IdGenerator.getID(), filterCommand.pluginFullName, filterCommand.arguments, filterCommand.processingImage);
 
                     lock (taskList)
                     {
@@ -134,19 +141,17 @@ namespace CIPP
                         }
                         else
                         {
-                            PluginInfo pi = null;
-                            foreach (PluginInfo plugIn in filterPluginList)
-                                if (plugIn.fullName == f.pluginFullName)
-                                {
-                                    pi = plugIn;
-                                    break;
-                                }
-
-                            IFilter filter = (IFilter)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, tempTask.parameters, null, null);
-
+                            PluginInfo pluginInfo = pluginFinder.findPluginForTask(tempTask);
+                            IFilter filter = PluginHelper.createInstance<IFilter>(pluginInfo, tempTask.parameters);
                             int subParts = 0;
-                            if (granularityType == GranularityTypeEnum.medium) subParts = Environment.ProcessorCount;
-                            else subParts = 2 * Environment.ProcessorCount;
+                            if (granularityType == GranularityTypeEnum.medium)
+                            {
+                                subParts = Environment.ProcessorCount;
+                            }
+                            else
+                            {
+                                subParts = 2 * Environment.ProcessorCount;
+                            }
 
                             ImageDependencies imageDependencies = filter.getImageDependencies();
                             if (imageDependencies == null)
@@ -164,16 +169,16 @@ namespace CIPP
                             tasksNumber += images.Length;
                             numberChanged(tasksNumber, true);
 
-                            FilterTask ft = null;
+                            FilterTask filterTask = null;
                             foreach (ProcessingImage p in images)
                             {
-                                ft = new FilterTask(IdGenerator.getID(), tempTask.pluginFullName, tempTask.parameters, p);
-                                ft.parent = (FilterTask)tempTask;
-                                taskList.Add(ft);
+                                filterTask = new FilterTask(IdGenerator.getID(), tempTask.pluginFullName, tempTask.parameters, p);
+                                filterTask.parent = (FilterTask)tempTask;
+                                taskList.Add(filterTask);
                             }
 
-                            ft.taken = true;
-                            return ft;
+                            filterTask.taken = true;
+                            return filterTask;
                         }
                     }
                 }
@@ -181,12 +186,12 @@ namespace CIPP
 
                 if (maskRequests.Count > 0)
                 {
-                    MaskCommand m;
-                    m = maskRequests.Dequeue();
+                    MaskCommand maskCommand;
+                    maskCommand = maskRequests.Dequeue();
                     commandsNumber--;
                     numberChanged(commandsNumber, false);
 
-                    tempTask = new MaskTask(IdGenerator.getID(), m.pluginFullName, m.arguments, m.processingImage);
+                    tempTask = new MaskTask(IdGenerator.getID(), maskCommand.pluginFullName, maskCommand.arguments, maskCommand.processingImage);
                     lock (taskList)
                     {
                         tasksNumber++;
@@ -199,12 +204,12 @@ namespace CIPP
 
                 if (motionRecognitionRequests.Count > 0)
                 {
-                    MotionRecognitionCommand m;
-                    m = motionRecognitionRequests.Dequeue();
+                    MotionRecognitionCommand motionRecognitionCommand;
+                    motionRecognitionCommand = motionRecognitionRequests.Dequeue();
                     commandsNumber--;
                     numberChanged(commandsNumber, false);
 
-                    Motion motion = new Motion(IdGenerator.getID(), (int)m.arguments[0], (int)m.arguments[1], m.processingImageList);
+                    Motion motion = new Motion(IdGenerator.getID(), (int)motionRecognitionCommand.arguments[0], (int)motionRecognitionCommand.arguments[1], motionRecognitionCommand.processingImageList);
 
                     lock (motionList)
                     {
@@ -212,12 +217,12 @@ namespace CIPP
                     }
                     lock (taskList)
                     {
-                        MotionRecognitionTask mrt = null;
+                        MotionRecognitionTask motionRecognitionTask = null;
                         for (int i = 1; i < motion.imageNumber; i++)
                         {
                             tempTask = new MotionRecognitionTask(
                                 IdGenerator.getID(), motion.id, motion.blockSize,
-                                motion.searchDistance, m.pluginFullName, m.arguments,
+                                motion.searchDistance, motionRecognitionCommand.pluginFullName, motionRecognitionCommand.arguments,
                                 motion.imageList[i - 1], motion.imageList[i]);
 
 
@@ -228,12 +233,20 @@ namespace CIPP
                             {
                                 tempTask.taken = true;
                                 int subParts = 0;
-                                if (granularityType == GranularityTypeEnum.medium) subParts = Environment.ProcessorCount;
-                                else subParts = 2 * Environment.ProcessorCount;
-
+                                if (granularityType == GranularityTypeEnum.medium)
+                                {
+                                    subParts = Environment.ProcessorCount;
+                                }
+                                else
+                                {
+                                    subParts = 2 * Environment.ProcessorCount;
+                                }
                                 ProcessingImage[] images1 = ((MotionRecognitionTask)tempTask).frame.split(new ImageDependencies(motion.searchDistance, motion.searchDistance, motion.searchDistance, motion.searchDistance), subParts);
                                 ProcessingImage[] images2 = ((MotionRecognitionTask)tempTask).nextFrame.split(new ImageDependencies(motion.searchDistance, motion.searchDistance, motion.searchDistance, motion.searchDistance), subParts);
-                                if (images1 == null || images2 == null) return tempTask;
+                                if (images1 == null || images2 == null)
+                                {
+                                    return tempTask;
+                                }
 
                                 ((MotionRecognitionTask)tempTask).result = MotionVectors.getMotionVectorArray(((MotionRecognitionTask)tempTask).frame, motion.blockSize, motion.searchDistance);
                                 ((MotionRecognitionTask)tempTask).subParts = images1.Length;
@@ -242,9 +255,9 @@ namespace CIPP
 
                                 for (int j = 0; j < images1.Length; j++)
                                 {
-                                    mrt = new MotionRecognitionTask(IdGenerator.getID(), motion.id, motion.blockSize, motion.searchDistance, tempTask.pluginFullName, tempTask.parameters, images1[j], images2[j]);
-                                    mrt.parent = (MotionRecognitionTask)tempTask;
-                                    taskList.Add(mrt);
+                                    motionRecognitionTask = new MotionRecognitionTask(IdGenerator.getID(), motion.id, motion.blockSize, motion.searchDistance, tempTask.pluginFullName, tempTask.parameters, images1[j], images2[j]);
+                                    motionRecognitionTask.parent = (MotionRecognitionTask)tempTask;
+                                    taskList.Add(motionRecognitionTask);
                                 }
                             }
                         }
@@ -258,8 +271,8 @@ namespace CIPP
                         }
                         else
                         {
-                            mrt.taken = true;
-                            return mrt;
+                            motionRecognitionTask.taken = true;
+                            return motionRecognitionTask;
                         }
                     }
                 }
@@ -279,33 +292,39 @@ namespace CIPP
             {
                 if (task.taskType == TaskTypeEnum.filter)
                 {
-                    FilterTask f = (FilterTask)task;
-                    if (f.parent != null)
+                    FilterTask filterTask = (FilterTask)task;
+                    if (filterTask.parent != null)
                     {
-                        f.parent.join(f);
-                        if (f.parent.state) taskFinished(f.parent);
+                        filterTask.parent.join(filterTask);
+                        if (filterTask.parent.state)
+                        {
+                            taskFinished(filterTask.parent);
+                        }
                     }
                     else
                     {
-                        addImageResult(f.result, TaskTypeEnum.filter);
+                        addImageResult(filterTask.result, TaskTypeEnum.filter);
                     }
                 }
                 else
                 {
                     if (task.taskType == TaskTypeEnum.mask)
                     {
-                        MaskTask m = (MaskTask)task;
-                        addImageResult(m.originalImage.cloneAndSubstituteAlpha(m.result), TaskTypeEnum.mask);
+                        MaskTask maskTask = (MaskTask)task;
+                        addImageResult(maskTask.originalImage.cloneAndSubstituteAlpha(maskTask.result), TaskTypeEnum.mask);
                     }
                     else
                     {
                         if (task.taskType == TaskTypeEnum.motionRecognition)
                         {
-                            MotionRecognitionTask m = (MotionRecognitionTask)task;
-                            if (m.parent != null)
+                            MotionRecognitionTask motionRecognitionTask = (MotionRecognitionTask)task;
+                            if (motionRecognitionTask.parent != null)
                             {
-                                m.parent.join(m);
-                                if (m.parent.state) taskFinished(m.parent);
+                                motionRecognitionTask.parent.join(motionRecognitionTask);
+                                if (motionRecognitionTask.parent.state)
+                                {
+                                    taskFinished(motionRecognitionTask.parent);
+                                }
                             }
                             else
                             {
@@ -313,9 +332,9 @@ namespace CIPP
                                 {
                                     foreach (Motion motion in motionList)
                                     {
-                                        if (m.motionId == motion.id)
+                                        if (motionRecognitionTask.motionId == motion.id)
                                         {
-                                            motion.addMotionVectors(m.frame, m.result);
+                                            motion.addMotionVectors(motionRecognitionTask.frame, motionRecognitionTask.result);
                                             if (motion.missingVectors == 0)
                                             {
                                                 addMotion(motion);

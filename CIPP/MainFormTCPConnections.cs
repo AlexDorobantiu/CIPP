@@ -8,17 +8,19 @@ namespace CIPP
 {
     public partial class CIPPForm
     {
+        private const string connectionsFilename = "connections.txt";
+
         private void addTCPConnectionButton_Click(object sender, EventArgs e)
         {
             AddConnectionForm f = new AddConnectionForm();
             if (f.ShowDialog() == DialogResult.OK)
             {
                 TCPProxy newproxy = new TCPProxy(f.ip, f.port);
-                newproxy.MessagePosted += new EventHandler<StringEventArgs>(messagePosted);
-                newproxy.WorkerPosted += new EventHandler<WorkerEventArgs>(workerPosted);
-                newproxy.TaskRequestReceived += new EventHandler(proxyRequestReceived);
-                newproxy.ResultsReceived += new ResultReceivedEventHandler(proxyResultReceived);
-                newproxy.connectionLost += new EventHandler(connectionLost);
+                newproxy.messagePosted += new EventHandler<StringEventArgs>(messagePosted);
+                newproxy.workerPosted += new EventHandler<WorkerEventArgs>(workerPosted);
+                newproxy.taskRequestReceivedEventHandler += new EventHandler(proxyRequestReceived);
+                newproxy.resultsReceivedEventHandler += new ResultReceivedEventHandler(proxyResultReceived);
+                newproxy.connectionLostEventHandler += new EventHandler(connectionLost);
                 TCPConnections.Add(newproxy);
                 TCPConnectionsListBox.Items.Add(newproxy.getNameAndStatus());
             }
@@ -29,7 +31,7 @@ namespace CIPP
             while (TCPConnectionsListBox.SelectedItems.Count > 0)
             {
                 int index = TCPConnectionsListBox.SelectedIndices[0];
-                TCPConnections[index].Disconnect();
+                TCPConnections[index].disconnect();
                 TCPConnections.RemoveAt(index);
                 TCPConnectionsListBox.Items.RemoveAt(index);
             }
@@ -39,7 +41,7 @@ namespace CIPP
         {
             foreach (int index in TCPConnectionsListBox.SelectedIndices)
             {
-                TCPConnections[index].TryConnect();
+                TCPConnections[index].tryToConnect();
                 TCPConnectionsListBox.Items[index] = TCPConnections[index].getNameAndStatus();
             }
         }
@@ -48,56 +50,62 @@ namespace CIPP
         {
             foreach (int index in TCPConnectionsListBox.SelectedIndices)
             {
-                TCPConnections[index].Disconnect();
+                TCPConnections[index].disconnect();
                 TCPConnectionsListBox.Items[index] = TCPConnections[index].getNameAndStatus();
             }
         }
 
-        public void loadConnectionsFromDisk()
+        private void loadConnectionsFromDisk()
         {
             try
             {
-                StreamReader sr = new StreamReader("connections.txt");
-                while (!sr.EndOfStream)
+                FileInfo fileInfo = new FileInfo(connectionsFilename);
+                if (fileInfo.Exists)
                 {
-                    string[] vals = sr.ReadLine().Split(',');
-                    TCPProxy newproxy = new TCPProxy(vals[0], int.Parse(vals[1]));
-                    newproxy.MessagePosted += new EventHandler<StringEventArgs>(messagePosted);
-                    newproxy.WorkerPosted += new EventHandler<WorkerEventArgs>(workerPosted);
-                    newproxy.TaskRequestReceived += new EventHandler(proxyRequestReceived);
-                    newproxy.ResultsReceived += new ResultReceivedEventHandler(proxyResultReceived);
-                    newproxy.connectionLost += new EventHandler(connectionLost);
-                    TCPConnections.Add(newproxy);
-                    TCPConnectionsListBox.Items.Add(newproxy.getNameAndStatus());
+                    StreamReader sr = new StreamReader(connectionsFilename);
+                    while (!sr.EndOfStream)
+                    {
+                        string[] vals = sr.ReadLine().Split(',');
+                        TCPProxy newproxy = new TCPProxy(vals[0], int.Parse(vals[1]));
+                        newproxy.messagePosted += new EventHandler<StringEventArgs>(messagePosted);
+                        newproxy.workerPosted += new EventHandler<WorkerEventArgs>(workerPosted);
+                        newproxy.taskRequestReceivedEventHandler += new EventHandler(proxyRequestReceived);
+                        newproxy.resultsReceivedEventHandler += new ResultReceivedEventHandler(proxyResultReceived);
+                        newproxy.connectionLostEventHandler += new EventHandler(connectionLost);
+                        TCPConnections.Add(newproxy);
+                        TCPConnectionsListBox.Items.Add(newproxy.getNameAndStatus());
+                    }
+                    sr.Close();
                 }
-                sr.Close();
             }
             catch { }
         }
 
-        public void saveConnectionsToDisk()
+        private void saveConnectionsToDisk()
         {
             try
             {
-                StreamWriter sw = new StreamWriter("connections.txt", false);
+                StreamWriter sw = new StreamWriter(connectionsFilename, false);
                 foreach (TCPProxy item in TCPConnections)
+                {
                     sw.WriteLine(item.hostname + ", " + item.port);
+                }
                 sw.Close();
             }
             catch { }
         }
 
-        public void messagePosted(object sender, StringEventArgs e)
+        private void messagePosted(object sender, StringEventArgs e)
         {
             addMessage(e.message);         
         }
 
-        public void workerPosted(object sender, WorkerEventArgs e)
+        private void workerPosted(object sender, WorkerEventArgs e)
         {
             displayWorker(e.name, !e.left);
         }
 
-        public void connectionLost(object sender, EventArgs e)
+        private void connectionLost(object sender, EventArgs e)
         {
             updateTCPList((TCPProxy)sender);
         }

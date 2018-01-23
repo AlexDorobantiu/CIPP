@@ -37,11 +37,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LowPassFilter", "LowPassFil
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TopMask", "TopMask\TopMask.csproj", "{84C1B5FA-39EF-4FA0-896E-AAA281FAEE90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaplacianOfGaussian", "LaplacianOfGaussian\LaplacianOfGaussian.csproj", "{741C9BC5-6C6D-4A0C-A3B5-E94446BC5592}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaplacianOfGaussianFilter", "LaplacianOfGaussian\LaplacianOfGaussianFilter.csproj", "{741C9BC5-6C6D-4A0C-A3B5-E94446BC5592}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SinFilter", "SinFilter\SinFilter.csproj", "{8DA7F024-A352-4E58-AB6B-E021656024B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecondDerivativeEdgeDetect", "SecondDerivativeEdgeDetect\SecondDerivativeEdgeDetect.csproj", "{E905DB16-A408-4494-85CC-C77D10771DAA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecondDerivativeEdgeDetectFilter", "SecondDerivativeEdgeDetect\SecondDerivativeEdgeDetectFilter.csproj", "{E905DB16-A408-4494-85CC-C77D10771DAA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CropFilter", "CropFilter\CropFilter.csproj", "{21B70597-575C-4951-A1E0-7A69D19E9793}"
 EndProject

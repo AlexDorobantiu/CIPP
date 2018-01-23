@@ -40,11 +40,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RequestTypeEnum.cs" />
+    <Compile Include="Commands\FilterCommand.cs" />
+    <Compile Include="Commands\MaskCommand.cs" />
+    <Compile Include="Commands\MotionRecognitionCommand.cs" />
+    <Compile Include="PluginFinder.cs" />
+    <Compile Include="PluginInfo.cs" />
     <Compile Include="ResultPackage.cs" />
-    <Compile Include="FilterTask.cs" />
+    <Compile Include="Tasks\FilterTask.cs" />
     <Compile Include="GranularityTypeEnum.cs" />
-    <Compile Include="MaskTask.cs" />
-    <Compile Include="MotionRecognitionTask.cs" />
+    <Compile Include="Tasks\MaskTask.cs" />
+    <Compile Include="Tasks\MotionRecognitionTask.cs" />
     <Compile Include="Task.cs" />
     <Compile Include="TaskTypeEnum.cs" />
     <Compile Include="IdGenerator.cs" />
@@ -74,9 +80,7 @@
       <Name>ProcessingImageSDK</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Protocols Class Diagram.cd" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

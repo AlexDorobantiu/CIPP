@@ -8,11 +8,11 @@ using Plugins.Filters;
 
 namespace Plugins.Filters.LaplacianOfGaussian
 {
-    public class LaplacianOfGaussian : IFilter
+    public class LaplacianOfGaussianFilter : IFilter
     {
         private static readonly List<IParameters> parameters = new List<IParameters>();
 
-        static LaplacianOfGaussian()
+        static LaplacianOfGaussianFilter()
         {
         }
 
@@ -21,7 +21,7 @@ namespace Plugins.Filters.LaplacianOfGaussian
             return parameters;
         }
 
-        public LaplacianOfGaussian()
+        public LaplacianOfGaussianFilter()
         {
         }
 

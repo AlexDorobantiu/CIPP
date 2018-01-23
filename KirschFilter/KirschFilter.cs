@@ -63,7 +63,7 @@ namespace KirschFilter
 
         public ImageDependencies getImageDependencies()
         {
-            return new ImageDependencies(1, 1, 1, 1);
+            return null;
         }
 
         public float[,] generateNormalizedGaussConvolutionMatrix(float sigma, int size)
@@ -75,23 +75,15 @@ namespace KirschFilter
             int min = size / 2;
             int max = size / 2 + size % 2;
 
-            float sum = 0;
             for (int y = -min; y < max; y++)
             {
                 for (int x = -min; x < max; x++)
                 {
-                    sum += gaussConvolutionMatrix[y + min, x + min] = coef1 * (float)Math.Exp(coef2 * (x * x + y * y));
+                    gaussConvolutionMatrix[y + min, x + min] = coef1 * (float)Math.Exp(coef2 * (x * x + y * y));
                 }
             }
 
-            // normalize
-            for (int y = 0; y < size; y++)
-            {
-                for (int x = 0; x < size; x++)
-                {
-                    gaussConvolutionMatrix[y, x] /= sum;
-                }
-            }
+            ProcessingImageUtils.normalize(gaussConvolutionMatrix);
             return gaussConvolutionMatrix;
         }
 

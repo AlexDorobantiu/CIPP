@@ -13,59 +13,11 @@ using ParametersSDK;
 using Plugins.Filters;
 using Plugins.Masks;
 using Plugins.MotionRecognition;
+using CIPPProtocols.Tasks;
+using CIPPProtocols.Commands;
 
 namespace CIPP
 {
-    public enum RequestType
-    {
-        local,
-        lan,
-        wan
-    }
-
-    public struct FilterCommand
-    {
-        public string pluginFullName;
-        public object[] arguments;
-        public ProcessingImage processingImage;
-
-        public FilterCommand(string pluginFullName, object[] arguments, ProcessingImage processingImage)
-        {
-            this.pluginFullName = pluginFullName;
-            this.arguments = arguments;
-            this.processingImage = processingImage;
-        }
-    }
-
-    public struct MaskCommand
-    {
-        public string pluginFullName;
-        public object[] arguments;
-        public ProcessingImage processingImage;
-
-        public MaskCommand(string pluginFullName, object[] arguments, ProcessingImage processingImage)
-        {
-            this.pluginFullName = pluginFullName;
-            this.arguments = arguments;
-            this.processingImage = processingImage;
-        }
-    }
-
-    public struct MotionRecognitionCommand
-    {
-        public string pluginFullName;
-        public object[] arguments;
-        public List<ProcessingImage> processingImageList;
-
-        public MotionRecognitionCommand(string pluginFullName, object[] arguments, List<ProcessingImage> processingImageList)
-        {
-            this.pluginFullName = pluginFullName;
-            this.arguments = arguments;
-            this.processingImageList = processingImageList;
-        }
-    }
-
-
     partial class CIPPForm
     {
         private const int threadStackSize = 8 * (1 << 20);
@@ -79,101 +31,72 @@ namespace CIPP
             while (true)
             {
                 addMessage(Thread.CurrentThread.Name + " requesting task!");
-                Task t = workManager.getTask(RequestType.local);
+                Task task = workManager.getTask(RequestTypeEnum.local);
 
-                if (t == null)
+                if (task == null)
                 {
                     addMessage(Thread.CurrentThread.Name + " finished work!");
                     break;
                 }
 
-                addMessage(Thread.CurrentThread.Name + " starting " + t.taskType.ToString() + " task " + t.id);
+                addMessage(Thread.CurrentThread.Name + " starting " + task.taskType.ToString() + " task " + task.id);
                 try
                 {
-                    solveTask(t);
-                    addMessage(Thread.CurrentThread.Name + " finished task " + t.id);
+                    solveTask(task);
+                    addMessage(Thread.CurrentThread.Name + " finished task " + task.id);
                 }
                 catch (Exception e)
                 {
                     MessageBox.Show("Task failed with exception: " + e.Message);
-                    addMessage(Thread.CurrentThread.Name + " failed task " + t.id);
-                }                
-                workManager.taskFinished(t);
+                    addMessage(Thread.CurrentThread.Name + " failed task " + task.id);
+                }
+                workManager.taskFinished(task);
             }
             displayWorker(Thread.CurrentThread.Name, false);
         }
 
-        private void solveTask(Task t)
+        private void solveTask(Task task)
         {
-            switch (t.taskType)
+            PluginInfo pluginInfo = pluginFinder.findPluginForTask(task);
+            switch (task.taskType)
             {
                 case TaskTypeEnum.filter:
                     {
-                        FilterTask f = (FilterTask)t;
-
-                        PluginInfo pi = null;
-                        foreach (PluginInfo plugIn in filterPluginList)
-                        {
-                            if (plugIn.fullName == f.pluginFullName)
-                            {
-                                pi = plugIn;
-                                break;
-                            }
-                        }
-
-                        IFilter filter = (IFilter)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, f.parameters, null, null);
-                        f.result = filter.filter(f.originalImage);
-                        f.state = true;
+                        FilterTask filterTask = (FilterTask)task;
+                        IFilter filter = PluginHelper.createInstance<IFilter>(pluginInfo, filterTask.parameters);
+                        filterTask.result = filter.filter(filterTask.originalImage);
                     } break;
                 case TaskTypeEnum.mask:
                     {
-                        MaskTask m = (MaskTask)t;
-
-                        PluginInfo pi = null;
-                        foreach (PluginInfo plugIn in maskPluginList)
-                        {
-                            if (plugIn.fullName == m.pluginFullName)
-                            {
-                                pi = plugIn;
-                                break;
-                            }
-                        }
-                        IMask mask = (IMask)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, m.parameters, null, null);
-                        m.result = mask.mask(m.originalImage);
-                        m.state = true;
+                        MaskTask maskTask = (MaskTask)task;
+                        IMask mask = PluginHelper.createInstance<IMask>(pluginInfo, maskTask.parameters);
+                        maskTask.result = mask.mask(maskTask.originalImage);
                     } break;
                 case TaskTypeEnum.motionRecognition:
                     {
-                        MotionRecognitionTask m = (MotionRecognitionTask)t;
-
-                        PluginInfo pi = null;
-                        foreach (PluginInfo plugIn in motionRecognitionPluginList)
-                            if (plugIn.fullName == m.pluginFullName)
-                            {
-                                pi = plugIn;
-                                break;
-                            }
-
-                        IMotionRecognition motionRecognition = (IMotionRecognition)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, m.parameters, null, null);
-                        m.result = motionRecognition.scan(m.frame, m.nextFrame);
-                        m.state = true;
+                        MotionRecognitionTask motionRecognitionTask = (MotionRecognitionTask)task;
+                        IMotionRecognition motionRecognition = PluginHelper.createInstance<IMotionRecognition>(pluginInfo, motionRecognitionTask.parameters);
+                        motionRecognitionTask.result = motionRecognition.scan(motionRecognitionTask.frame, motionRecognitionTask.nextFrame);
                     } break;
             }
+            task.state = true;
         }
 
-        public void proxyRequestReceived(object sender, EventArgs e)
+        private void proxyRequestReceived(object sender, EventArgs e)
         {
             try
             {
                 TCPProxy proxy = (TCPProxy)sender;
-                Task task = workManager.getTask(RequestType.lan);
+                Task task = workManager.getTask(RequestTypeEnum.lan);
                 if (task != null)
-                    proxy.SendSimulationTask(task);
+                {
+                    proxy.sendSimulationTask(task);
+                }
             }
             catch { }
         }
 
-        public void proxyResultReceived(object sender, ResultReceivedEventArgs e)
+        private void proxyResultReceived(object sender, ResultReceivedEventArgs e)
         {
             try
             {
@@ -187,7 +110,7 @@ namespace CIPP
         {
             try
             {
-                ArrayList selectedImageList = null;
+                List<ProcessingImage> selectedImageList = null;
                 ListBox.SelectedIndexCollection selectedIndices = null;
 
                 switch (imageTab.SelectedIndex)
@@ -217,9 +140,10 @@ namespace CIPP
                         }
                 }
 
-                if (selectedIndices.Count == 0) return; //no images selected
-
-
+                if (selectedIndices.Count == 0)
+                {
+                    return; //no images selected
+                }
 
                 List<FilterCommand> filterCommandList = null;
                 List<MaskCommand> maskCommandList = null;
@@ -245,7 +169,10 @@ namespace CIPP
                         } break;
                     case 2:
                         {
-                            if (selectedIndices.Count == 1) return; //only one image selected
+                            if (selectedIndices.Count == 1)
+                            {
+                                return; // only one image selected
+                            }
                             motionRecognitionCommandList = new List<MotionRecognitionCommand>();
                             checkBoxList = motionRecognitionPluginsCheckBoxList;
                             plugInList = motionRecognitionPluginList;
@@ -285,25 +212,32 @@ namespace CIPP
                                     {
                                         object[] combination = new object[parametersNumber];
                                         for (int k = 0; k < parametersNumber; k++)
+                                        {
                                             combination[k] = values[k][vi[k]];
-
+                                        }
                                         switch (processingTab.SelectedIndex)
                                         {
                                             case 0:
                                                 {
                                                     foreach (int selectedIndex in selectedIndices)
-                                                        filterCommandList.Add(new FilterCommand(name, combination, (ProcessingImage)selectedImageList[selectedIndex]));
+                                                    {
+                                                        filterCommandList.Add(new FilterCommand(name, combination, selectedImageList[selectedIndex]));
+                                                    }
                                                 } break;
                                             case 1:
                                                 {
                                                     foreach (int selectedIndex in selectedIndices)
-                                                        maskCommandList.Add(new MaskCommand(name, combination, (ProcessingImage)selectedImageList[selectedIndex]));
+                                                    {
+                                                        maskCommandList.Add(new MaskCommand(name, combination, selectedImageList[selectedIndex]));
+                                                    }
                                                 } break;
                                             case 2:
                                                 {
                                                     List<ProcessingImage> imageList = new List<ProcessingImage>();
                                                     foreach (int selectedIndex in selectedIndices)
-                                                        imageList.Add((ProcessingImage)selectedImageList[selectedIndex]);
+                                                    {
+                                                        imageList.Add(selectedImageList[selectedIndex]);
+                                                    }
                                                     motionRecognitionCommandList.Add(new MotionRecognitionCommand(name, combination, imageList));
                                                 } break;
                                         }
@@ -318,25 +252,34 @@ namespace CIPP
                                 case 0:
                                     {
                                         foreach (int selectedIndex in selectedIndices)
-                                            filterCommandList.Add(new FilterCommand(name, null, (ProcessingImage)selectedImageList[selectedIndex]));
+                                        {
+                                            filterCommandList.Add(new FilterCommand(name, null, selectedImageList[selectedIndex]));
+                                        }
                                     } break;
                                 case 1:
                                     {
                                         foreach (int selectedIndex in selectedIndices)
-                                            maskCommandList.Add(new MaskCommand(name, null, (ProcessingImage)selectedImageList[selectedIndex]));
+                                        {
+                                            maskCommandList.Add(new MaskCommand(name, null, selectedImageList[selectedIndex]));
+                                        }
                                     } break;
                                 case 2:
                                     {
                                         List<ProcessingImage> imageList = new List<ProcessingImage>();
                                         foreach (int selectedIndex in selectedIndices)
-                                            imageList.Add((ProcessingImage)selectedImageList[selectedIndex]);
+                                        {
+                                            imageList.Add(selectedImageList[selectedIndex]);
+                                        }
                                         motionRecognitionCommandList.Add(new MotionRecognitionCommand(name, null, imageList));
                                     } break;
                             }
                         }
                     }
                 }
-                if (!anyItems) return;
+                if (!anyItems)
+                {
+                    return;
+                }
 
                 if (workManager == null)
                 {
@@ -351,17 +294,26 @@ namespace CIPP
                 {
                     case 0:
                         {
-                            if (filterCommandList.Count == 0) return;
+                            if (filterCommandList.Count == 0)
+                            {
+                                return;
+                            }
                             workManager.updateCommandQueue(filterCommandList);
                         } break;
                     case 1:
                         {
-                            if (maskCommandList.Count == 0) return;
+                            if (maskCommandList.Count == 0)
+                            {
+                                return;
+                            }
                             workManager.updateCommandQueue(maskCommandList);
                         } break;
                     case 2:
                         {
-                            if (motionRecognitionCommandList.Count == 0) return;
+                            if (motionRecognitionCommandList.Count == 0)
+                            {
+                                return;
+                            }
                             workManager.updateCommandQueue(motionRecognitionCommandList);
                         } break;
                 }
@@ -399,10 +351,12 @@ namespace CIPP
                 }
 
                 foreach (TCPProxy proxy in TCPConnections)
-                    if (proxy.isConnected)
+                {
+                    if (proxy.connected)
                     {
-                        proxy.StartListening();
+                        proxy.startListening();
                     }
+                }
             }
             catch (Exception exceptie)
             {
@@ -424,10 +378,12 @@ namespace CIPP
                 }
 
                 foreach (TCPProxy proxy in TCPConnections)
-                    if (proxy.isConnected)
+                {
+                    if (proxy.connected)
                     {
-                        proxy.SendAbortRequest();
+                        proxy.sendAbortRequest();
                     }
+                }
 
                 workManager = null;
                 threads = null;
@@ -457,6 +413,7 @@ namespace CIPP
                 else
                 {
                     for (int i = 0; i < TCPConnections.Count; i++)
+                    {
                         if (proxy == TCPConnections[i])
                         {
                             if (TCPConnectionsListBox.Items[i] != null)
@@ -465,6 +422,7 @@ namespace CIPP
                                 break;
                             }
                         }
+                    }
                 }
             }
             catch { }
@@ -482,8 +440,14 @@ namespace CIPP
                 }
                 else
                 {
-                    if (visible) this.workersList.Items.Add(workerName);
-                    else this.workersList.Items.Remove(workerName);
+                    if (visible)
+                    {
+                        this.workersList.Items.Add(workerName);
+                    }
+                    else
+                    {
+                        this.workersList.Items.Remove(workerName);
+                    }
                 }
             }
             catch { }
@@ -567,7 +531,9 @@ namespace CIPP
                     time = 0;
                     totalTimeValueLabel.Text = "" + totalTime;
                     if (allertFinishCheckBox.Checked)
+                    {
                         MessageBox.Show("Finished!");
+                    }
                 }
             }
             catch { }
@@ -585,9 +551,13 @@ namespace CIPP
                 else
                 {
                     if (commandOrTask)
+                    {
                         numberOfTasksValueLabel.Text = "" + number;
+                    }
                     else
+                    {
                         numberOfCommandsValueLabel.Text = "" + number;
+                    }
                 }
             }
             catch { }

@@ -11,24 +11,6 @@ using Plugins.MotionRecognition;
 
 namespace CIPPProtocols
 {
-    public class PluginInfo
-    {
-        public string displayName;
-        public string fullName;
-        public Assembly assembly;
-        public Type type;
-        public List<IParameters> parameters;
-
-        public PluginInfo(string displayName, string fullName, Assembly assembly, Type type, List<IParameters> parameters)
-        {
-            this.displayName = displayName;
-            this.fullName = fullName;
-            this.assembly = assembly;
-            this.type = type;
-            this.parameters = parameters;
-        }
-    }
-
     public class PluginHelper
     {
         private static List<Assembly> loadPlugInAssemblies(string path)
@@ -63,7 +45,8 @@ namespace CIPPProtocols
                             List<IParameters> parameterList = null;
                             try
                             {
-                                parameterList = (List<IParameters>)type.InvokeMember("getParametersList", BindingFlags.Default | BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null, null);                                
+                                parameterList = (List<IParameters>)type.InvokeMember("getParametersList", 
+                                    BindingFlags.Default | BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null, null);                                
                             }
                             catch
                             {
@@ -76,6 +59,11 @@ namespace CIPPProtocols
                 }
             }
             return pluginsList;
+        }
+
+        public static T createInstance<T>(PluginInfo pluginInfo, object[] parameters) 
+        {
+            return (T)pluginInfo.assembly.CreateInstance(pluginInfo.fullName, false, BindingFlags.CreateInstance, null, parameters, null, null);
         }
     }
 }

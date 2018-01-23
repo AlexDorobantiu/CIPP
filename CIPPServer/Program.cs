@@ -16,11 +16,12 @@ namespace CIPPServer
     class Program
     {
         public const int defaultPort = 6050;
+        public const int waitTimeMilliseconds = 5000;
+
+        private const string listeningPortsFilename = "listening_ports.txt";
         public static int[] listeningPorts;
 
-        public static List<PluginInfo> filterPluginList;
-        public static List<PluginInfo> maskPluginList;
-        public static List<PluginInfo> motionRecognitionPluginList;
+        public static PluginFinder pluginFinder;
 
         static void Main(string[] args)
         {
@@ -34,7 +35,6 @@ namespace CIPPServer
                 clients[i].Start();
             }
 
-
             Console.WriteLine("Waiting for clients...");
             while (true)
             {
@@ -47,7 +47,7 @@ namespace CIPPServer
                     }
                 if (clientPending == -1)
                 {
-                    Thread.Sleep(5000);
+                    Thread.Sleep(waitTimeMilliseconds);
                 }
                 else
                 {
@@ -60,7 +60,7 @@ namespace CIPPServer
         {
             try
             {
-                StreamReader sr = new StreamReader("listening_ports.txt");
+                StreamReader sr = new StreamReader(listeningPortsFilename);
                 List<int> list_ports = new List<int>();
                 while (!sr.EndOfStream)
                 {
@@ -72,14 +72,15 @@ namespace CIPPServer
                     }
                 }
                 int nr_ports = list_ports.Count;
-                
+
                 listeningPorts = list_ports.ToArray();
             }
             catch
             {
                 if (listeningPorts != null)
                 {
-                    if (listeningPorts.Length==0) {
+                    if (listeningPorts.Length == 0)
+                    {
                         listeningPorts = new int[1];
                         listeningPorts[0] = defaultPort;
                     }
@@ -96,9 +97,10 @@ namespace CIPPServer
         {
             try
             {
-                filterPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\filters"), typeof(IFilter));
-                maskPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\masks"), typeof(IMask));
-                motionRecognitionPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\motionrecognition"), typeof(IMotionRecognition));
+                List<PluginInfo> filterPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\filters"), typeof(IFilter));
+                List<PluginInfo> maskPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\masks"), typeof(IMask));
+                List<PluginInfo> motionRecognitionPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\motionrecognition"), typeof(IMotionRecognition));
+                pluginFinder = new PluginFinder(filterPluginList, maskPluginList, motionRecognitionPluginList);
             }
             catch
             {

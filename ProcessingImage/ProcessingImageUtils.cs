@@ -346,5 +346,49 @@ namespace ProcessingImageSDK
 
             return result;
         }
+
+        public static void normalize(float[,] matrix)
+        {
+            int sizeX = matrix.GetLength(1);
+            int sizeY = matrix.GetLength(0);
+
+            float sum = 0;
+            for (int i = 0; i < sizeY; i++)
+            {
+                for (int j = 0; j < sizeX; j++)
+                {
+                    sum += matrix[i, j];
+                }
+            }
+            for (int i = 0; i < sizeY; i++)
+            {
+                for (int j = 0; j < sizeX; j++)
+                {
+                    matrix[i, j] /= sum;
+                }
+            }
+        }
+
+        public static void normalize(double[,] matrix)
+        {
+            int sizeX = matrix.GetLength(1);
+            int sizeY = matrix.GetLength(0);
+
+            double sum = 0;
+            for (int i = 0; i < sizeY; i++)
+            {
+                for (int j = 0; j < sizeX; j++)
+                {
+                    sum += matrix[i, j];
+                }
+            }
+            for (int i = 0; i < sizeY; i++)
+            {
+                for (int j = 0; j < sizeX; j++)
+                {
+                    matrix[i, j] /= sum;
+                }
+            }
+        }
     }
 }

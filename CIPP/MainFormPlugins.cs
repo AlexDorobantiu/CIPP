@@ -32,7 +32,7 @@ namespace CIPP
             {
                 switch (processingTab.SelectedIndex)
                 {
-                    //filter plugins tab
+                    // filter plugins tab
                     case 0:
                         {
                             filterPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\filters"), typeof(IFilter));
@@ -40,7 +40,7 @@ namespace CIPP
                             currentFlowLayoutPanel = flowLayoutPanelFilterPlugins;
                             currentCheckBoxList = filterPluginsCheckBoxList;
                         } break;
-                    //masking plugins tab
+                    // masking plugins tab
                     case 1:
                         {
                             maskPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\masks"), typeof(IMask));
@@ -48,7 +48,7 @@ namespace CIPP
                             currentFlowLayoutPanel = flowLayoutPanelMaskPlugins;
                             currentCheckBoxList = maskPluginsCheckBoxList;
                         } break;
-                    //motion recognition plugins tab
+                    // motion recognition plugins tab
                     default:
                         {
                             motionRecognitionPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\motionrecognition"), typeof(IMotionRecognition));
@@ -72,7 +72,9 @@ namespace CIPP
                     Button b = new Button();
                     b.FlatStyle = FlatStyle.Flat;
                     if (currentList[i].parameters.Count == 0)
+                    {
                         b.Enabled = false;
+                    }
                     b.Tag = currentList[i].parameters;
                     b.Text = "Options";
                     b.Click += new EventHandler(optionsButton_Click);
@@ -83,12 +85,19 @@ namespace CIPP
 
                     currentCheckBoxList.Add(cb);
                 }
+                updatePluginFinder();                
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message);
             }
+            this.ResumeLayout(false);
             this.PerformLayout();
+        }
+
+        private void updatePluginFinder()
+        {
+            pluginFinder.updatePluginLists(filterPluginList, maskPluginList, motionRecognitionPluginList);
         }
     }
 }

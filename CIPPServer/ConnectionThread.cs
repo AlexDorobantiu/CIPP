@@ -17,16 +17,16 @@ namespace CIPPServer
         private int port;
         private BinaryFormatter formatter;
 
-        private TcpClient client;
-        private NetworkStream ns;
-        private object ns_locker = new object();
+        private TcpClient tcpClient;
+        private NetworkStream networkStream;
+        private object networkStreamLocker = new object();
 
         private int header;
-        private string client_name;
+        private string clientName;
 
-        private Thread connection_thread;
+        private Thread connectionThread;
 
-        private int nrWorkerThreads;
+        private int numberOfWorkerThreads;
         private SimulationWorkerThread[] workerThreads;
 
         public Queue<Task> taskBuffer;
@@ -40,36 +40,38 @@ namespace CIPPServer
 
             taskBuffer = new Queue<Task>();
 
-            nrWorkerThreads = Environment.ProcessorCount;
-            workerThreads = new SimulationWorkerThread[nrWorkerThreads];
-            for (int i = 0; i < nrWorkerThreads; i++)
+            numberOfWorkerThreads = Environment.ProcessorCount;
+            workerThreads = new SimulationWorkerThread[numberOfWorkerThreads];
+            for (int i = 0; i < numberOfWorkerThreads; i++)
             {
                 workerThreads[i] = new SimulationWorkerThread(this, "worker thread # " + i);
             }
 
-            connection_thread = new Thread(HandleConnection);
-            connection_thread.Name = "Connection thread";
-            connection_thread.Start();
+            connectionThread = new Thread(HandleConnection);
+            connectionThread.Name = "Connection thread";
+            connectionThread.Start();
         }
 
         public void HandleConnection()
         {
             try
             {
-                client = tcpListener.AcceptTcpClient();
-                ns = client.GetStream();
-                header = ns.ReadByte(); //Client Name Byte
+                tcpClient = tcpListener.AcceptTcpClient();
+                networkStream = tcpClient.GetStream();
+                header = networkStream.ReadByte(); // Client Name Byte
                 if (header != (byte)TrasmissionFlagsEnum.ClientName)
+                {
                     throw new Exception();
+                }
 
-                client_name = (string)formatter.Deserialize(ns);
-                Console.WriteLine("Connected to " + client_name + " on port " + port);
+                clientName = (string)formatter.Deserialize(networkStream);
+                Console.WriteLine("Connected to " + clientName + " on port " + port);
             }
             catch
             {
                 Console.WriteLine("Invalid Client");
-                ns.Close();
-                client.Close();
+                networkStream.Close();
+                tcpClient.Close();
                 return;
             }
 
@@ -77,38 +79,46 @@ namespace CIPPServer
             {
                 while (true)
                 {
-                    header = ns.ReadByte();
-                    if (header == -1) break;
+                    header = networkStream.ReadByte();
+                    if (header == -1)
+                    {
+                        break;
+                    }
                     switch (header)
                     {
-                        //Start sending requests
+                        // Start sending requests
                         case (byte)TrasmissionFlagsEnum.Listening:
                             {
-                                Console.WriteLine("Hired by  " + client_name);
-                                for (int i = 0; i < nrWorkerThreads; i++)
+                                Console.WriteLine("Hired by  " + clientName);
+                                for (int i = 0; i < numberOfWorkerThreads; i++)
                                 {
                                     workerThreads[i].AbortCurrentTask();
                                     SendTaskRequest();
                                 }
                             } break;
-                        //Receive task
+                        // Receive task
                         case (byte)TrasmissionFlagsEnum.Task:
                             {
-                                Task tp = (Task)formatter.Deserialize(ns);
+                                Task tp = (Task)formatter.Deserialize(networkStream);
                                 lock (taskBuffer)
                                 {
                                     taskBuffer.Enqueue(tp);
                                 }
-                                for (int i = 0; i < nrWorkerThreads; i++)
+                                for (int i = 0; i < numberOfWorkerThreads; i++)
+                                {
                                     workerThreads[i].Awake();
-                                Console.WriteLine("TaskPackage received from " + client_name);
+                                }
+                                Console.WriteLine("TaskPackage received from " + clientName);
                             } break;
-                        //Stop Working (drop tasks)
+                        // Stop Working (drop tasks)
                         case (byte)TrasmissionFlagsEnum.AbortWork:
                             {
-                                for (int i = 0; i < nrWorkerThreads; i++)
+                                for (int i = 0; i < numberOfWorkerThreads; i++)
                                 {
-                                    if (workerThreads[i] != null) workerThreads[i].AbortCurrentTask();
+                                    if (workerThreads[i] != null)
+                                    {
+                                        workerThreads[i].AbortCurrentTask();
+                                    }
                                 }
                                 lock (taskBuffer)
                                 {
@@ -124,42 +134,42 @@ namespace CIPPServer
                 Console.WriteLine(e.Message);
             }
 
-            Console.WriteLine("Connection to " + client_name + " terminated");
+            Console.WriteLine("Connection to " + clientName + " terminated");
 
-            ns.Close();
-            client.Close();
+            networkStream.Close();
+            tcpClient.Close();
         }
 
         public void SendResult(int taskId, object result)
         {
-            lock (ns_locker)
+            lock (networkStreamLocker)
             {
                 ResultPackage rp = new ResultPackage(taskId, result);
                 try
                 {
-                    ns.WriteByte((byte)TrasmissionFlagsEnum.Result);
-                    formatter.Serialize(ns, rp);
-                    Console.WriteLine("Result sent back to " + client_name);
+                    networkStream.WriteByte((byte)TrasmissionFlagsEnum.Result);
+                    formatter.Serialize(networkStream, rp);
+                    Console.WriteLine("Result sent back to " + clientName);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Attempt to send result back to " + client_name + " failed: " + e.Message);
+                    Console.WriteLine("Attempt to send result back to " + clientName + " failed: " + e.Message);
                 }
             }
         }
 
         public void SendTaskRequest()
         {
-            lock (ns_locker)
+            lock (networkStreamLocker)
             {
                 try
                 {
-                    ns.WriteByte((byte)TrasmissionFlagsEnum.TaskRequest);
-                    Console.WriteLine("Task request sent to " + client_name + ".");
+                    networkStream.WriteByte((byte)TrasmissionFlagsEnum.TaskRequest);
+                    Console.WriteLine("Task request sent to " + clientName + ".");
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Attempt to send a task request to " + client_name + " failed: " + e.Message);
+                    Console.WriteLine("Attempt to send a task request to " + clientName + " failed: " + e.Message);
                 }
             }
         }

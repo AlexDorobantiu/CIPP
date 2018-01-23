@@ -9,26 +9,27 @@ using System.Threading;
 
 using CIPPProtocols;
 using ProcessingImageSDK;
+using CIPPProtocols.Tasks;
 
 namespace CIPP
 {
     public class TCPProxy
     {
-        public event ResultReceivedEventHandler ResultsReceived;
-        public event EventHandler TaskRequestReceived;
-        public event EventHandler<StringEventArgs> MessagePosted;
-        public event EventHandler<WorkerEventArgs> WorkerPosted;
+        public event ResultReceivedEventHandler resultsReceivedEventHandler;
+        public event EventHandler taskRequestReceivedEventHandler;
+        public event EventHandler<StringEventArgs> messagePosted;
+        public event EventHandler<WorkerEventArgs> workerPosted;
 
-        public event EventHandler connectionLost;
+        public event EventHandler connectionLostEventHandler;
 
         private TcpClient tcpClient;
         private NetworkStream networkStream;
-        private readonly IFormatter formatter;
-        List<Task> sentSimulations;
+        private readonly IFormatter formatter = new BinaryFormatter();
+        List<Task> sentSimulations = new List<Task>();
 
         public string hostname;
         public int port;
-        public bool isConnected = false;
+        public bool connected = false;
 
         private bool listening = false;
         private Thread listeningThread = null;
@@ -38,39 +39,36 @@ namespace CIPP
 
         public TCPProxy(string hostname, int port)
         {
-            formatter = new BinaryFormatter();
             this.hostname = hostname;
             this.port = port;
-
-            sentSimulations = new List<Task>();
         }
 
-        public void TryConnect()
+        public void tryToConnect()
         {
             try
             {
                 tcpClient = new TcpClient(hostname, port);
                 networkStream = tcpClient.GetStream();
-                isConnected = true;
+                connected = true;
                 networkStream.WriteByte((byte)TrasmissionFlagsEnum.ClientName);
                 formatter.Serialize(networkStream, Environment.MachineName);
                 networkStream.Flush();
 
                 postMessage("Connected to " + hostname + " on port " + port);
                 isConnectionThreadRunning = true;
-                listeningThread = new Thread(HandleConnection);
+                listeningThread = new Thread(handleConnection);
                 listeningThread.Start();
             }
             catch (Exception e)
             {
-                isConnected = false;
-                postMessage(e.Message);               
+                connected = false;
+                postMessage(e.Message);
             }
         }
 
-        public void Disconnect()
+        public void disconnect()
         {
-            if (isConnected)
+            if (connected)
             {
                 try
                 {
@@ -81,14 +79,16 @@ namespace CIPP
                 {
                     postMessage(getNameAndStatus() + " error: " + e.Message);
                 }
-                isConnected = false;
+                connected = false;
                 listening = false;
                 if (listeningThread != null)
+                {
                     listeningThread.Abort();
+                }
             }
         }
 
-        public void StartListening()
+        public void startListening()
         {
             if (!listening)
             {
@@ -108,11 +108,13 @@ namespace CIPP
             else
             {
                 for (int i = 0; i < taskRequests; i++)
-                    TaskRequestReceived(this, EventArgs.Empty);
+                {
+                    taskRequestReceivedEventHandler(this, EventArgs.Empty);
+                }
             }
         }
 
-        public void SendSimulationTask(Task task)
+        public void sendSimulationTask(Task task)
         {
             taskRequests--;
             try
@@ -129,7 +131,7 @@ namespace CIPP
 
         }
 
-        public void SendAbortRequest()
+        public void sendAbortRequest()
         {
             try
             {
@@ -144,20 +146,23 @@ namespace CIPP
             }
         }
 
-        private void HandleConnection()
+        private void handleConnection()
         {
             try
             {
                 while (isConnectionThreadRunning)
                 {
                     int header = networkStream.ReadByte();
-                    if (header == -1) break;
+                    if (header == -1)
+                    {
+                        break;
+                    }
                     switch (header)
                     {
                         case (byte)TrasmissionFlagsEnum.TaskRequest:
                             {
                                 postWorker("Worker @: " + hostname, false);
-                                TaskRequestReceived(this, EventArgs.Empty);
+                                taskRequestReceivedEventHandler(this, EventArgs.Empty);
                                 taskRequests++;
                                 postMessage("Received a task request from " + hostname + " on port " + port);
                             } break;
@@ -182,24 +187,33 @@ namespace CIPP
                                             {
                                                 tempTask.state = true;
                                                 if (tempTask.taskType == TaskTypeEnum.filter)
+                                                {
                                                     ((FilterTask)tempTask).result = (ProcessingImage)resultPackage.result;
+                                                }
                                                 else
+                                                {
                                                     if (tempTask.taskType == TaskTypeEnum.mask)
+                                                    {
                                                         ((MaskTask)tempTask).result = (byte[,])resultPackage.result;
+                                                    }
                                                     else
+                                                    {
                                                         if (tempTask.taskType == TaskTypeEnum.motionRecognition)
+                                                        {
                                                             ((MotionRecognitionTask)tempTask).result = (MotionVectorBase[,])resultPackage.result;
-
+                                                        }
+                                                    }
+                                                }
                                                 sentSimulations.Remove(tempTask);
-                                                ResultsReceived(this, new ResultReceivedEventArgs(tempTask));
+                                                resultsReceivedEventHandler(this, new ResultReceivedEventArgs(tempTask));
                                                 postMessage("Received a result from " + hostname + " on port " + port + " ");
                                             }
                                             else
                                             {
                                                 tempTask.state = false;
                                                 sentSimulations.Remove(tempTask);
-                                                ResultsReceived(this, new ResultReceivedEventArgs(tempTask));
-                                                postMessage("Task "+ tempTask.id +" not completed succesfuly by " + hostname + " on port " + port + " ");
+                                                resultsReceivedEventHandler(this, new ResultReceivedEventArgs(tempTask));
+                                                postMessage("Task " + tempTask.id + " not completed succesfuly by " + hostname + " on port " + port + " ");
                                             }
                                         }
                                         else
@@ -217,7 +231,7 @@ namespace CIPP
                             break;
                         default:
                             {
-                                connectionLost(this, EventArgs.Empty);
+                                connectionLostEventHandler(this, EventArgs.Empty);
                                 postMessage("Invalid message header received: " + header);
                                 isConnectionThreadRunning = false;
                                 listening = false;
@@ -232,28 +246,38 @@ namespace CIPP
             finally
             {
                 postMessage("Connection to " + hostname + " on port " + port + " terminated");
-                isConnected = false;
+                connected = false;
                 listening = false;
-                connectionLost(this, EventArgs.Empty);
+                connectionLostEventHandler(this, EventArgs.Empty);
                 for (int i = 0; i < taskRequests; i++)
+                {
                     postWorker("Worker @: " + hostname, true);
+                }
             }
         }
 
         private void postMessage(string message)
         {
-            if (MessagePosted != null) MessagePosted(this, new StringEventArgs(message));
+            if (messagePosted != null)
+            {
+                messagePosted(this, new StringEventArgs(message));
+            }
         }
 
         private void postWorker(string name, bool left)
         {
-            if (WorkerPosted != null) WorkerPosted(this, new WorkerEventArgs(name, left));
+            if (workerPosted != null)
+            {
+                workerPosted(this, new WorkerEventArgs(name, left));
+            }
         }
 
         public string getNameAndStatus()
         {
-            if (isConnected)
+            if (connected)
+            {
                 return hostname + ", " + port + ", connected";
+            }
             return hostname + ", " + port + ", not connected";
         }
     }

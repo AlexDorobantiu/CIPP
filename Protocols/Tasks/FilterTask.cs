@@ -4,7 +4,7 @@ using System.Text;
 
 using ProcessingImageSDK;
 
-namespace CIPPProtocols
+namespace CIPPProtocols.Tasks
 {
     [Serializable]
     public class FilterTask : Task

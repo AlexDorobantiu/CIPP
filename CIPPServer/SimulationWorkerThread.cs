@@ -10,6 +10,7 @@ using ProcessingImageSDK;
 using Plugins.Filters;
 using Plugins.Masks;
 using Plugins.MotionRecognition;
+using CIPPProtocols.Tasks;
 
 namespace CIPPServer
 {
@@ -19,7 +20,7 @@ namespace CIPPServer
         public readonly ConnectionThread parentConnectionThread;
         private bool isPendingClosure = false;
 
-        private EventWaitHandle wh_between_tasks = new AutoResetEvent(false);
+        private EventWaitHandle eventWaitHandleBetweenTasks = new AutoResetEvent(false);
         private Thread thread;
 
         public SimulationWorkerThread(ConnectionThread parent, string threadName)
@@ -27,7 +28,7 @@ namespace CIPPServer
             parentConnectionThread = parent;
             taskSource = parent.taskBuffer;
 
-            wh_between_tasks = new AutoResetEvent(false);
+            eventWaitHandleBetweenTasks = new AutoResetEvent(false);
             thread = new Thread(doWork);
             thread.Name = threadName;
             thread.Start();
@@ -35,7 +36,7 @@ namespace CIPPServer
 
         public void Awake()
         {
-            wh_between_tasks.Set();
+            eventWaitHandleBetweenTasks.Set();
         }
 
         public void AbortCurrentTask()
@@ -46,9 +47,9 @@ namespace CIPPServer
         public void Kill()
         {
             isPendingClosure = true;
-            wh_between_tasks.Set();
+            eventWaitHandleBetweenTasks.Set();
             thread.Join();
-            wh_between_tasks.Close();
+            eventWaitHandleBetweenTasks.Close();
         }
 
         public void Dispose()
@@ -64,68 +65,53 @@ namespace CIPPServer
                 {
                     try
                     {
-                        if (isPendingClosure) return;
+                        if (isPendingClosure)
+                        {
+                            return;
+                        }
 
                         Task task = null;
                         lock (taskSource)
                         {
-                            if (taskSource.Count > 0) task = taskSource.Dequeue();
+                            if (taskSource.Count > 0)
+                            {
+                                task = taskSource.Dequeue();
+                            }
                         }
 
-                        if (task == null) wh_between_tasks.WaitOne();
+                        if (task == null)
+                        {
+                            eventWaitHandleBetweenTasks.WaitOne();
+                        }
                         else
                         {
                             Console.WriteLine("Working on " + task.taskType.ToString() + " task " + task.id);
 
+                            PluginInfo pluginInfo = Program.pluginFinder.findPluginForTask(task);
                             object result = null;
                             try
                             {
-                                if (task.taskType == TaskTypeEnum.filter)
+                                switch (task.taskType)
                                 {
-                                    FilterTask f = (FilterTask)task;
-
-                                    PluginInfo pi = null;
-                                    foreach (PluginInfo plugIn in Program.filterPluginList)
-                                        if (plugIn.fullName == f.pluginFullName)
+                                    case TaskTypeEnum.filter:
                                         {
-                                            pi = plugIn;
-                                            break;
-                                        }
-
-                                    IFilter filter = (IFilter)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, f.parameters, null, null);
-                                    result = filter.filter(f.originalImage);
+                                            FilterTask filterTask = (FilterTask)task;
+                                            IFilter filter = PluginHelper.createInstance<IFilter>(pluginInfo, filterTask.parameters);
+                                            result = filter.filter(filterTask.originalImage);
+                                        } break;
+                                    case TaskTypeEnum.mask:
+                                        {
+                                            MaskTask maskTask = (MaskTask)task;
+                                            IMask mask = PluginHelper.createInstance<IMask>(pluginInfo, maskTask.parameters);
+                                            result = mask.mask(maskTask.originalImage);
+                                        } break;
+                                    case TaskTypeEnum.motionRecognition:
+                                        {
+                                            MotionRecognitionTask motionRecognitionTask = (MotionRecognitionTask)task;
+                                            IMotionRecognition motionRecognition = PluginHelper.createInstance<IMotionRecognition>(pluginInfo, motionRecognitionTask.parameters);
+                                            result = motionRecognition.scan(motionRecognitionTask.frame, motionRecognitionTask.nextFrame);
+                                        } break;
                                 }
-                                else
-                                    if (task.taskType == TaskTypeEnum.mask)
-                                    {
-                                        MaskTask m = (MaskTask)task;
-
-                                        PluginInfo pi = null;
-                                        foreach (PluginInfo plugIn in Program.maskPluginList)
-                                            if (plugIn.fullName == m.pluginFullName)
-                                            {
-                                                pi = plugIn;
-                                                break;
-                                            }
-
-                                        IMask mask = (IMask)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, m.parameters, null, null);
-                                        result = mask.mask(m.originalImage);
-                                    }
-                                    else
-                                        if (task.taskType == TaskTypeEnum.motionRecognition)
-                                        {
-                                            MotionRecognitionTask m = (MotionRecognitionTask)task;
-
-                                            PluginInfo pi = null;
-                                            foreach (PluginInfo plugIn in Program.motionRecognitionPluginList)
-                                                if (plugIn.fullName == m.pluginFullName)
-                                                {
-                                                    pi = plugIn;
-                                                    break;
-                                                }
-                                            IMotionRecognition motionRecognition = (IMotionRecognition)pi.assembly.CreateInstance(pi.fullName, false, BindingFlags.CreateInstance, null, m.parameters, null, null);
-                                            result = motionRecognition.scan(m.frame, m.nextFrame);
-                                        }
                             }
                             catch { }
 
