@@ -148,6 +148,7 @@ namespace CIPP
                     }
                 }
             }
+            this.ResumeLayout(false);
             this.PerformLayout();
         }
 
