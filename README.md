@@ -37,7 +37,7 @@ Disclaimer: The initial version of the program was developed during my Bachelor'
  - The platform does not come with an installation package (ready for execution).
 
 ##### Screenshot
-![CIPP Screenshot](images/cipp_printscreen.png)
+![CIPP Screenshot](cipp_printscreen.png)
  
 [![Creative Commons License](https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png)][CreativeCommonsLicence]
 <br />
