@@ -1,28 +1,28 @@
 CIPP - Compact Image Processing Platform
 ===================================
-Version 1.1 Released by [Alexandru Dorobanțiu](http://www.alex.dorobantiu.ro) on 24.01.2018
+Version 1.1 Released by [Alexandru Dorobanțiu](http://alex.dorobantiu.ro) on 24.01.2018
 
 ### Features
 - parallel and distributed image processing
 - pluggable architecture, explicitly designed for developing algorithms
-- simple Design Space Eploration through parameter combinatorics.
-- cotains example plugins for various consacrated image processing algorithms (more will be added)
+- simple Design Space Exploration through parameter combinatorics.
+- contains example plugins for various consecrated image processing algorithms (more will be added)
 
 ### Technology:
  - Written in plain **C#** using **Visual Studio 2010**
  - **.NET** framework is kept to version **2.0** for compatibility with older operating systems and Visual Studio versions. It also encourages writing simple and portable code to other programming languages without abusing syntactic sugar provided by newer C# extensions
- - The frontend is implemented using Windows Forms
+ - The front-end is implemented using Windows Forms
  
 #### Details
-The purpose of the platform is to separate the boilerplate code needed to view, load, save images from the implementation of image processing algorithms. The execution of the algorithms is also manged independently of the implementation. This separation is done using interfaces and a pluggable architecture.
+The purpose of the platform is to separate the boilerplate code needed to view, load, save images from the implementation of image processing algorithms. The execution of the algorithms is also managed independently of the implementation. This separation is done using interfaces and a pluggable architecture.
 
 CIPP supports three types of **image processing tasks**
 1. Filtering: Takes an image as input and outputs another image (most processing tasks fall into this category)
 2. Masking: Takes an image as input and outputs an alpha channel (which applied to the original image results in a masked image)
-3. Motion detection: Block matching in sequential frames, takes a sequence of images as input and outputs a series of motion vectors (which describe where the best block match was found in the successing image)
+3. Motion detection: Block matching in sequential frames, takes a sequence of images as input and outputs a series of motion vectors (which describe where the best block match was found in the succeeding image)
 
 #### Implementation Details
-Disclaimer: The initial version of the program was developed during my Bachelor's Thesis in Computer Science and the code was mostly organised in my coding standars back then which were not intended to be compatible with industry style coding. The naming conventions are a mix between C# and Java style (in a good sense).
+Disclaimer: The initial version of the program was developed during my Bachelor's Thesis in Computer Science and the code was mostly organised in my coding standards back then which were not intended to be compatible with industry style coding. The naming conventions are a mix between C# and Java style (in a good sense).
 
  - The main project is **CIPP** which is a **Windows Application**.
  - The secondary project is **CIPPServer** which is a **Console Application** used for distributed processing.
@@ -32,8 +32,8 @@ Disclaimer: The initial version of the program was developed during my Bachelor'
 
 ##### Notes
  - The plugins are loaded from a fixed folder relative to the application. In order to have a plugin build copied automatically to the specified folder, see the Post-build event command line (project -> properties -> Build Events tab) in the example plugins. The script copies the *.dll* file (which is the output of a class library) to the plugins folders of both the client and the server applications.
- - The framework code is using unsafe C# code for fast loading, creating, saving and trasforming Bitmaps, but I strongly discourage the use of unsafe code in plugins.
- - The solution should be easy to migrate to newer Visual Studio environments withoud any changes.
+ - The framework code is using unsafe C# code for fast loading, creating, saving and transforming Bitmaps, but I strongly discourage the use of unsafe code in plugins.
+ - The solution should be easy to migrate to newer Visual Studio environments without any changes.
  - The platform does not come with an installation package (ready for execution).
 
 ##### Screenshot
