@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("CIPP")]
-[assembly: AssemblyCopyright("Copyright © Alexandru Dorobantiu 2010")]
+[assembly: AssemblyCopyright("Copyright © Alexandru Dorobanțiu 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

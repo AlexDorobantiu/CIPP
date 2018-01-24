@@ -108,7 +108,7 @@
             this.labelCopyright.Name = "labelCopyright";
             this.labelCopyright.Size = new System.Drawing.Size(328, 17);
             this.labelCopyright.TabIndex = 21;
-            this.labelCopyright.Text = "Copyright: Alexandru DOROBANȚIU";
+            this.labelCopyright.Text = "Copyright © Alexandru Dorobanțiu 2018";
             this.labelCopyright.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBoxDescription
@@ -124,7 +124,7 @@
             this.textBoxDescription.Size = new System.Drawing.Size(328, 126);
             this.textBoxDescription.TabIndex = 23;
             this.textBoxDescription.TabStop = false;
-            this.textBoxDescription.Text = "CIPP - Compact Image Processing Platform";
+            this.textBoxDescription.Text = "CIPP - Compact Image Processing Platform\r\nhttp://alex.dorobantiu.ro";
             // 
             // okButton
             // 
