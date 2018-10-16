@@ -22,10 +22,10 @@ CIPP supports three types of **image processing tasks**
 3. Motion detection: Block matching in sequential frames, takes a sequence of images as input and outputs a series of motion vectors (which describe where the best block match was found in the succeeding image)
 
 #### Implementation Details
-Disclaimer: The initial version of the program was developed during my Bachelor's Thesis in Computer Science and the code was mostly organised in my coding standards back then which were not intended to be compatible with industry style coding. The naming conventions are a mix between C# and Java style (in a good sense).
+Disclaimer: The initial version of the program was developed during my Bachelor's Thesis in Computer Science and the code was mostly organised in my coding standards back then (2009-2010), which were not intended to be compatible with industry style coding. The coding and naming conventions are a mix between C# and Java style (in a good sense).
 
- - The main project is **CIPP** which is a **Windows Application**.
- - The secondary project is **CIPPServer** which is a **Console Application** used for distributed processing.
+ - The main project is **CIPP** which is a **Windows Application** using Windows Forms.
+ - The secondary project is **CIPPServer** which is a **Console Application** used for distributed processing over TCP/IP.
  - The **ProcessingImageSDK**, **ParametersSDK** and **Protocols** projects separates reusable code between the Client and Server application. The first two should also be referenced by the plugins. These projects are **Class Libraries**. 
  - The **FilterSDK**, **MaskSDK** and **MotionRecognitionSDK** projects are used for developing the three types of plugins and contain the interface the plugin must implement. Reference one of these in your plugin project. These projects are **Class Libraries**.
  - The rest of the projects contain various plugin implementations and are **Class Libraries**.
