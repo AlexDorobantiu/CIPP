@@ -188,7 +188,7 @@ namespace CIPP
 
                         string name = plugInList[index].fullName;
                         List<IParameters> parameterList = plugInList[index].parameters;
-                        int parametersNumber = parameterList.Count;
+                        int parametersNumber = parameterList != null ? parameterList.Count : 0;
 
                         // simple backtracking to compute all combinations of parameters
                         if (parametersNumber != 0)

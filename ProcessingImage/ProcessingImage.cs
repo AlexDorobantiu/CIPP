@@ -141,22 +141,6 @@ namespace ProcessingImageSDK
             return luminance;
         }
 
-        public Color getPixel(int x, int y)
-        {
-            try
-            {
-                if (grayscale)
-                {
-                    return Color.FromArgb(alpha[y, x], gray[y, x], gray[y, x], gray[y, x]);
-                }
-                return Color.FromArgb(alpha[y, x], red[y, x], green[y, x], blue[y, x]);
-            }
-            catch
-            {
-                return Color.Black;
-            }
-        }
-
         public void setSizeX(int sizeX)
         {
             this.sizeX = sizeX;
@@ -1181,7 +1165,11 @@ namespace ProcessingImageSDK
         /// <returns>An array of images</returns>
         public ProcessingImage[] split(ImageDependencies imageDependencies, int subParts)
         {
-            if (imageDependencies.left == -1)
+            if (imageDependencies == null)
+            {
+                return null;
+            }
+            if (imageDependencies.left < 0 || imageDependencies.right < 0 || imageDependencies.top < 0 || imageDependencies.bottom < 0)
             {
                 return null;
             }

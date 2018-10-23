@@ -14,6 +14,10 @@ namespace CIPP
 {
     partial class CIPPForm
     {
+        private const string FILTERS_RELATIVE_PATH = @"plugins\filters";
+        private const string MASKS_RELATIVE_PATH = @"plugins\masks";
+        private const string MOTION_RECOGNITION_RELATIVE_PATH = @"plugins\motionrecognition";
+
         private void optionsButton_Click(object sender, EventArgs e)
         {
             List<IParameters> parameterList = (List<IParameters>)((Button)sender).Tag;
@@ -35,7 +39,7 @@ namespace CIPP
                     // filter plugins tab
                     case 0:
                         {
-                            filterPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\filters"), typeof(IFilter));
+                            filterPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, FILTERS_RELATIVE_PATH), typeof(IFilter));
                             currentList = filterPluginList;
                             currentFlowLayoutPanel = flowLayoutPanelFilterPlugins;
                             currentCheckBoxList = filterPluginsCheckBoxList;
@@ -43,7 +47,7 @@ namespace CIPP
                     // masking plugins tab
                     case 1:
                         {
-                            maskPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\masks"), typeof(IMask));
+                            maskPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, MASKS_RELATIVE_PATH), typeof(IMask));
                             currentList = maskPluginList;
                             currentFlowLayoutPanel = flowLayoutPanelMaskPlugins;
                             currentCheckBoxList = maskPluginsCheckBoxList;
@@ -51,7 +55,7 @@ namespace CIPP
                     // motion recognition plugins tab
                     default:
                         {
-                            motionRecognitionPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\motionrecognition"), typeof(IMotionRecognition));
+                            motionRecognitionPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, MOTION_RECOGNITION_RELATIVE_PATH), typeof(IMotionRecognition));
                             currentList = motionRecognitionPluginList;
                             currentFlowLayoutPanel = flowLayoutPanelMotionRecognitionPlugins;
                             currentCheckBoxList = motionRecognitionPluginsCheckBoxList;
@@ -71,7 +75,7 @@ namespace CIPP
 
                     Button b = new Button();
                     b.FlatStyle = FlatStyle.Flat;
-                    if (currentList[i].parameters.Count == 0)
+                    if (currentList[i].parameters == null || currentList[i].parameters.Count == 0)
                     {
                         b.Enabled = false;
                     }
