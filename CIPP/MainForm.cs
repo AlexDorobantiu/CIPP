@@ -225,7 +225,6 @@ namespace CIPP
             }
         }
 
-
         private void moveDownButton_Click(object sender, EventArgs e)
         {
             List<ProcessingImage> visibleImagesList = null;
@@ -464,6 +463,27 @@ namespace CIPP
         private void previewPicture_SizeChanged(object sender, EventArgs e)
         {
             updateVisibleImage();
+        }
+
+        private void previewPicture_DoubleClick(object sender, EventArgs e)
+        {
+            viewImageButton_Click(sender, e);
+        }
+
+        private void ImageListBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (Keys.A.Equals(e.KeyCode) && Keys.Control.Equals(e.Modifiers))
+            {
+                List<ProcessingImage> visibleImagesList = null;
+                ListBox visibleListBox = null;
+                getVisibleLists(ref visibleImagesList, ref visibleListBox);
+                visibleListBox.BeginUpdate();
+                for (int i = 0; i < visibleListBox.Items.Count; i++)
+                {
+                    visibleListBox.SetSelected(i, true);
+                }
+                visibleListBox.EndUpdate();
+            }
         }
     }
 }

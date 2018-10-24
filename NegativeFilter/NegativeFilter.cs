@@ -31,7 +31,7 @@ namespace Plugins.Filters.NegativeFilter
             ProcessingImage outputImage = new ProcessingImage();
             outputImage.copyAttributesAndAlpha(inputImage);
             outputImage.addWatermark("Negative Filter, v1.0, Alex Dorobantiu");
-
+            outputImage.setName("");
             if (!inputImage.grayscale)
             {
                 byte[,] r = new byte[inputImage.getSizeY(), inputImage.getSizeX()];

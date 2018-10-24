@@ -552,6 +552,7 @@ namespace CIPP
             this.previewPicture.TabIndex = 1;
             this.previewPicture.TabStop = false;
             this.previewPicture.SizeChanged += new System.EventHandler(this.previewPicture_SizeChanged);
+            this.previewPicture.DoubleClick += new System.EventHandler(this.previewPicture_DoubleClick);
             // 
             // imageTab
             // 
@@ -599,6 +600,7 @@ namespace CIPP
             this.originalImageListBox.SelectedIndexChanged += new System.EventHandler(this.originalImageList_SelectedIndexChanged);
             this.originalImageListBox.DragDrop += new System.Windows.Forms.DragEventHandler(this.originalImageList_DragDrop);
             this.originalImageListBox.DragEnter += new System.Windows.Forms.DragEventHandler(this.originalImageList_DragEnter);
+            this.originalImageListBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ImageListBox_KeyUp);
             // 
             // processedImageTab
             // 
@@ -623,6 +625,7 @@ namespace CIPP
             this.processedImageListBox.Size = new System.Drawing.Size(207, 206);
             this.processedImageListBox.TabIndex = 1;
             this.processedImageListBox.SelectedIndexChanged += new System.EventHandler(this.originalImageList_SelectedIndexChanged);
+            this.processedImageListBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ImageListBox_KeyUp);
             // 
             // maskedImageTab
             // 
@@ -645,6 +648,7 @@ namespace CIPP
             this.maskedImageListBox.Size = new System.Drawing.Size(207, 206);
             this.maskedImageListBox.TabIndex = 1;
             this.maskedImageListBox.SelectedIndexChanged += new System.EventHandler(this.originalImageList_SelectedIndexChanged);
+            this.maskedImageListBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ImageListBox_KeyUp);
             // 
             // scanedImageTab
             // 

@@ -20,6 +20,7 @@ namespace CIPP
 {
     partial class CIPPForm
     {
+        private const String NO_NAME_DEFAULT = " - no name - ";
         private const int threadStackSize = 8 * (1 << 20);
 
         WorkManager workManager = null;
@@ -493,20 +494,30 @@ namespace CIPP
                 {
                     if (taskType == TaskTypeEnum.filter)
                     {
-                        processedImageListBox.Items.Add(processingImage.getName());
+                        processedImageListBox.Items.Add(getNameOrDefault(processingImage));
                         processedImageList.Add(processingImage);
                     }
                     else
                     {
                         if (taskType == TaskTypeEnum.mask)
                         {
-                            maskedImageListBox.Items.Add(processingImage.getName());
+                            maskedImageListBox.Items.Add(getNameOrDefault(processingImage));
                             maskedImageList.Add(processingImage);
                         }
                     }
                 }
             }
             catch { }
+        }
+
+        private static String getNameOrDefault(ProcessingImage processingImage)
+        {
+            String nameToAdd = processingImage.getName();
+            if (nameToAdd == null || String.Empty.Equals(nameToAdd))
+            {
+                return NO_NAME_DEFAULT;
+            }
+            return nameToAdd;
         }
 
         private void addMotion(Motion motion)
