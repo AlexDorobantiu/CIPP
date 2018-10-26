@@ -28,32 +28,37 @@ namespace CIPP
 
         private void doWork()
         {
+            string threadName = Thread.CurrentThread.Name;
             displayWorker(Thread.CurrentThread.Name, true);
-            while (true)
+            while (workManager != null)
             {
-                addMessage(Thread.CurrentThread.Name + " requesting task!");
+                addMessage(threadName + " requesting task!");
                 Task task = workManager.getTask(RequestTypeEnum.local);
 
                 if (task == null)
                 {
-                    addMessage(Thread.CurrentThread.Name + " finished work!");
+                    addMessage(threadName + " finished work!");
                     break;
                 }
 
-                addMessage(Thread.CurrentThread.Name + " starting " + task.taskType.ToString() + " task " + task.id);
+                addMessage(threadName + " starting " + task.taskType.ToString() + " task " + task.id);
                 try
                 {
                     solveTask(task);
-                    addMessage(Thread.CurrentThread.Name + " finished task " + task.id);
+                    addMessage(threadName + " finished task " + task.id);
+                    workManager.taskFinished(task);
+                }    
+                catch (ThreadAbortException)
+                {
+                    addMessage(threadName + " stopped working on task " + task.id);
                 }
                 catch (Exception e)
                 {
                     MessageBox.Show("Task failed with exception: " + e.Message);
-                    addMessage(Thread.CurrentThread.Name + " failed task " + task.id);
+                    addMessage(threadName + " failed task " + task.id);
                 }
-                workManager.taskFinished(task);
             }
-            displayWorker(Thread.CurrentThread.Name, false);
+            displayWorker(threadName, false);
         }
 
         private void solveTask(Task task)
@@ -380,10 +385,9 @@ namespace CIPP
             {
                 if (threads != null)
                 {
-                    foreach (Thread t in threads)
+                    foreach (Thread thread in threads)
                     {
-                        t.Abort();
-                        t.Join();
+                        thread.Abort();
                     }
                 }
 
