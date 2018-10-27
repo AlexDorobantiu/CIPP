@@ -52,7 +52,6 @@
     <Compile Include="Tasks\MaskTask.cs" />
     <Compile Include="Tasks\MotionRecognitionTask.cs" />
     <Compile Include="Task.cs" />
-    <Compile Include="TaskTypeEnum.cs" />
     <Compile Include="IdGenerator.cs" />
     <Compile Include="PluginHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

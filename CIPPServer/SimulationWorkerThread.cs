@@ -85,27 +85,27 @@ namespace CIPPServer
                         }
                         else
                         {
-                            Console.WriteLine("Working on " + task.taskType.ToString() + " task " + task.id);
+                            Console.WriteLine("Working on " + task.type.ToString() + " task " + task.id);
 
                             PluginInfo pluginInfo = Program.pluginFinder.findPluginForTask(task);
                             object result = null;
                             try
                             {
-                                switch (task.taskType)
+                                switch (task.type)
                                 {
-                                    case TaskTypeEnum.filter:
+                                    case Task.Type.FILTER:
                                         {
                                             FilterTask filterTask = (FilterTask)task;
                                             IFilter filter = PluginHelper.createInstance<IFilter>(pluginInfo, filterTask.parameters);
                                             result = filter.filter(filterTask.originalImage);
                                         } break;
-                                    case TaskTypeEnum.mask:
+                                    case Task.Type.MASK:
                                         {
                                             MaskTask maskTask = (MaskTask)task;
                                             IMask mask = PluginHelper.createInstance<IMask>(pluginInfo, maskTask.parameters);
                                             result = mask.mask(maskTask.originalImage);
                                         } break;
-                                    case TaskTypeEnum.motionRecognition:
+                                    case Task.Type.MOTION_RECOGNITION:
                                         {
                                             MotionRecognitionTask motionRecognitionTask = (MotionRecognitionTask)task;
                                             IMotionRecognition motionRecognition = PluginHelper.createInstance<IMotionRecognition>(pluginInfo, motionRecognitionTask.parameters);

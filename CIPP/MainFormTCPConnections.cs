@@ -12,10 +12,10 @@ namespace CIPP
 
         private void addTCPConnectionButton_Click(object sender, EventArgs e)
         {
-            AddConnectionForm f = new AddConnectionForm();
-            if (f.ShowDialog() == DialogResult.OK)
+            AddConnectionForm addConnectionForm = new AddConnectionForm();
+            if (addConnectionForm.ShowDialog() == DialogResult.OK)
             {
-                TCPProxy newproxy = new TCPProxy(f.ip, f.port);
+                TCPProxy newproxy = new TCPProxy(addConnectionForm.ip, addConnectionForm.port);
                 newproxy.messagePosted += new EventHandler<StringEventArgs>(messagePosted);
                 newproxy.workerPosted += new EventHandler<WorkerEventArgs>(workerPosted);
                 newproxy.taskRequestReceivedEventHandler += new EventHandler(proxyRequestReceived);
@@ -85,12 +85,12 @@ namespace CIPP
         {
             try
             {
-                StreamWriter sw = new StreamWriter(connectionsFilename, false);
-                foreach (TCPProxy item in TCPConnections)
+                StreamWriter streamWriter = new StreamWriter(connectionsFilename, false);
+                foreach (TCPProxy tcpProxy in TCPConnections)
                 {
-                    sw.WriteLine(item.hostname + ", " + item.port);
+                    streamWriter.WriteLine(tcpProxy.hostname + ", " + tcpProxy.port);
                 }
-                sw.Close();
+                streamWriter.Close();
             }
             catch { }
         }

@@ -22,9 +22,8 @@ namespace CIPPProtocols.Tasks
 
         public FilterTask(int id, string pluginFullName, object[] parameters, ProcessingImage originalImage)
         {
-            this.taskType = TaskTypeEnum.filter;
-            this.taken = false;
-            this.finishedSuccessfully = false;
+            this.type = Type.FILTER;
+            this.status = Status.NOT_TAKEN;
             subParts = 0;
             parent = null;
 
@@ -37,12 +36,22 @@ namespace CIPPProtocols.Tasks
 
         public void join(FilterTask subTask)
         {
+            if (status == Status.FAILED)
+            {
+                return;
+            }
+            if (subTask.status == Status.FAILED)
+            {
+                status = Status.FAILED;
+                return;
+            }
+
             result.join(subTask.result);
 
             subParts--;
             if (subParts == 0)
             {
-                finishedSuccessfully = true;
+                this.status = Status.SUCCESSFUL;
             }
         }
     }

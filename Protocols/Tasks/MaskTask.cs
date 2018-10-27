@@ -14,9 +14,8 @@ namespace CIPPProtocols.Tasks
 
         public MaskTask(int id, string pluginFullName, object[] parameters, ProcessingImage originalImage)
         {
-            this.taskType = TaskTypeEnum.mask;
-            this.taken = false;
-            this.finishedSuccessfully = false;
+            this.type = Type.MASK;
+            this.status = Status.NOT_TAKEN;
 
             this.id = id;
             this.pluginFullName = pluginFullName;

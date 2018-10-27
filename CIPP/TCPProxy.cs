@@ -188,26 +188,26 @@ namespace CIPP
                                         {
                                             if (resultPackage.result != null)
                                             {                                                
-                                                switch (tempTask.taskType)
+                                                switch (tempTask.type)
                                                 {
-                                                    case TaskTypeEnum.filter:
+                                                    case Task.Type.FILTER:
                                                         ((FilterTask)tempTask).result = (ProcessingImage)resultPackage.result; 
                                                         break;
-                                                    case TaskTypeEnum.mask:
+                                                    case Task.Type.MASK:
                                                         ((MaskTask)tempTask).result = (byte[,])resultPackage.result;
                                                         break;
-                                                    case TaskTypeEnum.motionRecognition:
+                                                    case Task.Type.MOTION_RECOGNITION:
                                                         ((MotionRecognitionTask)tempTask).result = (MotionVectorBase[,])resultPackage.result;
                                                         break;
                                                 }
-                                                tempTask.finishedSuccessfully = true;
+                                                tempTask.status = Task.Status.SUCCESSFUL;
                                                 sentSimulations.Remove(tempTask);
                                                 resultsReceivedEventHandler(this, new ResultReceivedEventArgs(tempTask));
                                                 postMessage("Received a result from " + hostname + " on port " + port + " ");
                                             }
                                             else
                                             {
-                                                tempTask.finishedSuccessfully = false;
+                                                tempTask.status = Task.Status.FAILED;
                                                 sentSimulations.Remove(tempTask);
                                                 resultsReceivedEventHandler(this, new ResultReceivedEventArgs(tempTask));
                                                 postMessage("Task " + tempTask.id + " not completed succesfuly by " + hostname + " on port " + port + " ");

@@ -7,12 +7,26 @@ namespace CIPPProtocols
     [Serializable]
     public abstract class Task
     {
+        public enum Type
+        {
+            FILTER,
+            MASK,
+            MOTION_RECOGNITION
+        }
+
+        public enum Status
+        {
+            NOT_TAKEN,
+            TAKEN,
+            SUCCESSFUL,
+            FAILED
+        }
+        
         public int id;
-        public TaskTypeEnum taskType;
+        public Type type;
         public string pluginFullName;
         public object[] parameters;
-
-        public bool taken;
-        public bool finishedSuccessfully;
+        public Status status;
+        public Exception exception;
     }
 }

@@ -41,21 +41,26 @@ namespace CIPP
                     break;
                 }
 
-                addMessage(threadName + " starting " + task.taskType.ToString() + " task " + task.id);
+                addMessage(threadName + " starting " + task.type.ToString() + " task " + task.id);
                 try
                 {
                     solveTask(task);
-                    addMessage(threadName + " finished task " + task.id);
+                    switch (task.status)
+                    {
+                        case Task.Status.SUCCESSFUL:
+                            addMessage(threadName + " finished task " + task.id);
+                            break;
+                        case Task.Status.FAILED:
+                            addMessage(threadName + " failed task " + task.id + " with exception: " + task.exception.Message);
+                            break;
+                        default:
+                            throw new NotImplementedException();
+                    }
                     workManager.taskFinished(task);
-                }    
+                }
                 catch (ThreadAbortException)
                 {
                     addMessage(threadName + " stopped working on task " + task.id);
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show("Task failed with exception: " + e.Message);
-                    addMessage(threadName + " failed task " + task.id);
                 }
             }
             displayWorker(threadName, false);
@@ -63,29 +68,37 @@ namespace CIPP
 
         private void solveTask(Task task)
         {
-            PluginInfo pluginInfo = pluginFinder.findPluginForTask(task);
-            switch (task.taskType)
+            try
             {
-                case TaskTypeEnum.filter:
-                    {
-                        FilterTask filterTask = (FilterTask)task;
-                        IFilter filter = PluginHelper.createInstance<IFilter>(pluginInfo, filterTask.parameters);
-                        filterTask.result = filter.filter(filterTask.originalImage);
-                    } break;
-                case TaskTypeEnum.mask:
-                    {
-                        MaskTask maskTask = (MaskTask)task;
-                        IMask mask = PluginHelper.createInstance<IMask>(pluginInfo, maskTask.parameters);
-                        maskTask.result = mask.mask(maskTask.originalImage);
-                    } break;
-                case TaskTypeEnum.motionRecognition:
-                    {
-                        MotionRecognitionTask motionRecognitionTask = (MotionRecognitionTask)task;
-                        IMotionRecognition motionRecognition = PluginHelper.createInstance<IMotionRecognition>(pluginInfo, motionRecognitionTask.parameters);
-                        motionRecognitionTask.result = motionRecognition.scan(motionRecognitionTask.frame, motionRecognitionTask.nextFrame);
-                    } break;
+                PluginInfo pluginInfo = pluginFinder.findPluginForTask(task);
+                switch (task.type)
+                {
+                    case Task.Type.FILTER:
+                        {
+                            FilterTask filterTask = (FilterTask)task;
+                            IFilter filter = PluginHelper.createInstance<IFilter>(pluginInfo, filterTask.parameters);
+                            filterTask.result = filter.filter(filterTask.originalImage);
+                        } break;
+                    case Task.Type.MASK:
+                        {
+                            MaskTask maskTask = (MaskTask)task;
+                            IMask mask = PluginHelper.createInstance<IMask>(pluginInfo, maskTask.parameters);
+                            maskTask.result = mask.mask(maskTask.originalImage);
+                        } break;
+                    case Task.Type.MOTION_RECOGNITION:
+                        {
+                            MotionRecognitionTask motionRecognitionTask = (MotionRecognitionTask)task;
+                            IMotionRecognition motionRecognition = PluginHelper.createInstance<IMotionRecognition>(pluginInfo, motionRecognitionTask.parameters);
+                            motionRecognitionTask.result = motionRecognition.scan(motionRecognitionTask.frame, motionRecognitionTask.nextFrame);
+                        } break;
+                }
+                task.status = Task.Status.SUCCESSFUL;
             }
-            task.finishedSuccessfully = true;
+            catch (Exception e)
+            {
+                task.status = Task.Status.FAILED;
+                task.exception = e;
+            }
         }
 
         private void proxyRequestReceived(object sender, EventArgs e)
@@ -123,27 +136,22 @@ namespace CIPP
                 {
                     //original tab
                     case 0:
-                        {
-                            selectedImageList = originalImageList;
-                            selectedIndices = originalImageListBox.SelectedIndices;
-                        } break;
+                        selectedImageList = originalImageList;
+                        selectedIndices = originalImageListBox.SelectedIndices;
+                        break;
                     //processed tab
                     case 1:
-                        {
-                            selectedImageList = processedImageList;
-                            selectedIndices = processedImageListBox.SelectedIndices;
-                        } break;
+                        selectedImageList = processedImageList;
+                        selectedIndices = processedImageListBox.SelectedIndices;
+                        break;
                     //masked tab
                     case 2:
-                        {
-                            selectedImageList = maskedImageList;
-                            selectedIndices = maskedImageListBox.SelectedIndices;
-                        } break;
+                        selectedImageList = maskedImageList;
+                        selectedIndices = maskedImageListBox.SelectedIndices;
+                        break;
                     //scaned tab
                     case 3:
-                        {
-                            return; //nothing to process (here, yet)
-                        }
+                        return; //nothing to process (here, yet)
                 }
 
                 if (selectedIndices.Count == 0)
@@ -160,29 +168,25 @@ namespace CIPP
 
                 switch (processingTab.SelectedIndex)
                 {
-                    //filtering tab
                     case 0:
-                        {
-                            filterCommandList = new List<FilterCommand>();
-                            checkBoxList = filterPluginsCheckBoxList;
-                            plugInList = filterPluginList;
-                        } break;
+                        filterCommandList = new List<FilterCommand>();
+                        checkBoxList = filterPluginsCheckBoxList;
+                        plugInList = filterPluginList;
+                        break;
                     case 1:
-                        {
-                            maskCommandList = new List<MaskCommand>();
-                            checkBoxList = maskPluginsCheckBoxList;
-                            plugInList = maskPluginList;
-                        } break;
+                        maskCommandList = new List<MaskCommand>();
+                        checkBoxList = maskPluginsCheckBoxList;
+                        plugInList = maskPluginList;
+                        break;
                     case 2:
+                        if (selectedIndices.Count == 1)
                         {
-                            if (selectedIndices.Count == 1)
-                            {
-                                return; // only one image selected
-                            }
-                            motionRecognitionCommandList = new List<MotionRecognitionCommand>();
-                            checkBoxList = motionRecognitionPluginsCheckBoxList;
-                            plugInList = motionRecognitionPluginList;
-                        } break;
+                            return; // only one image selected
+                        }
+                        motionRecognitionCommandList = new List<MotionRecognitionCommand>();
+                        checkBoxList = motionRecognitionPluginsCheckBoxList;
+                        plugInList = motionRecognitionPluginList;
+                        break;
                 }
 
                 bool anyItems = false;
@@ -485,33 +489,29 @@ namespace CIPP
             catch { }
         }
 
-        private void addImage(ProcessingImage processingImage, TaskTypeEnum taskType)
+        private void addImage(ProcessingImage processingImage, Task.Type taskType)
         {
-            try
+            if (this.processedImageListBox.InvokeRequired)
             {
-                if (this.processedImageListBox.InvokeRequired)
+                addImageCallback d = new addImageCallback(addImage);
+                this.Invoke(d, new object[] { processingImage, taskType });
+            }
+            else
+            {
+                switch (taskType)
                 {
-                    addImageCallback d = new addImageCallback(addImage);
-                    this.Invoke(d, new object[] { processingImage, taskType });
-                }
-                else
-                {
-                    if (taskType == TaskTypeEnum.filter)
-                    {
+                    case Task.Type.FILTER:
                         processedImageListBox.Items.Add(getNameOrDefault(processingImage));
                         processedImageList.Add(processingImage);
-                    }
-                    else
-                    {
-                        if (taskType == TaskTypeEnum.mask)
-                        {
-                            maskedImageListBox.Items.Add(getNameOrDefault(processingImage));
-                            maskedImageList.Add(processingImage);
-                        }
-                    }
+                        break;
+                    case Task.Type.MASK:
+                        maskedImageListBox.Items.Add(getNameOrDefault(processingImage));
+                        maskedImageList.Add(processingImage);
+                        break;
+                    default:
+                        throw new NotImplementedException();
                 }
             }
-            catch { }
         }
 
         private static String getNameOrDefault(ProcessingImage processingImage)
@@ -569,7 +569,7 @@ namespace CIPP
         {
             try
             {
-                if (this.processedImageListBox.InvokeRequired)
+                if (this.InvokeRequired)
                 {
                     numberChangedCallBack d = new numberChangedCallBack(numberChanged);
                     this.Invoke(d, new object[] { number, commandOrTask });

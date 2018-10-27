@@ -1215,14 +1215,14 @@ namespace ProcessingImageSDK
                 processingImage[i].sizeY = sizeY;
 
 
-                byte[,] al = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
+                byte[,] alpha = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
                 if (i == 0)
                 {
                     for (int y = 0; y < processingImage[i].sizeY; y++)
                     {
                         for (int x = 0; x < processingImage[i].sizeX; x++)
                         {
-                            al[y, x] = alpha[y, x];
+                            alpha[y, x] = this.alpha[y, x];
                         }
                     }
                 }
@@ -1232,24 +1232,24 @@ namespace ProcessingImageSDK
                     {
                         for (int x = 0; x < processingImage[i].sizeX; x++)
                         {
-                            al[y, x] = alpha[y, x - imageDependencies.left + start];
+                            alpha[y, x] = this.alpha[y, x - imageDependencies.left + start];
                         }
                     }
                 }
 
-                processingImage[i].alpha = al;
+                processingImage[i].alpha = alpha;
 
                 if (grayscale)
                 {
                     processingImage[i].grayscale = true;
-                    byte[,] gr = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
+                    byte[,] gray = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
                     if (i == 0)
                     {
                         for (int y = 0; y < processingImage[i].sizeY; y++)
                         {
                             for (int x = 0; x < processingImage[i].sizeX; x++)
                             {
-                                gr[y, x] = gray[y, x];
+                                gray[y, x] = this.gray[y, x];
                             }
                         }
                     }
@@ -1259,11 +1259,11 @@ namespace ProcessingImageSDK
                         {
                             for (int x = 0; x < processingImage[i].sizeX; x++)
                             {
-                                gr[y, x] = gray[y, x - imageDependencies.left + start];
+                                gray[y, x] = this.gray[y, x - imageDependencies.left + start];
                             }
                         }
                     }
-                    processingImage[i].gray = gr;
+                    processingImage[i].gray = gray;
                 }
                 else
                 {
@@ -1277,9 +1277,9 @@ namespace ProcessingImageSDK
                         {
                             for (int x = 0; x < processingImage[i].sizeX; x++)
                             {
-                                red[y, x] = red[y, x];
-                                green[y, x] = green[y, x];
-                                blue[y, x] = blue[y, x];
+                                red[y, x] = this.red[y, x];
+                                green[y, x] = this.green[y, x];
+                                blue[y, x] = this.blue[y, x];
                             }
                         }
                     }
@@ -1289,9 +1289,9 @@ namespace ProcessingImageSDK
                         {
                             for (int x = 0; x < processingImage[i].sizeX; x++)
                             {
-                                red[y, x] = red[y, x - imageDependencies.left + start];
-                                green[y, x] = green[y, x - imageDependencies.left + start];
-                                blue[y, x] = blue[y, x - imageDependencies.left + start];
+                                red[y, x] = this.red[y, x - imageDependencies.left + start];
+                                green[y, x] = this.green[y, x - imageDependencies.left + start];
+                                blue[y, x] = this.blue[y, x - imageDependencies.left + start];
                             }
                         }
                     }

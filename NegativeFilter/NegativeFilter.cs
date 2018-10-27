@@ -34,41 +34,40 @@ namespace Plugins.Filters.NegativeFilter
             outputImage.setName("");
             if (!inputImage.grayscale)
             {
-                byte[,] r = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
-                byte[,] g = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
-                byte[,] b = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
+                byte[,] red = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
+                byte[,] green = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
+                byte[,] blue = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
 
-                byte[,] ir = inputImage.getRed();
-                byte[,] ig = inputImage.getGreen();
-                byte[,] ib = inputImage.getBlue();
+                byte[,] inputRed = inputImage.getRed();
+                byte[,] inputGreen = inputImage.getGreen();
+                byte[,] inputBlue = inputImage.getBlue();
 
                 for (int i = 0; i < outputImage.getSizeY(); i++)
                 {
                     for (int j = 0; j < outputImage.getSizeX(); j++)
                     {
-                        r[i, j] = (byte)(255 - ir[i, j]);
-                        g[i, j] = (byte)(255 - ig[i, j]);
-                        b[i, j] = (byte)(255 - ib[i, j]);
+                        red[i, j] = (byte)(255 - inputRed[i, j]);
+                        green[i, j] = (byte)(255 - inputGreen[i, j]);
+                        blue[i, j] = (byte)(255 - inputBlue[i, j]);
                     }
                 }
-                outputImage.setRed(r);
-                outputImage.setGreen(g);
-                outputImage.setBlue(b);
+                outputImage.setRed(red);
+                outputImage.setGreen(green);
+                outputImage.setBlue(blue);
             }
             else
             {
                 byte[,] gray = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
-                byte[,] ig = inputImage.getGray();
+                byte[,] inputGray = inputImage.getGray();
                 for (int i = 0; i < outputImage.getSizeY(); i++)
                 {
                     for (int j = 0; j < outputImage.getSizeX(); j++)
                     {
-                        gray[i, j] = (byte)(255 - ig[i, j]);
+                        gray[i, j] = (byte)(255 - inputGray[i, j]);
                     }
                 }
                 outputImage.setGray(gray);
             }
-
             return outputImage;
         }
 

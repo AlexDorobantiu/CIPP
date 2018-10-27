@@ -29,7 +29,8 @@ namespace CIPPProtocols.Tasks
 
         public MotionRecognitionTask(int id, int motionId, int blockSize, int searchDistance, string pluginFullName, object[] parameters, ProcessingImage frame, ProcessingImage nextFrame)
         {
-            this.taskType = TaskTypeEnum.motionRecognition;
+            this.type = Type.MOTION_RECOGNITION;
+            this.status = Status.NOT_TAKEN;
             this.id = id;
             this.motionId = motionId;
             this.blockSize = blockSize;
@@ -46,6 +47,16 @@ namespace CIPPProtocols.Tasks
 
         public void join(MotionRecognitionTask subTask)
         {
+            if (status == Status.FAILED)
+            {
+                return;
+            }
+            if (subTask.status == Status.FAILED)
+            {
+                status = Status.FAILED;
+                return;
+            }
+
             int imagePosition = subTask.frame.getPositionX();
             if (imagePosition == 0)
             {
@@ -59,7 +70,7 @@ namespace CIPPProtocols.Tasks
             subParts--;
             if (subParts == 0)
             {
-                finishedSuccessfully = true;
+                this.status = Status.SUCCESSFUL;
             }
         }
     }
