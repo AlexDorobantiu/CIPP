@@ -4,15 +4,15 @@ using System.Text;
 using System.Reflection;
 using ParametersSDK;
 
-namespace CIPPProtocols
+namespace CIPPProtocols.Plugin
 {
     public class PluginInfo
     {
-        public string displayName;
-        public string fullName;
-        public Assembly assembly;
-        public Type type;
-        public List<IParameters> parameters;
+        public readonly string displayName;
+        public readonly string fullName;
+        public readonly Assembly assembly;
+        public readonly Type type;
+        public readonly List<IParameters> parameters;
 
         public PluginInfo(string displayName, string fullName, Assembly assembly, Type type, List<IParameters> parameters)
         {

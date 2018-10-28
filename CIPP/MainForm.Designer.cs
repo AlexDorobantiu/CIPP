@@ -33,9 +33,9 @@ namespace CIPP
             this.topMenu = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tutorialToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.processingAreaGroup = new System.Windows.Forms.GroupBox();
             this.updatePlugins = new System.Windows.Forms.Button();
             this.processingTab = new System.Windows.Forms.TabControl();
@@ -139,7 +139,7 @@ namespace CIPP
             this.topMenu.BackColor = System.Drawing.SystemColors.ControlDark;
             this.topMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.aboutToolStripMenuItem});
+            this.helpToolStripMenuItem});
             this.topMenu.Location = new System.Drawing.Point(0, 0);
             this.topMenu.Name = "topMenu";
             this.topMenu.Size = new System.Drawing.Size(853, 24);
@@ -161,14 +161,14 @@ namespace CIPP
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
-            // aboutToolStripMenuItem
+            // helpToolStripMenuItem
             // 
-            this.aboutToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tutorialToolStripMenuItem,
-            this.aboutToolStripMenuItem1});
-            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
-            this.aboutToolStripMenuItem.Text = "Help";
+            this.aboutToolStripMenuItem});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
+            this.helpToolStripMenuItem.Text = "Help";
             // 
             // tutorialToolStripMenuItem
             // 
@@ -177,12 +177,12 @@ namespace CIPP
             this.tutorialToolStripMenuItem.Text = "Tutorial";
             this.tutorialToolStripMenuItem.Click += new System.EventHandler(this.tutorialToolStripMenuItem_Click);
             // 
-            // aboutToolStripMenuItem1
+            // aboutToolStripMenuItem
             // 
-            this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
-            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(110, 22);
-            this.aboutToolStripMenuItem1.Text = "About";
-            this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem1_Click);
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
+            this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // processingAreaGroup
             // 
@@ -597,10 +597,11 @@ namespace CIPP
             this.originalImageListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.originalImageListBox.Size = new System.Drawing.Size(207, 206);
             this.originalImageListBox.TabIndex = 0;
-            this.originalImageListBox.SelectedIndexChanged += new System.EventHandler(this.originalImageList_SelectedIndexChanged);
+            this.originalImageListBox.SelectedIndexChanged += new System.EventHandler(this.imageListBox_SelectedIndexChanged);
             this.originalImageListBox.DragDrop += new System.Windows.Forms.DragEventHandler(this.originalImageList_DragDrop);
             this.originalImageListBox.DragEnter += new System.Windows.Forms.DragEventHandler(this.originalImageList_DragEnter);
-            this.originalImageListBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ImageListBox_KeyUp);
+            this.originalImageListBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.imageListBox_KeyPress);
+            this.originalImageListBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.imageListBox_KeyUp);
             // 
             // processedImageTab
             // 
@@ -617,15 +618,16 @@ namespace CIPP
             this.processedImageListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.processedImageListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.processedImageListBox.FormattingEnabled = true;
+            this.processedImageListBox.HorizontalScrollbar = true;
             this.processedImageListBox.IntegralHeight = false;
             this.processedImageListBox.Location = new System.Drawing.Point(0, 0);
-            this.processedImageListBox.Margin = new System.Windows.Forms.Padding(0);
             this.processedImageListBox.Name = "processedImageListBox";
             this.processedImageListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.processedImageListBox.Size = new System.Drawing.Size(207, 206);
             this.processedImageListBox.TabIndex = 1;
-            this.processedImageListBox.SelectedIndexChanged += new System.EventHandler(this.originalImageList_SelectedIndexChanged);
-            this.processedImageListBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ImageListBox_KeyUp);
+            this.processedImageListBox.SelectedIndexChanged += new System.EventHandler(this.imageListBox_SelectedIndexChanged);
+            this.processedImageListBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.imageListBox_KeyPress);
+            this.processedImageListBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.imageListBox_KeyUp);
             // 
             // maskedImageTab
             // 
@@ -641,14 +643,16 @@ namespace CIPP
             this.maskedImageListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.maskedImageListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.maskedImageListBox.FormattingEnabled = true;
+            this.maskedImageListBox.HorizontalScrollbar = true;
             this.maskedImageListBox.IntegralHeight = false;
             this.maskedImageListBox.Location = new System.Drawing.Point(0, 0);
             this.maskedImageListBox.Name = "maskedImageListBox";
             this.maskedImageListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.maskedImageListBox.Size = new System.Drawing.Size(207, 206);
             this.maskedImageListBox.TabIndex = 1;
-            this.maskedImageListBox.SelectedIndexChanged += new System.EventHandler(this.originalImageList_SelectedIndexChanged);
-            this.maskedImageListBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ImageListBox_KeyUp);
+            this.maskedImageListBox.SelectedIndexChanged += new System.EventHandler(this.imageListBox_SelectedIndexChanged);
+            this.maskedImageListBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.imageListBox_KeyPress);
+            this.maskedImageListBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.imageListBox_KeyUp);
             // 
             // scanedImageTab
             // 
@@ -664,6 +668,7 @@ namespace CIPP
             this.motionListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.motionListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.motionListBox.FormattingEnabled = true;
+            this.motionListBox.HorizontalScrollbar = true;
             this.motionListBox.IntegralHeight = false;
             this.motionListBox.Location = new System.Drawing.Point(0, 0);
             this.motionListBox.Margin = new System.Windows.Forms.Padding(0);
@@ -1091,10 +1096,10 @@ namespace CIPP
 
         private System.Windows.Forms.MenuStrip topMenu;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem tutorialToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.GroupBox processingAreaGroup;
         private System.Windows.Forms.GroupBox imageAreaGroup;
         private System.Windows.Forms.GroupBox workerControlAreaGroup;

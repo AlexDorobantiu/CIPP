@@ -5,10 +5,8 @@ using ProcessingImageSDK;
 
 namespace CIPPProtocols.Commands
 {
-    public class MaskCommand
+    public class MaskCommand : Command
     {
-        public string pluginFullName;
-        public object[] arguments;
         public ProcessingImage processingImage;
 
         public MaskCommand(string pluginFullName, object[] arguments, ProcessingImage processingImage)

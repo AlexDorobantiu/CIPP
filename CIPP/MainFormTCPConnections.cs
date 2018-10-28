@@ -16,10 +16,6 @@ namespace CIPP
             if (addConnectionForm.ShowDialog() == DialogResult.OK)
             {
                 TCPProxy newproxy = new TCPProxy(addConnectionForm.ip, addConnectionForm.port);
-                newproxy.messagePosted += new EventHandler<StringEventArgs>(messagePosted);
-                newproxy.workerPosted += new EventHandler<WorkerEventArgs>(workerPosted);
-                newproxy.taskRequestReceivedEventHandler += new EventHandler(proxyRequestReceived);
-                newproxy.resultsReceivedEventHandler += new ResultReceivedEventHandler(proxyResultReceived);
                 newproxy.connectionLostEventHandler += new EventHandler(connectionLost);
                 TCPConnections.Add(newproxy);
                 TCPConnectionsListBox.Items.Add(newproxy.getNameAndStatus());
@@ -67,10 +63,6 @@ namespace CIPP
                     {
                         string[] vals = sr.ReadLine().Split(',');
                         TCPProxy newproxy = new TCPProxy(vals[0], int.Parse(vals[1]));
-                        newproxy.messagePosted += new EventHandler<StringEventArgs>(messagePosted);
-                        newproxy.workerPosted += new EventHandler<WorkerEventArgs>(workerPosted);
-                        newproxy.taskRequestReceivedEventHandler += new EventHandler(proxyRequestReceived);
-                        newproxy.resultsReceivedEventHandler += new ResultReceivedEventHandler(proxyResultReceived);
                         newproxy.connectionLostEventHandler += new EventHandler(connectionLost);
                         TCPConnections.Add(newproxy);
                         TCPConnectionsListBox.Items.Add(newproxy.getNameAndStatus());
@@ -94,17 +86,7 @@ namespace CIPP
             }
             catch { }
         }
-
-        private void messagePosted(object sender, StringEventArgs e)
-        {
-            addMessage(e.message);         
-        }
-
-        private void workerPosted(object sender, WorkerEventArgs e)
-        {
-            displayWorker(e.name, !e.left);
-        }
-
+        
         private void connectionLost(object sender, EventArgs e)
         {
             updateTCPList((TCPProxy)sender);

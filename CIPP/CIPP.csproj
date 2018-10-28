@@ -84,6 +84,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WorkManagement\WorkManagerCallbacks.cs" />
     <EmbeddedResource Include="AboutBox.resx">
       <SubType>Designer</SubType>
       <DependentUpon>AboutBox.cs</DependentUpon>
@@ -140,7 +141,7 @@
     <Compile Include="ViewMotionForm.Designer.cs">
       <DependentUpon>ViewMotionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="WorkManager.cs" />
+    <Compile Include="WorkManagement\WorkManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FilterSDK\FilterSDK.csproj">

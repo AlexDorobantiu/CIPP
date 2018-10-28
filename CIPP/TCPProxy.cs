@@ -14,8 +14,37 @@ using ProcessingImageSDK.MotionVectors;
 
 namespace CIPP
 {
-    public class TCPProxy
+    class TCPProxy
     {
+        public class ResultReceivedEventArgs : EventArgs
+        {
+            public readonly Task task;
+            public ResultReceivedEventArgs(Task task)
+            {
+                this.task = task;
+            }
+        }
+
+        public class StringEventArgs : EventArgs
+        {
+            public readonly string message;
+            public StringEventArgs(string message)
+            {
+                this.message = message;
+            }
+        }
+
+        public class WorkerEventArgs : EventArgs
+        {
+            public readonly string name;
+            public readonly bool left;
+            public WorkerEventArgs(string name, bool left)
+            {
+                this.name = name;
+                this.left = left;
+            }
+        }
+
         public event ResultReceivedEventHandler resultsReceivedEventHandler;
         public event EventHandler taskRequestReceivedEventHandler;
         public event EventHandler<StringEventArgs> messagePosted;
@@ -276,37 +305,6 @@ namespace CIPP
                 return hostname + ", " + port + ", connected";
             }
             return hostname + ", " + port + ", not connected";
-        }
-    }
-
-    public delegate void ResultReceivedEventHandler(object sender, ResultReceivedEventArgs e);
-
-    public class ResultReceivedEventArgs : EventArgs
-    {
-        public readonly Task task;
-        public ResultReceivedEventArgs(Task task)
-        {
-            this.task = task;
-        }
-    }
-
-    public class StringEventArgs : EventArgs
-    {
-        public readonly string message;
-        public StringEventArgs(string message)
-        {
-            this.message = message;
-        }
-    }
-
-    public class WorkerEventArgs : EventArgs
-    {
-        public readonly string name;
-        public readonly bool left;
-        public WorkerEventArgs(string name, bool left)
-        {
-            this.name = name;
-            this.left = left;
         }
     }
 }

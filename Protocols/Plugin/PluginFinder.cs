@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CIPPProtocols
+namespace CIPPProtocols.Plugin
 {
     public class PluginFinder
     {
+
         private Dictionary<Task.Type, Dictionary<string, PluginInfo>> map;
 
         public PluginFinder(List<PluginInfo> filterPluginList, List<PluginInfo> maskPluginList, List<PluginInfo> motionRecognitionPluginList)

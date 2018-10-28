@@ -9,6 +9,7 @@ using System.Collections;
 using System.IO;
 
 using CIPPProtocols;
+using CIPPProtocols.Plugin;
 using ProcessingImageSDK;
 using Plugins.Filters;
 using Plugins.Masks;
@@ -18,10 +19,12 @@ namespace CIPP
 {
     public partial class CIPPForm : Form
     {
+        private const string tutorialsUrl = "https://alex.dorobantiu.ro";
+
         int totalTime;
         int time;
 
-        ProcessingImage visibleImage;
+        private ProcessingImage visibleImage;
 
         private List<ProcessingImage> originalImageList = new List<ProcessingImage>();
         private List<ProcessingImage> processedImageList = new List<ProcessingImage>();
@@ -91,26 +94,24 @@ namespace CIPP
             {
                 //original image tab
                 case 0:
-                    {
-                        visibleImagesList = originalImageList;
-                        visibleListBox = originalImageListBox;
-                    } break;
+                    visibleImagesList = originalImageList;
+                    visibleListBox = originalImageListBox;
+                    break;
                 //processed image tab
                 case 1:
-                    {
-                        visibleImagesList = processedImageList;
-                        visibleListBox = processedImageListBox;
-                    } break;
+                    visibleImagesList = processedImageList;
+                    visibleListBox = processedImageListBox;
+                    break;
                 //masked image tab
                 case 2:
-                    {
-                        visibleImagesList = maskedImageList;
-                        visibleListBox = maskedImageListBox;
-                    } break;
+                    visibleImagesList = maskedImageList;
+                    visibleListBox = maskedImageListBox;
+                    break;
                 //scaned image tab
                 case 3:
-                    {
-                    } break;
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
         }
 
@@ -134,7 +135,7 @@ namespace CIPP
             GC.Collect();
         }
 
-        private void originalImageList_SelectedIndexChanged(object sender, EventArgs e)
+        private void imageListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             visibleImage = null;
             previewPicture.Image = null;
@@ -149,7 +150,7 @@ namespace CIPP
 
             if (visibleImagesList != null && visibleListBox != null && visibleListBox.SelectedItems.Count == 1)
             {
-                visibleImage = (ProcessingImage)visibleImagesList[visibleListBox.SelectedIndex];
+                visibleImage = visibleImagesList[visibleListBox.SelectedIndex];
             }
             updateVisibleImage();
         }
@@ -160,40 +161,38 @@ namespace CIPP
             {
                 //original image tab
                 case 0:
+                    while (originalImageListBox.SelectedItems.Count > 0)
                     {
-                        while (originalImageListBox.SelectedItems.Count > 0)
-                        {
-                            originalImageList.RemoveAt(originalImageListBox.SelectedIndices[0]);
-                            originalImageListBox.Items.RemoveAt(originalImageListBox.SelectedIndices[0]);
-                        }
-                    } break;
+                        originalImageList.RemoveAt(originalImageListBox.SelectedIndices[0]);
+                        originalImageListBox.Items.RemoveAt(originalImageListBox.SelectedIndices[0]);
+                    }
+                    break;
                 //processed image tab
                 case 1:
+                    while (processedImageListBox.SelectedItems.Count > 0)
                     {
-                        while (processedImageListBox.SelectedItems.Count > 0)
-                        {
-                            processedImageList.RemoveAt(processedImageListBox.SelectedIndices[0]);
-                            processedImageListBox.Items.RemoveAt(processedImageListBox.SelectedIndices[0]);
-                        }
-                    } break;
+                        processedImageList.RemoveAt(processedImageListBox.SelectedIndices[0]);
+                        processedImageListBox.Items.RemoveAt(processedImageListBox.SelectedIndices[0]);
+                    }
+                    break;
                 //masked image tab
                 case 2:
+                    while (maskedImageListBox.SelectedItems.Count > 0)
                     {
-                        while (maskedImageListBox.SelectedItems.Count > 0)
-                        {
-                            maskedImageList.RemoveAt(maskedImageListBox.SelectedIndices[0]);
-                            maskedImageListBox.Items.RemoveAt(maskedImageListBox.SelectedIndices[0]);
-                        }
-                    } break;
+                        maskedImageList.RemoveAt(maskedImageListBox.SelectedIndices[0]);
+                        maskedImageListBox.Items.RemoveAt(maskedImageListBox.SelectedIndices[0]);
+                    }
+                    break;
                 //scaned image tab
                 case 3:
+                    while (motionListBox.SelectedItems.Count > 0)
                     {
-                        while (motionListBox.SelectedItems.Count > 0)
-                        {
-                            motionList.RemoveAt(motionListBox.SelectedIndices[0]);
-                            motionListBox.Items.RemoveAt(motionListBox.SelectedIndices[0]);
-                        }
-                    } break;
+                        motionList.RemoveAt(motionListBox.SelectedIndices[0]);
+                        motionListBox.Items.RemoveAt(motionListBox.SelectedIndices[0]);
+                    }
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
             GC.Collect();
         }
@@ -333,35 +332,31 @@ namespace CIPP
             {
                 //original image tab
                 case 0:
-                    {
-                        addImageButton.Enabled = true;
-                        viewImageButton.Enabled = true;
-                        previewMotionButton.Enabled = false;
-                    } break;
+                    addImageButton.Enabled = true;
+                    viewImageButton.Enabled = true;
+                    previewMotionButton.Enabled = false;
+                    break;
                 //processed image tab
                 case 1:
-                    {
-                        addImageButton.Enabled = false;
-                        viewImageButton.Enabled = true;
-                        previewMotionButton.Enabled = false;
-                    } break;
+                    addImageButton.Enabled = false;
+                    viewImageButton.Enabled = true;
+                    previewMotionButton.Enabled = false;
+                    break;
                 //masked image tab
                 case 2:
-                    {
-                        addImageButton.Enabled = false;
-                        viewImageButton.Enabled = true;
-                        previewMotionButton.Enabled = false;
-                    } break;
+                    addImageButton.Enabled = false;
+                    viewImageButton.Enabled = true;
+                    previewMotionButton.Enabled = false;
+                    break;
                 //scaned image tab
                 case 3:
-                    {
-                        //startButton.Enabled = false;
-                        addImageButton.Enabled = false;
-                        viewImageButton.Enabled = false;
-                        previewMotionButton.Enabled = true;
-                    } break;
+                    //startButton.Enabled = false;
+                    addImageButton.Enabled = false;
+                    viewImageButton.Enabled = false;
+                    previewMotionButton.Enabled = true;
+                    break;
             }
-            originalImageList_SelectedIndexChanged(sender, e);
+            imageListBox_SelectedIndexChanged(sender, e);
         }
 
         private void viewImageButton_Click(object sender, EventArgs e)
@@ -388,7 +383,7 @@ namespace CIPP
             Application.Exit();
         }
 
-        private void aboutToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AboutBox aboutBox = new AboutBox();
             aboutBox.ShowDialog();
@@ -432,7 +427,7 @@ namespace CIPP
         {
             for (int i = 0; i < motionListBox.SelectedIndices.Count; i++)
             {
-                Form form = new ViewMotionForm((Motion)(motionList[motionListBox.SelectedIndices[i]]));
+                Form form = new ViewMotionForm(motionList[motionListBox.SelectedIndices[i]]);
                 form.Show();
                 form.Focus();
             }
@@ -455,9 +450,12 @@ namespace CIPP
         {
             try
             {
-                System.Diagnostics.Process.Start("http://www.dorobantiu.ro");
+                System.Diagnostics.Process.Start(tutorialsUrl);
             }
-            catch { }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message);
+            }
         }
 
         private void previewPicture_SizeChanged(object sender, EventArgs e)
@@ -470,10 +468,10 @@ namespace CIPP
             viewImageButton_Click(sender, e);
         }
 
-        private void ImageListBox_KeyUp(object sender, KeyEventArgs e)
-        {
+        private void imageListBox_KeyUp(object sender, KeyEventArgs e)
+        {            
             if (Keys.A.Equals(e.KeyCode) && Keys.Control.Equals(e.Modifiers))
-            {
+            {                
                 List<ProcessingImage> visibleImagesList = null;
                 ListBox visibleListBox = null;
                 getVisibleLists(ref visibleImagesList, ref visibleListBox);
@@ -482,8 +480,14 @@ namespace CIPP
                 {
                     visibleListBox.SetSelected(i, true);
                 }
-                visibleListBox.EndUpdate();
+                visibleListBox.EndUpdate();                
             }
+            e.Handled = true;
+        }
+
+        private void imageListBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.Handled = true;
         }
     }
 }

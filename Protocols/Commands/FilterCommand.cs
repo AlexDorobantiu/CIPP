@@ -5,10 +5,8 @@ using ProcessingImageSDK;
 
 namespace CIPPProtocols.Commands
 {
-    public class FilterCommand
+    public class FilterCommand : Command
     {
-        public string pluginFullName;
-        public object[] arguments;
         public ProcessingImage processingImage;
 
         public FilterCommand(string pluginFullName, object[] arguments, ProcessingImage processingImage)

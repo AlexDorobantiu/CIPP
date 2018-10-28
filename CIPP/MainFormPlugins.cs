@@ -5,6 +5,7 @@ using System.IO;
 using System.Windows.Forms;
 
 using CIPPProtocols;
+using CIPPProtocols.Plugin;
 using ParametersSDK;
 using Plugins.Filters;
 using Plugins.Masks;
@@ -53,13 +54,15 @@ namespace CIPP
                             currentCheckBoxList = maskPluginsCheckBoxList;
                         } break;
                     // motion recognition plugins tab
-                    default:
+                    case 2:
                         {
                             motionRecognitionPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, MOTION_RECOGNITION_RELATIVE_PATH), typeof(IMotionRecognition));
                             currentList = motionRecognitionPluginList;
                             currentFlowLayoutPanel = flowLayoutPanelMotionRecognitionPlugins;
                             currentCheckBoxList = motionRecognitionPluginsCheckBoxList;
                         } break;
+                    default:
+                        throw new NotImplementedException();
                 }
 
                 currentFlowLayoutPanel.Controls.Clear();

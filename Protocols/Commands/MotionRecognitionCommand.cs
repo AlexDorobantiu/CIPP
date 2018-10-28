@@ -5,10 +5,8 @@ using ProcessingImageSDK;
 
 namespace CIPPProtocols.Commands
 {
-    public class MotionRecognitionCommand
+    public class MotionRecognitionCommand : Command
     {
-        public string pluginFullName;
-        public object[] arguments;
         public List<ProcessingImage> processingImageList;
 
         public MotionRecognitionCommand(string pluginFullName, object[] arguments, List<ProcessingImage> processingImageList)

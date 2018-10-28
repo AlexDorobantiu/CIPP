@@ -6,6 +6,7 @@ using System.Threading;
 using System.Reflection;
 
 using CIPPProtocols;
+using CIPPProtocols.Plugin;
 using ProcessingImageSDK;
 using Plugins.Filters;
 using Plugins.Masks;

@@ -9,7 +9,7 @@ using Plugins.Filters;
 using Plugins.Masks;
 using Plugins.MotionRecognition;
 
-namespace CIPPProtocols
+namespace CIPPProtocols.Plugin
 {
     public class PluginHelper
     {

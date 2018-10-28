@@ -40,12 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="RequestTypeEnum.cs" />
+    <Compile Include="Command.cs" />
     <Compile Include="Commands\FilterCommand.cs" />
     <Compile Include="Commands\MaskCommand.cs" />
     <Compile Include="Commands\MotionRecognitionCommand.cs" />
-    <Compile Include="PluginFinder.cs" />
-    <Compile Include="PluginInfo.cs" />
+    <Compile Include="Plugin\PluginFinder.cs" />
+    <Compile Include="Plugin\PluginInfo.cs" />
     <Compile Include="ResultPackage.cs" />
     <Compile Include="Tasks\FilterTask.cs" />
     <Compile Include="GranularityTypeEnum.cs" />
@@ -53,7 +53,7 @@
     <Compile Include="Tasks\MotionRecognitionTask.cs" />
     <Compile Include="Task.cs" />
     <Compile Include="IdGenerator.cs" />
-    <Compile Include="PluginHelper.cs" />
+    <Compile Include="Plugin\PluginHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransmissionFlagsEnum.cs" />
   </ItemGroup>

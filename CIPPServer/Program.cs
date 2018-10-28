@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Threading;
 
 using CIPPProtocols;
+using CIPPProtocols.Plugin;
 using Plugins.Filters;
 using Plugins.Masks;
 using Plugins.MotionRecognition;
@@ -17,6 +18,10 @@ namespace CIPPServer
     {
         public const int defaultPort = 6050;
         public const int waitTimeMilliseconds = 5000;
+
+        private const string FILTERS_RELATIVE_PATH = @"plugins\filters";
+        private const string MASKS_RELATIVE_PATH = @"plugins\masks";
+        private const string MOTION_RECOGNITION_RELATIVE_PATH = @"plugins\motionrecognition";
 
         private const string listeningPortsFilename = "listening_ports.txt";
         public static int[] listeningPorts;
@@ -97,9 +102,9 @@ namespace CIPPServer
         {
             try
             {
-                List<PluginInfo> filterPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\filters"), typeof(IFilter));
-                List<PluginInfo> maskPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\masks"), typeof(IMask));
-                List<PluginInfo> motionRecognitionPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, @"plugins\motionrecognition"), typeof(IMotionRecognition));
+                List<PluginInfo> filterPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, FILTERS_RELATIVE_PATH), typeof(IFilter));
+                List<PluginInfo> maskPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, MASKS_RELATIVE_PATH), typeof(IMask));
+                List<PluginInfo> motionRecognitionPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, MOTION_RECOGNITION_RELATIVE_PATH), typeof(IMotionRecognition));
                 pluginFinder = new PluginFinder(filterPluginList, maskPluginList, motionRecognitionPluginList);
             }
             catch

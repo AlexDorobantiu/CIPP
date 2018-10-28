@@ -4,9 +4,9 @@ using System.Text;
 
 namespace CIPPProtocols
 {
-    public enum RequestTypeEnum
+    public abstract class Command
     {
-        local,
-        lan
+        public string pluginFullName;
+        public object[] arguments;
     }
 }
