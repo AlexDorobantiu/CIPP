@@ -1,19 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.Collections;
 using System.IO;
-
-using CIPPProtocols;
+using System.Windows.Forms;
+using CIPP.WorkManagement;
 using CIPPProtocols.Plugin;
 using ProcessingImageSDK;
-using Plugins.Filters;
-using Plugins.Masks;
-using Plugins.MotionRecognition;
 
 namespace CIPP
 {

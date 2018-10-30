@@ -12,7 +12,7 @@ using ProcessingImageSDK;
 using CIPPProtocols.Tasks;
 using ProcessingImageSDK.MotionVectors;
 
-namespace CIPP
+namespace CIPP.WorkManagement
 {
     class TcpProxy
     {

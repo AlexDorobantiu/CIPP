@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using ProcessingImageSDK;
+using System.IO;
 
 namespace CIPP
 {
@@ -135,10 +136,16 @@ namespace CIPP
 
         private void checkerCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (!loaded) return;
+            if (!loaded)
+            {
+                return;
+            }
             try
             {
-                if (checkerCheckBox.Checked) this.piBox.BackgroundImage = new Bitmap("checkers.png");
+                if (checkerCheckBox.Checked)
+                {
+                    this.piBox.BackgroundImage = new Bitmap(Path.Combine("Resources", "checkers.png"));
+                }
                 else
                 {
                     this.piBox.BackgroundImage = null;

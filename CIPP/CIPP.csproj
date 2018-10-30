@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CIPP</RootNamespace>
     <AssemblyName>CIPP</AssemblyName>
-    <ApplicationIcon>logo.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\logo.ico</ApplicationIcon>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -128,7 +128,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="TcpProxy.cs" />
+    <Compile Include="WorkManagement\TcpProxy.cs" />
     <Compile Include="ViewImageForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -170,10 +170,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="checkers.png">
+    <Content Include="Resources\checkers.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="logo.ico" />
+    <Content Include="Resources\logo.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
