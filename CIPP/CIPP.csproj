@@ -128,7 +128,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="TCPProxy.cs" />
+    <Compile Include="TcpProxy.cs" />
     <Compile Include="ViewImageForm.cs">
       <SubType>Form</SubType>
     </Compile>

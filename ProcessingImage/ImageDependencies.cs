@@ -7,18 +7,10 @@ namespace ProcessingImageSDK
     [Serializable]
     public class ImageDependencies
     {
-        public int left;
-        public int right;
-        public int top;
-        public int bottom;
-
-        public ImageDependencies()
-        {
-            this.left = 0;
-            this.right = 0;
-            this.top = 0;
-            this.bottom = 0;
-        }
+        public readonly int left;
+        public readonly int right;
+        public readonly int top;
+        public readonly int bottom;
 
         public ImageDependencies(int left, int right, int top, int bottom)
         {

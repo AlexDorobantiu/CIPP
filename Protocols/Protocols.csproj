@@ -47,6 +47,7 @@
     <Compile Include="Plugin\PluginFinder.cs" />
     <Compile Include="Plugin\PluginInfo.cs" />
     <Compile Include="ResultPackage.cs" />
+    <Compile Include="TaskHelper.cs" />
     <Compile Include="Tasks\FilterTask.cs" />
     <Compile Include="GranularityTypeEnum.cs" />
     <Compile Include="Tasks\MaskTask.cs" />

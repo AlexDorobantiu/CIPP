@@ -11,37 +11,35 @@ namespace CIPPProtocols.Tasks
     public class MotionRecognitionTask : Task
     {
         [NonSerialized]
-        public int motionId;
+        public readonly int motionId;
 
-        public int blockSize;
-        public int searchDistance;
+        public readonly int blockSize;
+        public readonly int searchDistance;
 
         [NonSerialized]
         public int subParts;
         [NonSerialized]
-        public MotionRecognitionTask parent;
+        public readonly MotionRecognitionTask parent;
 
-        public ProcessingImage frame;
-        public ProcessingImage nextFrame;
+        public readonly ProcessingImage frame;
+        public readonly ProcessingImage nextFrame;
 
         [NonSerialized]
         public MotionVectorBase[,] result;
 
-        public MotionRecognitionTask(int id, int motionId, int blockSize, int searchDistance, string pluginFullName, object[] parameters, ProcessingImage frame, ProcessingImage nextFrame)
+        public MotionRecognitionTask(int id, int motionId, int blockSize, int searchDistance, string pluginFullName, object[] parameters, 
+            ProcessingImage frame, ProcessingImage nextFrame, MotionRecognitionTask parent)
+            : base(id, Type.MOTION_RECOGNITION, pluginFullName, parameters)
         {
-            this.type = Type.MOTION_RECOGNITION;
             this.status = Status.NOT_TAKEN;
-            this.id = id;
             this.motionId = motionId;
             this.blockSize = blockSize;
             this.searchDistance = searchDistance;
-            this.pluginFullName = pluginFullName;
-            this.parameters = parameters;
             this.frame = frame;
             this.nextFrame = nextFrame;
-
-            this.subParts = 0;
-            this.parent = null;
+            this.parent = parent;
+            
+            this.subParts = 0;            
             this.result = null;
         }
 
@@ -72,6 +70,11 @@ namespace CIPPProtocols.Tasks
             {
                 this.status = Status.SUCCESSFUL;
             }
+        }
+
+        public override object getResult()
+        {
+            return result;
         }
     }
 }

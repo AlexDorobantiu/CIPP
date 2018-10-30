@@ -12,9 +12,10 @@ namespace CIPP.WorkManagement
         public readonly addMotionCallback addMotion;
         public readonly jobFinishedCallback jobDone;
         public readonly numberChangedCallBack numberChanged;
+        public readonly updateTCPListCallback updateTcpList;
 
         public WorkManagerCallbacks(addMessageCallback addMessage, addWorkerItemCallback addWorkerItem, addImageCallback addImageResult,
-            addMotionCallback addMotion, jobFinishedCallback jobDone, numberChangedCallBack numberChanged)
+            addMotionCallback addMotion, jobFinishedCallback jobDone, numberChangedCallBack numberChanged, updateTCPListCallback updateTCPList)
         {
             this.addMessage = addMessage;
             this.addWorkerItem = addWorkerItem;
@@ -22,6 +23,7 @@ namespace CIPP.WorkManagement
             this.addMotion = addMotion;
             this.jobDone = jobDone;
             this.numberChanged = numberChanged;
+            this.updateTcpList = updateTCPList;
         }
     }
 }

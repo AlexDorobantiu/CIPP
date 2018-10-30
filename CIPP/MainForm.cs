@@ -40,7 +40,7 @@ namespace CIPP
         private List<CheckBox> maskPluginsCheckBoxList = new List<CheckBox>();
         private List<CheckBox> motionRecognitionPluginsCheckBoxList = new List<CheckBox>();
 
-        private List<TCPProxy> TCPConnections = new List<TCPProxy>();
+        private List<TcpProxy> TCPConnections = new List<TcpProxy>();
 
         /// <summary>
         /// Main application form
@@ -51,7 +51,7 @@ namespace CIPP
             localNumberOfWorkers.Value = Environment.ProcessorCount;
             localGranularityComboBox.SelectedIndex = 0;
 
-            TCPConnections = new List<TCPProxy>();
+            TCPConnections = new List<TcpProxy>();
             loadConnectionsFromDisk();
 
             pluginFinder = new PluginFinder(filterPluginList, maskPluginList, motionRecognitionPluginList);

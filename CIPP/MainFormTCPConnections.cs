@@ -15,8 +15,7 @@ namespace CIPP
             AddConnectionForm addConnectionForm = new AddConnectionForm();
             if (addConnectionForm.ShowDialog() == DialogResult.OK)
             {
-                TCPProxy newproxy = new TCPProxy(addConnectionForm.ip, addConnectionForm.port);
-                newproxy.connectionLostEventHandler += new EventHandler(connectionLost);
+                TcpProxy newproxy = new TcpProxy(addConnectionForm.ip, addConnectionForm.port);
                 TCPConnections.Add(newproxy);
                 TCPConnectionsListBox.Items.Add(newproxy.getNameAndStatus());
             }
@@ -62,15 +61,16 @@ namespace CIPP
                     while (!sr.EndOfStream)
                     {
                         string[] vals = sr.ReadLine().Split(',');
-                        TCPProxy newproxy = new TCPProxy(vals[0], int.Parse(vals[1]));
-                        newproxy.connectionLostEventHandler += new EventHandler(connectionLost);
+                        TcpProxy newproxy = new TcpProxy(vals[0], int.Parse(vals[1]));
                         TCPConnections.Add(newproxy);
                         TCPConnectionsListBox.Items.Add(newproxy.getNameAndStatus());
                     }
                     sr.Close();
                 }
             }
-            catch { }
+            catch
+            {
+            }
         }
 
         private void saveConnectionsToDisk()
@@ -78,18 +78,16 @@ namespace CIPP
             try
             {
                 StreamWriter streamWriter = new StreamWriter(connectionsFilename, false);
-                foreach (TCPProxy tcpProxy in TCPConnections)
+                foreach (TcpProxy tcpProxy in TCPConnections)
                 {
                     streamWriter.WriteLine(tcpProxy.hostname + ", " + tcpProxy.port);
                 }
                 streamWriter.Close();
             }
-            catch { }
+            catch
+            {
+            }
         }
-        
-        private void connectionLost(object sender, EventArgs e)
-        {
-            updateTCPList((TCPProxy)sender);
-        }
+
     }
 }

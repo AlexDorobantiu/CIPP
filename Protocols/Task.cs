@@ -21,12 +21,23 @@ namespace CIPPProtocols
             SUCCESSFUL,
             FAILED
         }
-        
-        public int id;
-        public Type type;
-        public string pluginFullName;
-        public object[] parameters;
+
+        public readonly int id;
+        public readonly Type type;
+        public readonly string pluginFullName;
+        public readonly object[] parameters;
         public Status status;
         public Exception exception;
+
+        public Task(int id, Type type, string pluginFullName, object[] parameters)
+        {
+            this.id = id;
+            this.type = type;
+            this.pluginFullName = pluginFullName;
+            this.parameters = parameters;
+        }
+
+        public abstract object getResult();
+
     }
 }

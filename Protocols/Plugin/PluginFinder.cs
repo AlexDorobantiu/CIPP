@@ -6,8 +6,11 @@ namespace CIPPProtocols.Plugin
 {
     public class PluginFinder
     {
+        private readonly Dictionary<Task.Type, Dictionary<string, PluginInfo>> map = new Dictionary<Task.Type, Dictionary<string, PluginInfo>>();
 
-        private Dictionary<Task.Type, Dictionary<string, PluginInfo>> map;
+        public PluginFinder()
+        {
+        }
 
         public PluginFinder(List<PluginInfo> filterPluginList, List<PluginInfo> maskPluginList, List<PluginInfo> motionRecognitionPluginList)
         {
@@ -16,7 +19,7 @@ namespace CIPPProtocols.Plugin
 
         public void updatePluginLists(List<PluginInfo> filterPluginList, List<PluginInfo> maskPluginList, List<PluginInfo> motionRecognitionPluginList)
         {
-            map = new Dictionary<Task.Type, Dictionary<string, PluginInfo>>();
+            map.Clear();
             map.Add(Task.Type.FILTER, new Dictionary<string, PluginInfo>());
             map.Add(Task.Type.MASK, new Dictionary<string, PluginInfo>());
             map.Add(Task.Type.MOTION_RECOGNITION, new Dictionary<string, PluginInfo>());

@@ -9,19 +9,20 @@ namespace CIPPProtocols.Tasks
     [Serializable]
     public class MaskTask : Task
     {
-        public ProcessingImage originalImage;
+        public readonly ProcessingImage originalImage;
         public byte[,] result;
 
         public MaskTask(int id, string pluginFullName, object[] parameters, ProcessingImage originalImage)
+            : base(id, Type.MASK, pluginFullName, parameters)
         {
-            this.type = Type.MASK;
             this.status = Status.NOT_TAKEN;
-
-            this.id = id;
-            this.pluginFullName = pluginFullName;
-            this.parameters = parameters;
             this.originalImage = originalImage;
             this.result = null;
+        }
+
+        public override object getResult()
+        {
+            return result;
         }
     }
 }

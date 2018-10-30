@@ -65,6 +65,12 @@ namespace CIPPServer
         {
             try
             {
+                if (!File.Exists(listeningPortsFilename))
+                {
+                    loadDefaultListeningPorts();
+                    return;
+                }
+
                 StreamReader sr = new StreamReader(listeningPortsFilename);
                 List<int> list_ports = new List<int>();
                 while (!sr.EndOfStream)
@@ -82,19 +88,16 @@ namespace CIPPServer
             }
             catch
             {
-                if (listeningPorts != null)
-                {
-                    if (listeningPorts.Length == 0)
-                    {
-                        listeningPorts = new int[1];
-                        listeningPorts[0] = defaultPort;
-                    }
-                }
-                else
-                {
-                    listeningPorts = new int[1];
-                    listeningPorts[0] = defaultPort;
-                }
+                loadDefaultListeningPorts();
+            }
+        }
+
+        static void loadDefaultListeningPorts()
+        {
+            if (listeningPorts == null || listeningPorts.Length == 0)
+            {
+                listeningPorts = new int[1];
+                listeningPorts[0] = defaultPort;
             }
         }
 

@@ -16,8 +16,8 @@ namespace CIPP
     delegate void numberChangedCallBack(int number, bool commandOrTask);
     delegate void addMotionCallback(Motion motion);
     delegate void jobFinishedCallback();
-    delegate void updateTCPListCallback(TCPProxy proxy);
-    delegate void ResultReceivedEventHandler(object sender, TCPProxy.ResultReceivedEventArgs e);
+    delegate void updateTCPListCallback(TcpProxy proxy);
+    delegate void ResultReceivedEventHandler(object sender, TcpProxy.ResultReceivedEventArgs e);
 
     partial class CIPPForm
     {
@@ -202,7 +202,7 @@ namespace CIPP
 
                 if (workManager == null)
                 {
-                    WorkManagerCallbacks callbacks = new WorkManagerCallbacks(addMessage, displayWorker, addImage, addMotion, jobFinished, numberChanged);
+                    WorkManagerCallbacks callbacks = new WorkManagerCallbacks(addMessage, displayWorker, addImage, addMotion, jobFinished, numberChanged, updateTCPList);
                     int numberOfLocalThreads = (int)localNumberOfWorkers.Value;
                     workManager = new WorkManager(numberOfLocalThreads, (GranularityTypeEnum)localGranularityComboBox.SelectedIndex, callbacks);
                     displayWorker("Manager - " + numberOfLocalThreads + " local threads", true);
@@ -268,7 +268,7 @@ namespace CIPP
             numberOfTasksValueLabel.Text = "0";
         }
 
-        private void updateTCPList(TCPProxy proxy)
+        private void updateTCPList(TcpProxy proxy)
         {
             if (this.TCPConnectionsListBox.InvokeRequired)
             {
@@ -277,13 +277,17 @@ namespace CIPP
             }
             else
             {
+                if (this.TCPConnectionsListBox.IsDisposed)
+                {
+                    return;
+                }
                 for (int i = 0; i < TCPConnections.Count; i++)
                 {
                     if (proxy == TCPConnections[i])
                     {
-                        if (TCPConnectionsListBox.Items[i] != null)
+                        if (this.TCPConnectionsListBox.Items[i] != null)
                         {
-                            TCPConnectionsListBox.Items[i] = proxy.getNameAndStatus();
+                            this.TCPConnectionsListBox.Items[i] = proxy.getNameAndStatus();
                             break;
                         }
                     }
@@ -300,6 +304,10 @@ namespace CIPP
             }
             else
             {
+                if (this.workersList.IsDisposed)
+                {
+                    return;
+                }
                 if (visible)
                 {
                     this.workersList.Items.Add(workerName);
@@ -322,6 +330,10 @@ namespace CIPP
                 }
                 else
                 {
+                    if (this.messagesList.IsDisposed)
+                    {
+                        return;
+                    }
                     messagesList.Items.Add(message);
                 }
             }
@@ -337,6 +349,10 @@ namespace CIPP
             }
             else
             {
+                if (this.processedImageListBox.IsDisposed)
+                {
+                    return;
+                }
                 switch (taskType)
                 {
                     case Task.Type.FILTER:
@@ -372,6 +388,10 @@ namespace CIPP
             }
             else
             {
+                if (this.motionListBox.IsDisposed)
+                {
+                    return;
+                }
                 motionListBox.Items.Add("Motion " + motion.id);
                 motionList.Add(motion);
             }
@@ -379,40 +399,24 @@ namespace CIPP
 
         private void jobFinished()
         {
-            if (this.InvokeRequired)
+            timer.Stop();
+            time = 0;
+            totalTimeValueLabel.Text = "" + totalTime;
+            if (allertFinishCheckBox.Checked)
             {
-                jobFinishedCallback d = new jobFinishedCallback(jobFinished);
-                this.Invoke(d, null);
-            }
-            else
-            {
-                timer.Stop();
-                time = 0;
-                totalTimeValueLabel.Text = "" + totalTime;
-                if (allertFinishCheckBox.Checked)
-                {
-                    MessageBox.Show("Finished!");
-                }
+                MessageBox.Show("Finished!");
             }
         }
 
         private void numberChanged(int number, bool commandOrTask)
         {
-            if (this.InvokeRequired)
+            if (commandOrTask)
             {
-                numberChangedCallBack d = new numberChangedCallBack(numberChanged);
-                this.Invoke(d, new object[] { number, commandOrTask });
+                numberOfTasksValueLabel.Text = "" + number;
             }
             else
             {
-                if (commandOrTask)
-                {
-                    numberOfTasksValueLabel.Text = "" + number;
-                }
-                else
-                {
-                    numberOfCommandsValueLabel.Text = "" + number;
-                }
+                numberOfCommandsValueLabel.Text = "" + number;
             }
         }
     }

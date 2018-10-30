@@ -13,23 +13,19 @@ namespace CIPPProtocols.Tasks
         public int subParts;
 
         [NonSerialized]
-        public FilterTask parent;
+        public readonly FilterTask parent;
 
-        public ProcessingImage originalImage;
+        public readonly ProcessingImage originalImage;
 
         [NonSerialized]
         public ProcessingImage result;
 
-        public FilterTask(int id, string pluginFullName, object[] parameters, ProcessingImage originalImage)
-        {
-            this.type = Type.FILTER;
+        public FilterTask(int id, string pluginFullName, object[] parameters, ProcessingImage originalImage, FilterTask parent)
+            : base(id, Type.FILTER, pluginFullName, parameters)
+        {           
             this.status = Status.NOT_TAKEN;
             subParts = 0;
-            parent = null;
-
-            this.id = id;
-            this.pluginFullName = pluginFullName;
-            this.parameters = parameters;
+            this.parent = parent;
             this.originalImage = originalImage;
             this.result = null;
         }
@@ -53,6 +49,11 @@ namespace CIPPProtocols.Tasks
             {
                 this.status = Status.SUCCESSFUL;
             }
+        }
+
+        public override object getResult()
+        {
+            return result;
         }
     }
 }

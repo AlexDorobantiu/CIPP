@@ -15,21 +15,20 @@ using CIPPProtocols.Tasks;
 
 namespace CIPPServer
 {
-    public class SimulationWorkerThread : IDisposable
+    public class TaskWorkerThread : IDisposable
     {
         public readonly Queue<Task> taskSource;
         public readonly ConnectionThread parentConnectionThread;
         private bool isPendingClosure = false;
 
-        private EventWaitHandle eventWaitHandleBetweenTasks = new AutoResetEvent(false);
+        private readonly EventWaitHandle eventWaitHandleBetweenTasks = new AutoResetEvent(false);
         private Thread thread;
 
-        public SimulationWorkerThread(ConnectionThread parent, string threadName)
+        public TaskWorkerThread(ConnectionThread parent, string threadName)
         {
             parentConnectionThread = parent;
             taskSource = parent.taskBuffer;
 
-            eventWaitHandleBetweenTasks = new AutoResetEvent(false);
             thread = new Thread(doWork);
             thread.Name = threadName;
             thread.Start();
@@ -87,37 +86,11 @@ namespace CIPPServer
                         else
                         {
                             Console.WriteLine("Working on " + task.type.ToString() + " task " + task.id);
+                            TaskHelper.solveTask(task, Program.pluginFinder);
+                            object result = task.getResult();
 
-                            PluginInfo pluginInfo = Program.pluginFinder.findPluginForTask(task);
-                            object result = null;
-                            try
-                            {
-                                switch (task.type)
-                                {
-                                    case Task.Type.FILTER:
-                                        {
-                                            FilterTask filterTask = (FilterTask)task;
-                                            IFilter filter = PluginHelper.createInstance<IFilter>(pluginInfo, filterTask.parameters);
-                                            result = filter.filter(filterTask.originalImage);
-                                        } break;
-                                    case Task.Type.MASK:
-                                        {
-                                            MaskTask maskTask = (MaskTask)task;
-                                            IMask mask = PluginHelper.createInstance<IMask>(pluginInfo, maskTask.parameters);
-                                            result = mask.mask(maskTask.originalImage);
-                                        } break;
-                                    case Task.Type.MOTION_RECOGNITION:
-                                        {
-                                            MotionRecognitionTask motionRecognitionTask = (MotionRecognitionTask)task;
-                                            IMotionRecognition motionRecognition = PluginHelper.createInstance<IMotionRecognition>(pluginInfo, motionRecognitionTask.parameters);
-                                            result = motionRecognition.scan(motionRecognitionTask.frame, motionRecognitionTask.nextFrame);
-                                        } break;
-                                }
-                            }
-                            catch { }
-
-                            parentConnectionThread.SendResult(task.id, result);
-                            parentConnectionThread.SendTaskRequest();
+                            parentConnectionThread.sendResult(task.id, result);
+                            parentConnectionThread.sendTaskRequest();
                         }
                     }
                     catch (ThreadAbortException)

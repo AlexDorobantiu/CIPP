@@ -15,23 +15,24 @@ namespace CIPP.WorkManagement
     class WorkManager
     {
         private const int threadStackSize = 8 * (1 << 20);
-        private static object locker = new object();
+        private readonly object locker = new object();
 
         private int commandsNumber = 0;
         private int tasksNumber = 0;
 
-        private Queue<FilterCommand> filterRequests = new Queue<FilterCommand>();
-        private Queue<MaskCommand> maskRequests = new Queue<MaskCommand>();
-        private Queue<MotionRecognitionCommand> motionRecognitionRequests = new Queue<MotionRecognitionCommand>();
+        private readonly Queue<FilterCommand> filterRequests = new Queue<FilterCommand>();
+        private readonly Queue<MaskCommand> maskRequests = new Queue<MaskCommand>();
+        private readonly Queue<MotionRecognitionCommand> motionRecognitionRequests = new Queue<MotionRecognitionCommand>();
 
-        private List<Task> taskList = new List<Task>();
-        private List<Motion> motionList = new List<Motion>();
-        
-        private int numberOfLocalThreads;
-        private GranularityTypeEnum granularityType;
-        private WorkManagerCallbacks callbacks;
+        private readonly Queue<Task> tasks = new Queue<Task>();
+        private readonly Dictionary<int, Task> activeTasks = new Dictionary<int, Task>();
+        private readonly Dictionary<int, Motion> activeMotions = new Dictionary<int, Motion>();
+
+        private readonly int numberOfLocalThreads;
+        private readonly GranularityTypeEnum granularityType;
+        private readonly WorkManagerCallbacks callbacks;
                
-        private PluginFinder pluginFinder;
+        private readonly PluginFinder pluginFinder = new PluginFinder();
 
         private Thread[] threads = null;
 
@@ -44,7 +45,10 @@ namespace CIPP.WorkManagement
 
         public void updateLists(List<PluginInfo> filterPluginList, List<PluginInfo> maskPluginList, List<PluginInfo> motionRecognitionPluginList)
         {
-            pluginFinder = new PluginFinder(filterPluginList, maskPluginList, motionRecognitionPluginList);
+            lock (pluginFinder)
+            {
+                pluginFinder.updatePluginLists(filterPluginList, maskPluginList, motionRecognitionPluginList);
+            }
         }
 
         public void updateCommandQueue(List<FilterCommand> filterRequests)
@@ -86,7 +90,7 @@ namespace CIPP.WorkManagement
             }
         }
         
-        public void startWorkers(List<TCPProxy> TCPConnections)
+        public void startWorkers(List<TcpProxy> TCPConnections)
         {
             if (numberOfLocalThreads > 0)
             {
@@ -116,20 +120,19 @@ namespace CIPP.WorkManagement
                 }
             }
 
-            foreach (TCPProxy proxy in TCPConnections)
+            foreach (TcpProxy proxy in TCPConnections)
             {
                 if (proxy.connected)
                 {
-                    proxy.taskRequestReceivedEventHandler += new EventHandler(proxyRequestReceived);
-                    proxy.resultsReceivedEventHandler += new ResultReceivedEventHandler(proxyResultReceived);
-                    proxy.messagePosted += new EventHandler<TCPProxy.StringEventArgs>(messagePosted);
-                    proxy.workerPosted += new EventHandler<TCPProxy.WorkerEventArgs>(workerPosted);
+                    // hackish remove and add
+                    removeHandlers(proxy);
+                    addHandlers(proxy);
                     proxy.startListening();
                 }
             }
         }
 
-        public void stopWorkers(List<TCPProxy> TCPConnections)
+        public void stopWorkers(List<TcpProxy> TCPConnections)
         {
             if (threads != null)
             {
@@ -139,104 +142,161 @@ namespace CIPP.WorkManagement
                 }
             }
 
-            foreach (TCPProxy proxy in TCPConnections)
-            {
+            foreach (TcpProxy proxy in TCPConnections)
+            {                
                 if (proxy.connected)
                 {
                     proxy.sendAbortRequest();
+                    removeHandlers(proxy);
                 }
             }
             threads = null;
         }
-        
+
+        private void addHandlers(TcpProxy proxy)
+        {
+            proxy.taskRequestReceivedEventHandler += new EventHandler(proxyRequestReceived);
+            proxy.resultsReceivedEventHandler += new ResultReceivedEventHandler(proxyResultReceived);
+            proxy.messagePosted += new EventHandler<TcpProxy.StringEventArgs>(messagePosted);
+            proxy.workerPosted += new EventHandler<TcpProxy.WorkerEventArgs>(workerPosted);
+            proxy.connectionLostEventHandler += new EventHandler(connectionLost);
+        }
+
+        private void removeHandlers(TcpProxy proxy)
+        {
+            proxy.taskRequestReceivedEventHandler -= new EventHandler(proxyRequestReceived);
+            proxy.resultsReceivedEventHandler -= new ResultReceivedEventHandler(proxyResultReceived);
+            proxy.messagePosted -= new EventHandler<TcpProxy.StringEventArgs>(messagePosted);
+            proxy.workerPosted -= new EventHandler<TcpProxy.WorkerEventArgs>(workerPosted);
+            proxy.connectionLostEventHandler -= new EventHandler(connectionLost);
+        }
+
         private Task extractFreeTask()
         {
-            lock (taskList)
+            lock (tasks)
             {
-                foreach (Task task in taskList)
+                if (tasks.Count > 0)
                 {
-                    if (task.status == Task.Status.NOT_TAKEN)
-                    {
-                        task.status = Task.Status.TAKEN;
-                        return task;
-                    }
+                    Task task = tasks.Dequeue();
+                    task.status = Task.Status.TAKEN;
+                    return task;
                 }
             }
             return null;
         }
 
+        private void addActiveTask(Task task, bool parentTask)
+        {
+            lock (activeTasks)
+            {
+                activeTasks.Add(task.id, task);
+                if (parentTask)
+                {
+                    tasksNumber++;
+                }
+            }
+        }
+
+        private void removeActiveTask(Task task)
+        {
+            lock (activeTasks)
+            {
+                if (activeTasks.ContainsKey(task.id))
+                {
+                    activeTasks.Remove(task.id);
+                    tasksNumber--;
+                }
+                else
+                {
+                    throw new Exception("Invalid task received");
+                }
+            }
+        }
+
+        private void addTask(Task task)
+        {
+            lock (tasks)
+            {
+                task.status = Task.Status.NOT_TAKEN;
+                tasks.Enqueue(task);
+                tasksNumber++;
+            }
+        }
+        
         private Task getTask()
         {
-            lock (locker)
+            Task task = extractFreeTask();
+            if (task != null)
             {
-                Task tempTask = extractFreeTask();
-                if (tempTask != null)
-                {
-                    return tempTask;
-                }
+                addActiveTask(task, false);
+                return task;
+            }
 
+            lock (filterRequests)
+            {
                 if (filterRequests.Count > 0)
                 {
                     FilterCommand filterCommand = filterRequests.Dequeue();
                     commandsNumber--;
                     callbacks.numberChanged(commandsNumber, false);
-                    tempTask = new FilterTask(IdGenerator.getID(), filterCommand.pluginFullName, filterCommand.arguments, filterCommand.processingImage);
+                    FilterTask tempTask = new FilterTask(IdGenerator.getId(), filterCommand.pluginFullName, filterCommand.arguments, filterCommand.processingImage, null);
 
-                    lock (taskList)
+                    if (granularityType == GranularityTypeEnum.low)
                     {
-                        taskList.Add(tempTask);
-                        tasksNumber++;
-                        tempTask.status = Task.Status.TAKEN;
-                        if (granularityType == GranularityTypeEnum.low)
+                        addTask(tempTask);
+                    }
+                    else
+                    {
+                        PluginInfo pluginInfo;
+                        lock (pluginFinder)
                         {
-                            callbacks.numberChanged(tasksNumber, true);
-                            return tempTask;
+                            pluginInfo = pluginFinder.findPluginForTask(tempTask);
+                        }
+                        IFilter filter = PluginHelper.createInstance<IFilter>(pluginInfo, tempTask.parameters);
+                        ImageDependencies imageDependencies = filter.getImageDependencies();
+                        if (imageDependencies == null)
+                        {
+                            addTask(tempTask);
                         }
                         else
                         {
-                            PluginInfo pluginInfo = pluginFinder.findPluginForTask(tempTask);
-                            IFilter filter = PluginHelper.createInstance<IFilter>(pluginInfo, tempTask.parameters);
-                            ImageDependencies imageDependencies = filter.getImageDependencies();
-                            if (imageDependencies == null)
-                            {
-                                return tempTask;
-                            }
-                            int subParts = 0;
+                            int numberOfSubParts = 0;
                             if (granularityType == GranularityTypeEnum.medium)
                             {
-                                subParts = Environment.ProcessorCount;
+                                numberOfSubParts = Environment.ProcessorCount;
                             }
                             else
                             {
-                                subParts = 2 * Environment.ProcessorCount;
+                                numberOfSubParts = 2 * Environment.ProcessorCount;
                             }
 
-                            ProcessingImage[] images = ((FilterTask)tempTask).originalImage.split(imageDependencies, subParts);
-                            if (images == null)
+                            ProcessingImage[] subParts = ((FilterTask)tempTask).originalImage.split(imageDependencies, numberOfSubParts);
+                            if (subParts == null)
                             {
-                                return tempTask;
+                                addTask(tempTask);
                             }
-                            ((FilterTask)tempTask).result = ((FilterTask)tempTask).originalImage.blankClone();
-                            ((FilterTask)tempTask).subParts = images.Length;
-
-                            tasksNumber += images.Length;
-                            callbacks.numberChanged(tasksNumber, true);
-
-                            FilterTask filterTask = null;
-                            foreach (ProcessingImage p in images)
+                            else
                             {
-                                filterTask = new FilterTask(IdGenerator.getID(), tempTask.pluginFullName, tempTask.parameters, p);
-                                filterTask.parent = (FilterTask)tempTask;
-                                taskList.Add(filterTask);
-                            }
+                                ((FilterTask)tempTask).result = ((FilterTask)tempTask).originalImage.blankClone();
+                                ((FilterTask)tempTask).subParts = subParts.Length;
 
-                            filterTask.status = Task.Status.TAKEN;
-                            return filterTask;
+                                FilterTask filterTask = null;
+                                foreach (ProcessingImage subPart in subParts)
+                                {
+                                    filterTask = new FilterTask(IdGenerator.getId(), tempTask.pluginFullName, tempTask.parameters, subPart, tempTask);
+                                    addTask(filterTask);
+                                }
+                                addActiveTask(tempTask, true);
+                            }
                         }
                     }
+                    callbacks.numberChanged(tasksNumber, true);
+                    return getTask();
                 }
+            }
 
-
+            lock (maskRequests)
+            {
                 if (maskRequests.Count > 0)
                 {
                     MaskCommand maskCommand;
@@ -244,17 +304,15 @@ namespace CIPP.WorkManagement
                     commandsNumber--;
                     callbacks.numberChanged(commandsNumber, false);
 
-                    tempTask = new MaskTask(IdGenerator.getID(), maskCommand.pluginFullName, maskCommand.arguments, maskCommand.processingImage);
-                    lock (taskList)
-                    {
-                        tasksNumber++;
-                        callbacks.numberChanged(tasksNumber, true);
-                        tempTask.status = Task.Status.TAKEN;
-                        taskList.Add(tempTask);
-                        return tempTask;
-                    }
+                    Task tempTask = new MaskTask(IdGenerator.getId(), maskCommand.pluginFullName, maskCommand.arguments, maskCommand.processingImage);
+                    addTask(tempTask);
+                    callbacks.numberChanged(tasksNumber, true);                    
+                    return getTask();
                 }
+            }
 
+            lock (motionRecognitionRequests)
+            {
                 if (motionRecognitionRequests.Count > 0)
                 {
                     MotionRecognitionCommand motionRecognitionCommand;
@@ -262,72 +320,53 @@ namespace CIPP.WorkManagement
                     commandsNumber--;
                     callbacks.numberChanged(commandsNumber, false);
 
-                    Motion motion = new Motion(IdGenerator.getID(), (int)motionRecognitionCommand.arguments[0], (int)motionRecognitionCommand.arguments[1], motionRecognitionCommand.processingImageList);
+                    Motion motion = new Motion(IdGenerator.getId(), (int)motionRecognitionCommand.arguments[0], (int)motionRecognitionCommand.arguments[1], motionRecognitionCommand.processingImageList);
+                    activeMotions.Add(motion.id, motion);
 
-                    lock (motionList)
+                    for (int i = 1; i < motion.imageNumber; i++)
                     {
-                        motionList.Add(motion);
-                    }
-                    lock (taskList)
-                    {
-                        MotionRecognitionTask motionRecognitionTask = null;
-                        for (int i = 1; i < motion.imageNumber; i++)
-                        {
-                            tempTask = new MotionRecognitionTask(
-                                IdGenerator.getID(), motion.id, motion.blockSize,
-                                motion.searchDistance, motionRecognitionCommand.pluginFullName, motionRecognitionCommand.arguments,
-                                motion.imageList[i - 1], motion.imageList[i]);
-
-
-                            taskList.Add(tempTask);
-                            tasksNumber++;
-
-                            if (granularityType != GranularityTypeEnum.low)
-                            {
-                                tempTask.status = Task.Status.TAKEN;
-                                int subParts = 0;
-                                if (granularityType == GranularityTypeEnum.medium)
-                                {
-                                    subParts = Environment.ProcessorCount;
-                                }
-                                else
-                                {
-                                    subParts = 2 * Environment.ProcessorCount;
-                                }
-                                ProcessingImage[] images1 = ((MotionRecognitionTask)tempTask).frame.split(new ImageDependencies(motion.searchDistance, motion.searchDistance, motion.searchDistance, motion.searchDistance), subParts);
-                                ProcessingImage[] images2 = ((MotionRecognitionTask)tempTask).nextFrame.split(new ImageDependencies(motion.searchDistance, motion.searchDistance, motion.searchDistance, motion.searchDistance), subParts);
-                                if (images1 == null || images2 == null)
-                                {
-                                    return tempTask;
-                                }
-
-                                ((MotionRecognitionTask)tempTask).result = MotionVectorUtils.getMotionVectorArray(((MotionRecognitionTask)tempTask).frame, motion.blockSize, motion.searchDistance);
-                                ((MotionRecognitionTask)tempTask).subParts = images1.Length;
-
-                                tasksNumber += images1.Length;
-
-                                for (int j = 0; j < images1.Length; j++)
-                                {
-                                    motionRecognitionTask = new MotionRecognitionTask(IdGenerator.getID(), motion.id, motion.blockSize, motion.searchDistance, tempTask.pluginFullName, tempTask.parameters, images1[j], images2[j]);
-                                    motionRecognitionTask.parent = (MotionRecognitionTask)tempTask;
-                                    taskList.Add(motionRecognitionTask);
-                                }
-                            }
-                        }
-                        callbacks.numberChanged(tasksNumber, true);
+                        MotionRecognitionTask tempTask = new MotionRecognitionTask(
+                            IdGenerator.getId(), motion.id, motion.blockSize,
+                            motion.searchDistance, motionRecognitionCommand.pluginFullName, motionRecognitionCommand.arguments,
+                            motion.imageList[i - 1], motion.imageList[i], null);
 
                         if (granularityType == GranularityTypeEnum.low)
                         {
-                            tempTask = taskList[taskList.Count - 1];
-                            tempTask.status = Task.Status.TAKEN;
-                            return tempTask;
+                            addTask(tempTask);
                         }
                         else
                         {
-                            motionRecognitionTask.status = Task.Status.TAKEN;
-                            return motionRecognitionTask;
+                            int numberOfSubParts = 0;
+                            if (granularityType == GranularityTypeEnum.medium)
+                            {
+                                numberOfSubParts = Environment.ProcessorCount;
+                            }
+                            else
+                            {
+                                numberOfSubParts = 2 * Environment.ProcessorCount;
+                            }
+                            ImageDependencies imageDependencies = new ImageDependencies(motion.searchDistance, motion.searchDistance, motion.searchDistance, motion.searchDistance);
+                            ProcessingImage[] images1 = ((MotionRecognitionTask)tempTask).frame.split(imageDependencies, numberOfSubParts);
+                            ProcessingImage[] images2 = ((MotionRecognitionTask)tempTask).nextFrame.split(imageDependencies, numberOfSubParts);
+                            if (images1 == null || images2 == null)
+                            {
+                                addTask(tempTask);
+                                continue;
+                            }
+
+                            tempTask.result = MotionVectorUtils.getMotionVectorArray(tempTask.frame, motion.blockSize, motion.searchDistance);
+                            tempTask.subParts = images1.Length;
+
+                            for (int j = 0; j < images1.Length; j++)
+                            {
+                                MotionRecognitionTask motionRecognitionTask = new MotionRecognitionTask(IdGenerator.getId(), motion.id, motion.blockSize, motion.searchDistance, tempTask.pluginFullName, tempTask.parameters, images1[j], images2[j], tempTask);
+                                addTask(motionRecognitionTask);
+                            }
+                            addActiveTask(tempTask, true);
                         }
                     }
+                    callbacks.numberChanged(tasksNumber, true);
+                    return getTask();
                 }
             }
             return null;
@@ -353,6 +392,10 @@ namespace CIPP.WorkManagement
                         {
                             callbacks.addImageResult(filterTask.result, Task.Type.FILTER);
                         }
+                        else
+                        {
+                            callbacks.addMessage("Task with id " + task.id + " failed.");
+                        }
                     }
                     break;
                 case Task.Type.MASK:
@@ -374,39 +417,34 @@ namespace CIPP.WorkManagement
                     }
                     else
                     {
-                        lock (motionList)
+                        if (activeMotions.ContainsKey(motionRecognitionTask.motionId))
                         {
-                            foreach (Motion motion in motionList)
+                            Motion motion = activeMotions[motionRecognitionTask.motionId];
+                            if (motionRecognitionTask.status == Task.Status.SUCCESSFUL)
                             {
-                                if (motionRecognitionTask.motionId == motion.id)
+                                motion.addMotionVectors(motionRecognitionTask.frame, motionRecognitionTask.result);
+                                if (motion.missingVectors == 0)
                                 {
-                                    if (motionRecognitionTask.status == Task.Status.SUCCESSFUL)
-                                    {
-                                        motion.addMotionVectors(motionRecognitionTask.frame, motionRecognitionTask.result);
-                                    }
-                                    if (motion.missingVectors == 0)
-                                    {
-                                        if (motionRecognitionTask.status == Task.Status.SUCCESSFUL)
-                                        {
-                                            callbacks.addMotion(motion);
-                                        }
-                                        motionList.Remove(motion);
-                                    }
-                                    break;
+                                    callbacks.addMotion(motion);
+                                    activeMotions.Remove(motion.id);
                                 }
-                            }
+                            }                            
+                        }
+                        else
+                        {
+                            throw new Exception("Invalid motion recognition task");
                         }
                     }
                     break;
                 default:
                     throw new NotImplementedException();
             }
-            lock (taskList)
+
+            removeActiveTask(task);
+            callbacks.numberChanged(tasksNumber, true);
+            lock (locker)
             {
-                taskList.Remove(task);
-                tasksNumber--;
-                callbacks.numberChanged(tasksNumber, true);
-                if (taskList.Count == 0 && filterRequests.Count == 0 && maskRequests.Count == 0 && motionRecognitionRequests.Count == 0)
+                if (tasksNumber == 0 && filterRequests.Count == 0 && maskRequests.Count == 0 && motionRecognitionRequests.Count == 0)
                 {
                     callbacks.jobDone();
                 }
@@ -421,7 +459,6 @@ namespace CIPP.WorkManagement
             {
                 callbacks.addMessage(threadName + " requesting task!");
                 Task task = getTask();
-
                 if (task == null)
                 {
                     callbacks.addMessage(threadName + " finished work!");
@@ -431,7 +468,7 @@ namespace CIPP.WorkManagement
                 callbacks.addMessage(threadName + " starting " + task.type.ToString() + " task " + task.id);
                 try
                 {
-                    solveTask(task);
+                    TaskHelper.solveTask(task, pluginFinder);
                     switch (task.status)
                     {
                         case Task.Status.SUCCESSFUL:
@@ -453,66 +490,36 @@ namespace CIPP.WorkManagement
             callbacks.addWorkerItem(threadName, false);
         }
 
-        private void solveTask(Task task)
-        {
-            try
-            {
-                PluginInfo pluginInfo = pluginFinder.findPluginForTask(task);
-                switch (task.type)
-                {
-                    case Task.Type.FILTER:
-                        {
-                            FilterTask filterTask = (FilterTask)task;
-                            IFilter filter = PluginHelper.createInstance<IFilter>(pluginInfo, filterTask.parameters);
-                            filterTask.result = filter.filter(filterTask.originalImage);
-                        } break;
-                    case Task.Type.MASK:
-                        {
-                            MaskTask maskTask = (MaskTask)task;
-                            IMask mask = PluginHelper.createInstance<IMask>(pluginInfo, maskTask.parameters);
-                            maskTask.result = mask.mask(maskTask.originalImage);
-                        } break;
-                    case Task.Type.MOTION_RECOGNITION:
-                        {
-                            MotionRecognitionTask motionRecognitionTask = (MotionRecognitionTask)task;
-                            IMotionRecognition motionRecognition = PluginHelper.createInstance<IMotionRecognition>(pluginInfo, motionRecognitionTask.parameters);
-                            motionRecognitionTask.result = motionRecognition.scan(motionRecognitionTask.frame, motionRecognitionTask.nextFrame);
-                        } break;
-                }
-                task.status = Task.Status.SUCCESSFUL;
-            }
-            catch (Exception e)
-            {
-                task.status = Task.Status.FAILED;
-                task.exception = e;
-            }
-        }
-
         private void proxyRequestReceived(object sender, EventArgs e)
         {
-            TCPProxy proxy = (TCPProxy)sender;
-            Task task = getTask();
+            TcpProxy proxy = (TcpProxy)sender;
+            Task task;
+            task = getTask();
             if (task != null)
             {
-                proxy.sendSimulationTask(task);
+                proxy.sendTask(task);
             }
         }
 
-        private void proxyResultReceived(object sender, TCPProxy.ResultReceivedEventArgs e)
+        private void proxyResultReceived(object sender, TcpProxy.ResultReceivedEventArgs e)
         {
-            TCPProxy proxy = (TCPProxy)sender;
+            TcpProxy proxy = (TcpProxy)sender;
             taskFinished(e.task);
         }
 
-        private void messagePosted(object sender, TCPProxy.StringEventArgs e)
+        private void messagePosted(object sender, TcpProxy.StringEventArgs e)
         {
             callbacks.addMessage(e.message);
         }
 
-        private void workerPosted(object sender, TCPProxy.WorkerEventArgs e)
+        private void workerPosted(object sender, TcpProxy.WorkerEventArgs e)
         {
             callbacks.addWorkerItem(e.name, !e.left);
         }
 
+        private void connectionLost(object sender, EventArgs e)
+        {
+            callbacks.updateTcpList((TcpProxy)sender);
+        }
     }
 }

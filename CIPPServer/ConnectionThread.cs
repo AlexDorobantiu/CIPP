@@ -13,64 +13,65 @@ namespace CIPPServer
 {
     public class ConnectionThread
     {
-        private TcpListener tcpListener;
-        private int port;
-        private BinaryFormatter formatter;
+        private static readonly BinaryFormatter formatter = new BinaryFormatter();
+
+        private readonly TcpListener tcpListener;
+        private readonly int port;
 
         private TcpClient tcpClient;
         private NetworkStream networkStream;
-        private object networkStreamLocker = new object();
 
-        private int header;
         private string clientName;
 
         private Thread connectionThread;
 
         private int numberOfWorkerThreads;
-        private SimulationWorkerThread[] workerThreads;
+        private TaskWorkerThread[] workerThreads;
 
-        public Queue<Task> taskBuffer;
+        public readonly Queue<Task> taskBuffer = new Queue<Task>();
 
         public ConnectionThread(TcpListener tcpListener, int port)
         {
-            formatter = new BinaryFormatter();
-
             this.tcpListener = tcpListener;
             this.port = port;
 
-            taskBuffer = new Queue<Task>();
-
             numberOfWorkerThreads = Environment.ProcessorCount;
-            workerThreads = new SimulationWorkerThread[numberOfWorkerThreads];
+            workerThreads = new TaskWorkerThread[numberOfWorkerThreads];
             for (int i = 0; i < numberOfWorkerThreads; i++)
             {
-                workerThreads[i] = new SimulationWorkerThread(this, "worker thread # " + i);
+                workerThreads[i] = new TaskWorkerThread(this, "worker thread # " + i);
             }
 
-            connectionThread = new Thread(HandleConnection);
+            connectionThread = new Thread(handleConnection);
             connectionThread.Name = "Connection thread";
             connectionThread.Start();
         }
 
-        public void HandleConnection()
+        public void handleConnection()
         {
             try
             {
                 tcpClient = tcpListener.AcceptTcpClient();
                 networkStream = tcpClient.GetStream();
-                header = networkStream.ReadByte(); // Client Name Byte
-                if (header != (byte)TrasmissionFlagsEnum.ClientName)
+                lock (networkStream)
                 {
-                    throw new Exception();
-                }
+                    int header = networkStream.ReadByte(); // Client Name Byte
+                    if (header != (byte)TrasmissionFlagsEnum.ClientName)
+                    {
+                        throw new Exception();
+                    }
 
-                clientName = (string)formatter.Deserialize(networkStream);
+                    clientName = (string)formatter.Deserialize(networkStream);
+                }
                 Console.WriteLine("Connected to " + clientName + " on port " + port);
             }
             catch
             {
                 Console.WriteLine("Invalid Client");
-                networkStream.Close();
+                if (networkStream != null)
+                {
+                    networkStream.Close();
+                }
                 tcpClient.Close();
                 return;
             }
@@ -79,7 +80,7 @@ namespace CIPPServer
             {
                 while (true)
                 {
-                    header = networkStream.ReadByte();
+                    int header = networkStream.ReadByte();
                     if (header == -1)
                     {
                         break;
@@ -93,16 +94,16 @@ namespace CIPPServer
                                 for (int i = 0; i < numberOfWorkerThreads; i++)
                                 {
                                     workerThreads[i].AbortCurrentTask();
-                                    SendTaskRequest();
+                                    sendTaskRequest();
                                 }
                             } break;
                         // Receive task
                         case (byte)TrasmissionFlagsEnum.Task:
                             {
-                                Task tp = (Task)formatter.Deserialize(networkStream);
+                                Task task = (Task)formatter.Deserialize(networkStream);
                                 lock (taskBuffer)
                                 {
-                                    taskBuffer.Enqueue(tp);
+                                    taskBuffer.Enqueue(task);
                                 }
                                 for (int i = 0; i < numberOfWorkerThreads; i++)
                                 {
@@ -140,37 +141,39 @@ namespace CIPPServer
             tcpClient.Close();
         }
 
-        public void SendResult(int taskId, object result)
+        public void sendResult(int taskId, object result)
         {
-            lock (networkStreamLocker)
+            ResultPackage resultPackage = new ResultPackage(taskId, result);
+            try
             {
-                ResultPackage rp = new ResultPackage(taskId, result);
-                try
+                lock (networkStream)
                 {
                     networkStream.WriteByte((byte)TrasmissionFlagsEnum.Result);
-                    formatter.Serialize(networkStream, rp);
-                    Console.WriteLine("Result sent back to " + clientName);
+                    formatter.Serialize(networkStream, resultPackage);
+                    networkStream.Flush();
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Attempt to send result back to " + clientName + " failed: " + e.Message);
-                }
+                Console.WriteLine("Result sent back to " + clientName);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Attempt to send result back to " + clientName + " failed: " + e.Message);
             }
         }
 
-        public void SendTaskRequest()
+        public void sendTaskRequest()
         {
-            lock (networkStreamLocker)
+            try
             {
-                try
+                lock (networkStream)
                 {
                     networkStream.WriteByte((byte)TrasmissionFlagsEnum.TaskRequest);
-                    Console.WriteLine("Task request sent to " + clientName + ".");
+                    networkStream.Flush();
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Attempt to send a task request to " + clientName + " failed: " + e.Message);
-                }
+                Console.WriteLine("Task request sent to " + clientName + ".");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Attempt to send a task request to " + clientName + " failed: " + e.Message);
             }
         }
     }

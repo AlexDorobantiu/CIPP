@@ -14,7 +14,7 @@ using ProcessingImageSDK.MotionVectors;
 
 namespace CIPP
 {
-    class TCPProxy
+    class TcpProxy
     {
         public class ResultReceivedEventArgs : EventArgs
         {
@@ -49,25 +49,24 @@ namespace CIPP
         public event EventHandler taskRequestReceivedEventHandler;
         public event EventHandler<StringEventArgs> messagePosted;
         public event EventHandler<WorkerEventArgs> workerPosted;
-
         public event EventHandler connectionLostEventHandler;
 
+        private static readonly IFormatter formatter = new BinaryFormatter();
         private TcpClient tcpClient;
         private NetworkStream networkStream;
-        private readonly IFormatter formatter = new BinaryFormatter();
-        List<Task> sentSimulations = new List<Task>();
 
-        public string hostname;
-        public int port;
+        private int taskRequests = 0;
+        private readonly Dictionary<int, Task> sentTasks = new Dictionary<int, Task>();
+
+        public readonly string hostname;
+        public readonly int port;
         public bool connected = false;
 
         private bool listening = false;
         private Thread listeningThread = null;
-        private bool isConnectionThreadRunning = false;
+        private bool isConnectionThreadRunning = false;       
 
-        private int taskRequests = 0;
-
-        public TCPProxy(string hostname, int port)
+        public TcpProxy(string hostname, int port)
         {
             this.hostname = hostname;
             this.port = port;
@@ -79,9 +78,12 @@ namespace CIPP
             {
                 tcpClient = new TcpClient(hostname, port);
                 networkStream = tcpClient.GetStream();
-                networkStream.WriteByte((byte)TrasmissionFlagsEnum.ClientName);
-                formatter.Serialize(networkStream, Environment.MachineName);
-                networkStream.Flush();
+                lock (networkStream)
+                {
+                    networkStream.WriteByte((byte)TrasmissionFlagsEnum.ClientName);
+                    formatter.Serialize(networkStream, Environment.MachineName);
+                    networkStream.Flush();
+                }
                 connected = true;
                 
                 postMessage("Connected to " + hostname + " on port " + port);
@@ -123,11 +125,15 @@ namespace CIPP
             if (!listening)
             {
                 listening = true;
-                sentSimulations.Clear();
+                sentTasks.Clear();
                 taskRequests = 0;
                 try
                 {
-                    networkStream.WriteByte((byte)TrasmissionFlagsEnum.Listening);
+                    lock (networkStream)
+                    {
+                        networkStream.WriteByte((byte)TrasmissionFlagsEnum.Listening);
+                        networkStream.Flush();
+                    }
                     postMessage("Listening to " + hostname + ", " + port);
                 }
                 catch (Exception e)
@@ -144,30 +150,44 @@ namespace CIPP
             }
         }
 
-        public void sendSimulationTask(Task task)
+        public void sendTask(Task task)
         {
-            taskRequests--;
             try
             {
-                networkStream.WriteByte((byte)TrasmissionFlagsEnum.Task);
-                formatter.Serialize(networkStream, task);
+                lock (networkStream)
+                {
+                    networkStream.WriteByte((byte)TrasmissionFlagsEnum.Task);
+                    formatter.Serialize(networkStream, task);
+                    networkStream.Flush();
+                }
                 postMessage("Task sent to " + hostname + " on port " + port);
-                sentSimulations.Add(task);
+                lock (sentTasks)
+                {
+                    sentTasks.Add(task.id, task);
+                    taskRequests--;
+                }
             }
             catch (Exception e)
             {
                 postMessage(e.Message);
             }
-
         }
 
         public void sendAbortRequest()
         {
             try
             {
-                networkStream.WriteByte((byte)TrasmissionFlagsEnum.AbortWork);
+                lock (networkStream)
+                {
+                    networkStream.WriteByte((byte)TrasmissionFlagsEnum.AbortWork);
+                    networkStream.Flush();
+                }
                 postMessage("Abort request sent to: " + hostname + " on port: " + port);
-                taskRequests = 0;
+                lock (sentTasks)
+                {
+                    sentTasks.Clear();
+                    taskRequests = 0;
+                }
                 listening = false;
             }
             catch (Exception e)
@@ -190,78 +210,77 @@ namespace CIPP
                     switch (header)
                     {
                         case (byte)TrasmissionFlagsEnum.TaskRequest:
+                            postWorker("Worker @: " + hostname, false);
+                            if (taskRequestReceivedEventHandler != null)
                             {
-                                postWorker("Worker @: " + hostname, false);
                                 taskRequestReceivedEventHandler(this, EventArgs.Empty);
-                                taskRequests++;
-                                postMessage("Received a task request from " + hostname + " on port " + port);
-                            } break;
+                            }
+                            taskRequests++;
+                            postMessage("Received a task request from " + hostname + " on port " + port);
+                            break;
                         case (byte)TrasmissionFlagsEnum.Result:
+                            ResultPackage resultPackage = (ResultPackage)formatter.Deserialize(networkStream);
+                            if (resultPackage != null)
                             {
-                                ResultPackage resultPackage = (ResultPackage)formatter.Deserialize(networkStream);
-                                if (resultPackage != null)
+                                Task tempTask = null;
+                                lock (sentTasks)
                                 {
-                                    Task tempTask = null;
-                                    lock (sentSimulations)
+                                    if (sentTasks.ContainsKey(resultPackage.taskId))
                                     {
-                                        foreach (Task task in sentSimulations)
-                                        {
-                                            if (task.id == resultPackage.taskId)
-                                            {
-                                                tempTask = task;
-                                                break;
-                                            }
-                                        }
-
-                                        if (tempTask != null)
-                                        {
-                                            if (resultPackage.result != null)
-                                            {                                                
-                                                switch (tempTask.type)
-                                                {
-                                                    case Task.Type.FILTER:
-                                                        ((FilterTask)tempTask).result = (ProcessingImage)resultPackage.result; 
-                                                        break;
-                                                    case Task.Type.MASK:
-                                                        ((MaskTask)tempTask).result = (byte[,])resultPackage.result;
-                                                        break;
-                                                    case Task.Type.MOTION_RECOGNITION:
-                                                        ((MotionRecognitionTask)tempTask).result = (MotionVectorBase[,])resultPackage.result;
-                                                        break;
-                                                }
-                                                tempTask.status = Task.Status.SUCCESSFUL;
-                                                sentSimulations.Remove(tempTask);
-                                                resultsReceivedEventHandler(this, new ResultReceivedEventArgs(tempTask));
-                                                postMessage("Received a result from " + hostname + " on port " + port + " ");
-                                            }
-                                            else
-                                            {
-                                                tempTask.status = Task.Status.FAILED;
-                                                sentSimulations.Remove(tempTask);
-                                                resultsReceivedEventHandler(this, new ResultReceivedEventArgs(tempTask));
-                                                postMessage("Task " + tempTask.id + " not completed succesfuly by " + hostname + " on port " + port + " ");
-                                            }
-                                        }
-                                        else
-                                        {
-                                            postMessage("Received a false result from " + hostname + " on port " + port + " ");
-                                        }
+                                        tempTask = sentTasks[resultPackage.taskId];
+                                        sentTasks.Remove(resultPackage.taskId);
                                     }
+                                    else
+                                    {
+                                        postMessage("Received a false result from " + hostname + " on port " + port + " ");
+                                        throw new Exception("Invalid result package received");
+                                    }
+                                }
+                                if (resultPackage.result != null)
+                                {
+                                    switch (tempTask.type)
+                                    {
+                                        case Task.Type.FILTER:
+                                            ((FilterTask)tempTask).result = (ProcessingImage)resultPackage.result;
+                                            break;
+                                        case Task.Type.MASK:
+                                            ((MaskTask)tempTask).result = (byte[,])resultPackage.result;
+                                            break;
+                                        case Task.Type.MOTION_RECOGNITION:
+                                            ((MotionRecognitionTask)tempTask).result = (MotionVectorBase[,])resultPackage.result;
+                                            break;
+                                        default:
+                                            throw new NotImplementedException();
+                                    }
+                                    tempTask.status = Task.Status.SUCCESSFUL;
+                                    postMessage("Received a result from " + hostname + " on port " + port + " ");
                                 }
                                 else
                                 {
-                                    postMessage("Received an empty result package from " + hostname + " on port " + port + " ");
+                                    tempTask.status = Task.Status.FAILED;
+                                    postMessage("Task " + tempTask.id + " not completed succesfuly by " + hostname + " on port " + port + " ");
                                 }
-                                postWorker("Worker @: " + hostname, true);
+                                if (resultsReceivedEventHandler != null)
+                                {
+                                    resultsReceivedEventHandler(this, new ResultReceivedEventArgs(tempTask));
+                                }
                             }
+                            else
+                            {
+                                postMessage("Received an empty result package from " + hostname + " on port " + port + " ");
+                                throw new Exception("Invalid result package received");
+                            }
+                            postWorker("Worker @: " + hostname, true);
                             break;
                         default:
+                            if (connectionLostEventHandler != null)
                             {
                                 connectionLostEventHandler(this, EventArgs.Empty);
-                                postMessage("Invalid message header received: " + header);
-                                isConnectionThreadRunning = false;
-                                listening = false;
-                            } break;
+                            }
+                            postMessage("Invalid message header received: " + header);
+                            isConnectionThreadRunning = false;
+                            listening = false;
+                            break;
                     }
                 }
             }
@@ -272,12 +291,21 @@ namespace CIPP
             finally
             {
                 postMessage("Connection to " + hostname + " on port " + port + " terminated");
+                isConnectionThreadRunning = false;
                 connected = false;
                 listening = false;
-                connectionLostEventHandler(this, EventArgs.Empty);
                 for (int i = 0; i < taskRequests; i++)
                 {
                     postWorker("Worker @: " + hostname, true);
+                }
+                lock (sentTasks)
+                {
+                    sentTasks.Clear();
+                    taskRequests = 0;
+                }
+                if (connectionLostEventHandler != null)
+                {
+                    connectionLostEventHandler(this, EventArgs.Empty);
                 }
             }
         }

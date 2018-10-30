@@ -7,12 +7,13 @@ namespace ProcessingImageSDK
 {
     public class Motion
     {
-        public int id;
-        public int imageNumber;
+        public readonly int id;
+        public readonly int imageNumber;
+        public readonly int blockSize;
+        public readonly int searchDistance;
+        public readonly ProcessingImage[] imageList;
+
         public int missingVectors;
-        public int blockSize;
-        public int searchDistance;
-        public ProcessingImage[] imageList;
         public MotionVectorBase[][,] vectors;
 
         public Motion(int id, int blockSize, int searchDistance, List<ProcessingImage> processingImageList)
@@ -37,11 +38,6 @@ namespace ProcessingImageSDK
                     break;
                 }
             }
-        }
-
-        public void save(string fileName)
-        {
-            throw new NotImplementedException();
         }
     }
 }
