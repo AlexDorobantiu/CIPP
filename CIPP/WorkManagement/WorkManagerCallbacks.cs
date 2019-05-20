@@ -11,11 +11,11 @@ namespace CIPP.WorkManagement
         public readonly addImageCallback addImageResult;
         public readonly addMotionCallback addMotion;
         public readonly jobFinishedCallback jobDone;
-        public readonly numberChangedCallBack numberChanged;
+        public readonly numberChangedCallback numberChanged;
         public readonly updateTCPListCallback updateTcpList;
 
         public WorkManagerCallbacks(addMessageCallback addMessage, addWorkerItemCallback addWorkerItem, addImageCallback addImageResult,
-            addMotionCallback addMotion, jobFinishedCallback jobDone, numberChangedCallBack numberChanged, updateTCPListCallback updateTCPList)
+            addMotionCallback addMotion, jobFinishedCallback jobDone, numberChangedCallback numberChanged, updateTCPListCallback updateTCPList)
         {
             this.addMessage = addMessage;
             this.addWorkerItem = addWorkerItem;

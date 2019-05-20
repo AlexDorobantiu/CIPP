@@ -285,10 +285,5 @@ namespace CannyFilter
             return result;
         }
 
-        private struct Position2d
-        {
-            public int x;
-            public int y;
-        }
     }
 }

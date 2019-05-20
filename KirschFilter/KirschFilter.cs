@@ -288,11 +288,5 @@ namespace KirschFilter
 
         #endregion
 
-
-        private struct Position2d
-        {
-            public int x;
-            public int y;
-        }
     }
 }

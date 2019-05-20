@@ -13,7 +13,7 @@ namespace CIPP
     delegate void addMessageCallback(string message);
     delegate void addWorkerItemCallback(string name, bool visible);
     delegate void addImageCallback(ProcessingImage processingImage, Task.Type taskType);
-    delegate void numberChangedCallBack(int number, bool commandOrTask);
+    delegate void numberChangedCallback(int number, bool commandOrTask);
     delegate void addMotionCallback(Motion motion);
     delegate void jobFinishedCallback();
     delegate void updateTCPListCallback(TcpProxy proxy);
@@ -321,23 +321,19 @@ namespace CIPP
 
         private void addMessage(string message)
         {
-            try
+            if (this.messagesList.InvokeRequired)
             {
-                if (this.messagesList.InvokeRequired)
-                {
-                    addMessageCallback d = new addMessageCallback(addMessage);
-                    this.Invoke(d, new object[] { message });
-                }
-                else
-                {
-                    if (this.messagesList.IsDisposed)
-                    {
-                        return;
-                    }
-                    messagesList.Items.Add(message);
-                }
+                addMessageCallback d = new addMessageCallback(addMessage);
+                this.Invoke(d, new object[] { message });
             }
-            catch { }
+            else
+            {
+                if (this.messagesList.IsDisposed)
+                {
+                    return;
+                }
+                messagesList.Items.Add(message);
+            }
         }
 
         private void addImage(ProcessingImage processingImage, Task.Type taskType)
@@ -397,6 +393,26 @@ namespace CIPP
             }
         }
 
+        private void numberChanged(int number, bool commandOrTask)
+        {
+            if (this.workersList.InvokeRequired)
+            {
+                numberChangedCallback d = new numberChangedCallback(numberChanged);
+                this.Invoke(d, new object[] { number, commandOrTask });
+            }
+            else
+            {
+                if (commandOrTask)
+                {
+                    numberOfTasksValueLabel.Text = "" + number;
+                }
+                else
+                {
+                    numberOfCommandsValueLabel.Text = "" + number;
+                }
+            }
+        }
+
         private void jobFinished()
         {
             timer.Stop();
@@ -408,16 +424,5 @@ namespace CIPP
             }
         }
 
-        private void numberChanged(int number, bool commandOrTask)
-        {
-            if (commandOrTask)
-            {
-                numberOfTasksValueLabel.Text = "" + number;
-            }
-            else
-            {
-                numberOfCommandsValueLabel.Text = "" + number;
-            }
-        }
     }
 }

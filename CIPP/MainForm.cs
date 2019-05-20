@@ -221,8 +221,8 @@ namespace CIPP
             ListBox visibleListBox = null;
             getVisibleLists(ref visibleImagesList, ref visibleListBox);
 
-            if (visibleImagesList == null || visibleListBox == null || visibleListBox.SelectedIndices.Count == 0 || 
-                visibleListBox.SelectedIndices[originalImageListBox.SelectedIndices.Count - 1] == originalImageListBox.Items.Count - 1)
+            if (visibleImagesList == null || visibleListBox == null || visibleListBox.SelectedIndices.Count == 0 ||
+                visibleListBox.SelectedIndices[visibleListBox.SelectedIndices.Count - 1] == visibleListBox.Items.Count - 1)
             {
                 return;
             }
@@ -238,8 +238,8 @@ namespace CIPP
                 visibleImagesList[currentSelected] = visibleImagesList[currentSelected + 1];
                 visibleImagesList[currentSelected + 1] = temp;
 
-                originalImageListBox.SetSelected(currentSelected, false);
-                originalImageListBox.SetSelected(currentSelected + 1, true);
+                visibleListBox.SetSelected(currentSelected, false);
+                visibleListBox.SetSelected(currentSelected + 1, true);
             }
         }
 
@@ -460,9 +460,9 @@ namespace CIPP
         }
 
         private void imageListBox_KeyUp(object sender, KeyEventArgs e)
-        {            
+        {
             if (Keys.A.Equals(e.KeyCode) && Keys.Control.Equals(e.Modifiers))
-            {                
+            {
                 List<ProcessingImage> visibleImagesList = null;
                 ListBox visibleListBox = null;
                 getVisibleLists(ref visibleImagesList, ref visibleListBox);
@@ -471,7 +471,14 @@ namespace CIPP
                 {
                     visibleListBox.SetSelected(i, true);
                 }
-                visibleListBox.EndUpdate();                
+                visibleListBox.EndUpdate();
+            }
+            else
+            {
+                if (Keys.Delete.Equals(e.KeyCode))
+                {
+                    removeImageButton_Click(sender, e);
+                }
             }
             e.Handled = true;
         }
