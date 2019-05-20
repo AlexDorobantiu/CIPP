@@ -17,8 +17,8 @@ namespace CIPP.WorkManagement
         private const int threadStackSize = 8 * (1 << 20);
         private readonly object locker = new object();
 
-        private int commandsNumber = 0;
-        private int tasksNumber = 0;
+        private volatile int commandsNumber = 0;
+        private volatile int tasksNumber = 0;
 
         private readonly Queue<FilterCommand> filterRequests = new Queue<FilterCommand>();
         private readonly Queue<MaskCommand> maskRequests = new Queue<MaskCommand>();

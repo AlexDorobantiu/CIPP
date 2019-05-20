@@ -904,6 +904,10 @@ namespace ProcessingImageSDK
 
         public Bitmap getPreviewBitmap(int sizeX, int sizeY)
         {
+            if (sizeX == 0 || sizeY == 0)
+            {
+                return null;
+            }
             try
             {
                 // take the best ratio
@@ -960,9 +964,9 @@ namespace ProcessingImageSDK
                 bitmap.UnlockBits(bitmapData);
                 return bitmap;
             }
-            catch
+            catch (Exception e)
             {
-                throw new Exception("Could not convert to preview bitmap.");
+                throw new Exception("Could not convert to preview bitmap. " + e.Message);
             }
         }
 

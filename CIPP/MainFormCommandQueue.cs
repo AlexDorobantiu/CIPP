@@ -321,18 +321,26 @@ namespace CIPP
 
         private void addMessage(string message)
         {
-            if (this.messagesList.InvokeRequired)
+            try
             {
-                addMessageCallback d = new addMessageCallback(addMessage);
-                this.Invoke(d, new object[] { message });
-            }
-            else
-            {
-                if (this.messagesList.IsDisposed)
+                if (this.messagesList.InvokeRequired)
                 {
-                    return;
+                    addMessageCallback d = new addMessageCallback(addMessage);
+                    this.Invoke(d, new object[] { message });
                 }
-                messagesList.Items.Add(message);
+                else
+                {
+                    if (this.messagesList.IsDisposed)
+                    {
+                        return;
+                    }
+                    messagesList.Items.Add(message);
+                }
+            }
+            catch (ObjectDisposedException e)
+            {
+                Console.WriteLine(e.Message);
+                // do nothing when the thread was stopped
             }
         }
 
