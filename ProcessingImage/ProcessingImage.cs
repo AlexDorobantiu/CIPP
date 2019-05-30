@@ -57,15 +57,7 @@ namespace ProcessingImageSDK
             this.sizeY = sizeY;
             if (createOpaqueAlphaChannel)
             {
-                byte[,] alphaChannel = new byte[sizeY, sizeX];
-                for (int i = 0; i < sizeY; i++)
-                {
-                    for (int j = 0; j < sizeX; j++)
-                    {
-                        alphaChannel[i, j] = 255;
-                    }
-                }
-                setAlpha(alphaChannel);
+                setAlpha(ProcessingImageUtils.createChannel(sizeX, sizeY, 255));
             }
 
             this.positionX = positionX;
@@ -910,6 +902,12 @@ namespace ProcessingImageSDK
             }
             try
             {
+                if (this.alpha == null)
+                {
+                    setAlpha(ProcessingImageUtils.createChannel(this.sizeX, this.sizeY, 255));
+                    this.watermaks.Add("Alpha channel was missing. A default one was generated.");
+                }
+
                 // take the best ratio
                 float delta = (float)this.sizeX / sizeX > (float)this.sizeY / sizeY ? (float)this.sizeX / sizeX : (float)this.sizeY / sizeY;
                 float currentX, currentY = 0;
@@ -1046,14 +1044,7 @@ namespace ProcessingImageSDK
             ProcessingImage processingImage = new ProcessingImage();
             copyAttributes(this, processingImage, false);
 
-            processingImage.alpha = new byte[sizeY, sizeX];
-            for (int i = 0; i < sizeY; i++)
-            {
-                for (int j = 0; j < sizeX; j++)
-                {
-                    processingImage.alpha[i, j] = 255;
-                }
-            }
+            processingImage.alpha = ProcessingImageUtils.createChannel(sizeX, sizeY, 255);
             if (!grayscale)
             {
                 processingImage.red = new byte[sizeY, sizeX];

@@ -390,5 +390,18 @@ namespace ProcessingImageSDK
                 }
             }
         }
+        
+        public static byte[,] createChannel(int sizeX, int sizeY, byte defaultColor = 0)
+        {
+            byte[,] channel = new byte[sizeY, sizeX];
+            for (int i = 0; i < sizeY; i++)
+            {
+                for (int j = 0; j < sizeX; j++)
+                {
+                    channel[i, j] = defaultColor;
+                }
+            }
+            return channel;
+        }
     }
 }
