@@ -5,6 +5,7 @@ using Plugins.Filters;
 using ParametersSDK;
 using ProcessingImageSDK;
 using System.IO;
+using ProcessingImageSDK.Position;
 
 namespace KirschFilter
 {

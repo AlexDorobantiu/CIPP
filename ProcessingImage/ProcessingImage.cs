@@ -6,6 +6,7 @@ using System.Drawing.Imaging;
 using System.Runtime.Serialization;
 using System.IO;
 using ProcessingImageSDK.PixelStructures;
+using ProcessingImageSDK.Position;
 
 namespace ProcessingImageSDK
 {
@@ -26,7 +27,14 @@ namespace ProcessingImageSDK
         private byte[,] blue;       // blue component
         private byte[,] gray;    // gray component (if any)
 
+        /// <summary>
+        /// Is true when the image only has the gray (and alpha) component.
+        /// </summary>
         public bool grayscale;
+
+        /// <summary>
+        /// Is true when at least one of the alpha values is different than 255 (full opaque)
+        /// </summary>
         public bool masked;
 
         [NonSerialized]
@@ -38,8 +46,7 @@ namespace ProcessingImageSDK
         private List<string> watermaks = new List<string>();
 
         // position in the original image (if this is a subpart)
-        private int positionX;
-        private int positionY;
+        private Position2d position;
 
         private ImageDependencies imageDependencies;
 
@@ -50,7 +57,15 @@ namespace ProcessingImageSDK
         {
         }
 
-        public ProcessingImage initialize(String name, int sizeX, int sizeY, bool createOpaqueAlphaChannel = true, int positionX = 0, int positionY = 0)
+        /// <summary>
+        /// Initializer method for a new ProcessingImage.
+        /// </summary>
+        /// <param name="name">The name which appears in the GUI</param>
+        /// <param name="sizeX">The width of the image</param>
+        /// <param name="sizeY">The height of the image</param>
+        /// <param name="createOpaqueAlphaChannel">If true, a new opaque alpha channel will be created</param>
+        /// <param name="position">The virtual position of the image (useful when the image is subdivided)</param>
+        public void initialize(String name, int sizeX, int sizeY, bool createOpaqueAlphaChannel = true, Position2d position = new Position2d())
         {
             this.name = name;
             this.sizeX = sizeX;
@@ -60,9 +75,7 @@ namespace ProcessingImageSDK
                 setAlpha(ProcessingImageUtils.createChannel(sizeX, sizeY, 255));
             }
 
-            this.positionX = positionX;
-            this.positionY = positionY;
-            return this;
+            this.position = position;
         }
 
         public string getName()
@@ -85,14 +98,9 @@ namespace ProcessingImageSDK
             return sizeY;
         }
 
-        public int getPositionX()
+        public Position2d getPosition()
         {
-            return positionX;
-        }
-
-        public int getPositionY()
-        {
-            return positionY;
+            return position;
         }
 
         public byte[,] getRed()
@@ -179,11 +187,9 @@ namespace ProcessingImageSDK
 
         public void loadImage(Bitmap bitmap)
         {
-            positionX = 0;
-            positionY = 0;
-
             sizeX = bitmap.Width;
             sizeY = bitmap.Height;
+            position = new Position2d();
 
             grayscale = true;
 
@@ -412,6 +418,9 @@ namespace ProcessingImageSDK
             }
         }
 
+        /// <summary>
+        /// Computes the grayscale channel from the red, green and blue components by averaging them
+        /// </summary>
         public void computeGray()
         {
             if (gray == null)
@@ -422,11 +431,14 @@ namespace ProcessingImageSDK
             {
                 for (int j = 0; j < sizeX; j++)
                 {
-                    gray[i, j] = (byte)((red[i, j] + green[i, j] + blue[i, j]) / 3);
+                    gray[i, j] = (byte)Math.Round((red[i, j] + green[i, j] + blue[i, j]) / 3.0f);
                 }
             }
         }
 
+        /// <summary>
+        /// Compute the luminance channel from the red, green and blue components using an weighted average
+        /// </summary>
         public void computeLuminance()
         {
             if (!grayscale)
@@ -449,6 +461,11 @@ namespace ProcessingImageSDK
             }
         }
 
+        /// <summary>
+        /// Creates a System.Drawing.Bitmap from the ProcessingImage.
+        /// </summary>
+        /// <param name="type">Specifies which channels to include when creating the bitmap</param>
+        /// <returns>A new System.Drawing.Bitmap</returns>
         public Bitmap getBitmap(ProcessingImageBitmapType type)
         {
             try
@@ -894,6 +911,12 @@ namespace ProcessingImageSDK
             }
         }
 
+        /// <summary>
+        /// Creates a System.Drawing.Bitmap for displaying scaled to the specified size, but keeping the aspect ratio.
+        /// </summary>
+        /// <param name="sizeX">The desired width</param>
+        /// <param name="sizeY">The desired height</param>
+        /// <returns>A new System.Drawing.Bitmap</returns>
         public Bitmap getPreviewBitmap(int sizeX, int sizeY)
         {
             if (sizeX == 0 || sizeY == 0)
@@ -989,8 +1012,7 @@ namespace ProcessingImageSDK
             target.masked = source.masked;
             target.sizeX = source.sizeX;
             target.sizeY = source.sizeY;
-            target.positionX = source.positionX;
-            target.positionY = source.positionY;
+            target.position = source.position;
             target.imageDependencies = source.imageDependencies;
 
             target.path = null;
@@ -1190,8 +1212,8 @@ namespace ProcessingImageSDK
             for (int i = 0; i < subParts; i++)
             {
                 processingImage[i].imageDependencies = imageDependencies;
-                processingImage[i].positionX = start;
-                processingImage[i].positionY = 0;
+                processingImage[i].position.x = start;
+                processingImage[i].position.y = 0;
                 if (i == 0)
                 {
                     processingImage[i].sizeX = stepSize + imageDependencies.right;
@@ -1300,17 +1322,21 @@ namespace ProcessingImageSDK
             return processingImage;
         }
 
+        /// <summary>
+        /// Attaches an image to the current one at the subpart position
+        /// </summary>
+        /// <param name="subPart"></param>
         public void join(ProcessingImage subPart)
         {
             try
             {
-                if (subPart.positionX == 0)
+                if (subPart.position.x == 0)
                 {
                     for (int i = subPart.imageDependencies.top; i < subPart.sizeY - subPart.imageDependencies.bottom; i++)
                     {
                         for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
                         {
-                            alpha[i + subPart.positionY, j + subPart.positionX] = subPart.alpha[i, j];
+                            alpha[i + subPart.position.y, j + subPart.position.x] = subPart.alpha[i, j];
                         }
                     }
 
@@ -1322,7 +1348,7 @@ namespace ProcessingImageSDK
                     {
                         for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
                         {
-                            alpha[i + subPart.positionY, j + subPart.positionX - subPart.imageDependencies.left] = subPart.alpha[i, j];
+                            alpha[i + subPart.position.y, j + subPart.position.x - subPart.imageDependencies.left] = subPart.alpha[i, j];
                         }
                     }
                 }
@@ -1336,13 +1362,13 @@ namespace ProcessingImageSDK
                         gray = new byte[this.sizeY, this.sizeX];
                         grayscale = true;
                     }
-                    if (subPart.positionX == 0)
+                    if (subPart.position.x == 0)
                     {
                         for (int i = subPart.imageDependencies.top; i < subPart.sizeY - subPart.imageDependencies.bottom; i++)
                         {
                             for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
                             {
-                                gray[i + subPart.positionY, j + subPart.positionX] = subPart.gray[i, j];
+                                gray[i + subPart.position.y, j + subPart.position.x] = subPart.gray[i, j];
                             }
                         }
                     }
@@ -1352,7 +1378,7 @@ namespace ProcessingImageSDK
                         {
                             for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
                             {
-                                gray[i + subPart.positionY, j + subPart.positionX - subPart.imageDependencies.left] = subPart.gray[i, j];
+                                gray[i + subPart.position.y, j + subPart.position.x - subPart.imageDependencies.left] = subPart.gray[i, j];
                             }
                         }
                     }
@@ -1367,15 +1393,15 @@ namespace ProcessingImageSDK
                         blue = new byte[this.sizeY, this.sizeX];
                         grayscale = false;
                     }
-                    if (subPart.positionX == 0)
+                    if (subPart.position.x == 0)
                     {
                         for (int i = subPart.imageDependencies.top; i < subPart.sizeY - subPart.imageDependencies.bottom; i++)
                         {
                             for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
                             {
-                                red[i + subPart.positionY, j + subPart.positionX] = subPart.red[i, j];
-                                green[i + subPart.positionY, j + subPart.positionX] = subPart.green[i, j];
-                                blue[i + subPart.positionY, j + subPart.positionX] = subPart.blue[i, j];
+                                red[i + subPart.position.y, j + subPart.position.x] = subPart.red[i, j];
+                                green[i + subPart.position.y, j + subPart.position.x] = subPart.green[i, j];
+                                blue[i + subPart.position.y, j + subPart.position.x] = subPart.blue[i, j];
                             }
                         }
                     }
@@ -1385,9 +1411,9 @@ namespace ProcessingImageSDK
                         {
                             for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
                             {
-                                red[i + subPart.positionY, j + subPart.positionX - subPart.imageDependencies.left] = subPart.red[i, j];
-                                green[i + subPart.positionY, j + subPart.positionX - subPart.imageDependencies.left] = subPart.green[i, j];
-                                blue[i + subPart.positionY, j + subPart.positionX - subPart.imageDependencies.left] = subPart.blue[i, j];
+                                red[i + subPart.position.y, j + subPart.position.x - subPart.imageDependencies.left] = subPart.red[i, j];
+                                green[i + subPart.position.y, j + subPart.position.x - subPart.imageDependencies.left] = subPart.green[i, j];
+                                blue[i + subPart.position.y, j + subPart.position.x - subPart.imageDependencies.left] = subPart.blue[i, j];
                             }
                         }
                     }
@@ -1399,6 +1425,10 @@ namespace ProcessingImageSDK
             }
         }
 
+        /// <summary>
+        /// Returns the display name of the ProcessingImage
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return name;

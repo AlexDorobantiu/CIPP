@@ -4,6 +4,7 @@ using ParametersSDK;
 using Plugins.Filters;
 using ProcessingImageSDK;
 using System.IO;
+using ProcessingImageSDK.Position;
 
 namespace CannyFilter
 {

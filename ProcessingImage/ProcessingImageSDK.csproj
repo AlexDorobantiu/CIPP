@@ -8,7 +8,7 @@
     <ProjectGuid>{E2C1765E-3E77-4D6F-A552-98A0C2CE008A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ProcessingImage</RootNamespace>
+    <RootNamespace>ProcessingImageSDK</RootNamespace>
     <AssemblyName>ProcessingImage</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileUpgradeFlags>
@@ -54,6 +54,7 @@
     <Compile Include="PixelStructures\Pixel24Bpp.cs" />
     <Compile Include="PixelStructures\Pixel32Bpp.cs" />
     <Compile Include="PixelStructures\Pixel8Bpp.cs" />
+    <Compile Include="Position\Position2d.cs" />
     <Compile Include="ProcessingImageBitmapType.cs" />
     <Compile Include="Motion.cs" />
     <Compile Include="MotionVectorUtils.cs" />

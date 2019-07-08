@@ -335,6 +335,7 @@ namespace CIPP
                         return;
                     }
                     messagesList.Items.Add(message);
+                    messagesList.TopIndex = messagesList.Items.Count - 1; // scroll to the bottom
                 }
             }
             catch (ObjectDisposedException e)
@@ -423,12 +424,20 @@ namespace CIPP
 
         private void jobFinished()
         {
-            timer.Stop();
-            time = 0;
-            totalTimeValueLabel.Text = "" + totalTime;
-            if (allertFinishCheckBox.Checked)
+            if (this.InvokeRequired)
             {
-                MessageBox.Show("Finished!");
+                jobFinishedCallback d = new jobFinishedCallback(jobFinished);
+                this.Invoke(d);
+            }
+            else
+            {
+                timer.Stop();
+                time = 0;
+                totalTimeValueLabel.Text = "" + totalTime;
+                if (allertFinishCheckBox.Checked)
+                {
+                    MessageBox.Show("Finished!");
+                }
             }
         }
 

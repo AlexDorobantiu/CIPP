@@ -55,7 +55,7 @@ namespace CIPPProtocols.Tasks
                 return;
             }
 
-            int imagePosition = subTask.frame.getPositionX();
+            int imagePosition = subTask.frame.getPosition().x;
             if (imagePosition == 0)
             {
                 MotionVectorUtils.blendMotionVectors(result, subTask.result, 0);
