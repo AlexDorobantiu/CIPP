@@ -52,11 +52,6 @@ namespace CIPPServer
             eventWaitHandleBetweenTasks.Close();
         }
 
-        public void Dispose()
-        {
-            Kill();
-        }
-
         private void doWork()
         {
             try
@@ -104,5 +99,30 @@ namespace CIPPServer
                 Console.WriteLine("The thread abortion process occured at a time when it could not be properly handled.");
             }
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    Kill();
+                }
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }

@@ -7,6 +7,7 @@ namespace ProcessingImageSDK.Position
     /// <summary>
     /// Useful for describing pixel positions inside an image
     /// </summary>
+    [Serializable]
     public struct Position2d
     {
         public int x;
