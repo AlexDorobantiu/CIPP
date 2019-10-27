@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-using ParametersSDK;
 using ProcessingImageSDK;
 using ProcessingImageSDK.MotionVectors;
 

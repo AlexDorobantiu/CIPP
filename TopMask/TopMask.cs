@@ -1,10 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 using ProcessingImageSDK;
 using ParametersSDK;
-using Plugins.Masks;
 
 namespace Plugins.Masks.TopMask
 {

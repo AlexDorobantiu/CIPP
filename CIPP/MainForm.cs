@@ -5,12 +5,15 @@ using System.Windows.Forms;
 using CIPP.WorkManagement;
 using CIPPProtocols.Plugin;
 using ProcessingImageSDK;
+using CIPP.State;
+using CIPP.Utils;
 
 namespace CIPP
 {
     public partial class CIPPForm : Form
     {
         private const string tutorialsUrl = "https://alex.dorobantiu.ro";
+        private const string STATE_FILENAME = "cipp_state.json";
 
         int totalTime;
         int time;
@@ -46,7 +49,60 @@ namespace CIPP
             loadConnectionsFromDisk();
 
             pluginFinder = new PluginFinder(filterPluginList, maskPluginList, motionRecognitionPluginList);
-            updatePlugins_Click(this, null);           
+            updatePlugins_Click(this, null);
+            loadState();
+        }
+
+        private void saveState()
+        {
+            MainFormState state = new MainFormState();
+            foreach (ProcessingImage image in originalImageList)
+            {
+                state.loadedImages.Add(image.getPath());
+            }
+            foreach (int index in originalImageListBox.SelectedIndices)
+            {
+                state.selectedImages.Add(index);
+            }
+            for (int index = 0; index < filterPluginsCheckBoxList.Count; index++)
+            {
+                if (filterPluginsCheckBoxList[index].Checked)
+                {
+                    state.selectedFilterPlugins.Add(filterPluginList[index].fullName);
+                }
+            }
+            JsonUtil.SerializeToFile(Path.Combine(ReflectionUtil.getCurrentExeDirectory(), STATE_FILENAME), state);
+        }
+
+        private void loadState()
+        {
+            try
+            {
+                MainFormState state = JsonUtil.DeserializeFromFile<MainFormState>(Path.Combine(ReflectionUtil.getCurrentExeDirectory(), STATE_FILENAME));
+                if (state == null)
+                {
+                    return;
+                }
+                foreach (string filename in state.loadedImages)
+                {
+                    loadFile(filename);
+                }
+                foreach (int index in state.selectedImages)
+                {
+                    originalImageListBox.SelectedIndices.Add(index);
+                }
+                for (int index = 0; index < filterPluginsCheckBoxList.Count; index++)
+                {
+                    if (state.selectedFilterPlugins.Contains(filterPluginList[index].fullName))
+                    {
+                        filterPluginsCheckBoxList[index].Checked = true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                addMessage(e.Message);
+            }
         }
 
         private void loadFile(string fileName)
@@ -427,6 +483,7 @@ namespace CIPP
         private void CIPPForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             saveConnectionsToDisk();
+            saveState();
             finishButton_Click(this, EventArgs.Empty);
         }
 

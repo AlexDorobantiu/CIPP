@@ -1,16 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 using ProcessingImageSDK;
 
 namespace CIPP
 {
-    public partial class ViewMotionForm : Form
+    partial class ViewMotionForm : Form
     {
         public ViewMotionForm(Motion motion)
         {

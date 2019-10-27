@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Plugins.Filters;
 using ParametersSDK;
 using ProcessingImageSDK;

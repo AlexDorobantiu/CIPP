@@ -1,17 +1,15 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using ProcessingImageSDK;
 using System.IO;
 
 namespace CIPP
 {
-    public partial class ViewImageForm : Form
+    partial class ViewImageForm : Form
     {
+        private const string RESOURCES_FOLDER = "Resources";
+        private const string CHECKERS_PATTERN_FILE = "checkers.png";
         ProcessingImage pi;
         public bool loaded;
         public ViewImageForm(ProcessingImage image)
@@ -144,11 +142,11 @@ namespace CIPP
             {
                 if (checkerCheckBox.Checked)
                 {
-                    this.piBox.BackgroundImage = new Bitmap(Path.Combine("Resources", "checkers.png"));
+                    piBox.BackgroundImage = new Bitmap(Path.Combine(RESOURCES_FOLDER, CHECKERS_PATTERN_FILE));
                 }
                 else
                 {
-                    this.piBox.BackgroundImage = null;
+                    piBox.BackgroundImage = null;
                     GC.Collect();
                 }
             }

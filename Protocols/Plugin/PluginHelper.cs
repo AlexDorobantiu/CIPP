@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Reflection;
 using System.IO;
 
 using ParametersSDK;
-using Plugins.Filters;
-using Plugins.Masks;
-using Plugins.MotionRecognition;
 
 namespace CIPPProtocols.Plugin
 {

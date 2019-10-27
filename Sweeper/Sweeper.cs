@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 using ProcessingImageSDK;
 using ParametersSDK;
-using Plugins.MotionRecognition;
 using ProcessingImageSDK.MotionVectors;
 
 namespace Plugins.MotionRecognition.Sweeper

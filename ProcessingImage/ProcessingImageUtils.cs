@@ -1,11 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ProcessingImageSDK
+﻿namespace ProcessingImageSDK
 {
+    /// <summary>
+    /// Utility class for working with image processing
+    /// </summary>
     public static class ProcessingImageUtils
     {
+        /// <summary>
+        /// Computes the result of the convolution with the floating point kernel specified
+        /// </summary>
+        /// <param name="colorChannel"></param>
+        /// <param name="convolutionMatrix"></param>
+        /// <returns></returns>
         public static float[,] delayedConvolution(byte[,] colorChannel, float[,] convolutionMatrix)
         {
             int colorChannelSizeX = colorChannel.GetLength(1);
@@ -34,6 +39,12 @@ namespace ProcessingImageSDK
             return output;
         }
 
+        /// <summary>
+        /// Computes the result of the convolution with the integer kernel specified
+        /// </summary>
+        /// <param name="colorChannel"></param>
+        /// <param name="convolutionMatrix"></param>
+        /// <returns></returns>
         public static int[,] delayedConvolution(byte[,] colorChannel, int[,] convolutionMatrix)
         {
             int colorChannelSizeX = colorChannel.GetLength(1);
@@ -62,24 +73,43 @@ namespace ProcessingImageSDK
             return output;
         }
 
-        public static int outsideMirroredPosition(int position, int maxPositions)
+        /// <summary>
+        /// Gets a position in a mirrored way when outside of the interval [0, maxPosition)
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="maxPosition"></param>
+        /// <returns></returns>
+        public static int outsideMirroredPosition(int position, int maxPosition)
         {
             if (position < 0)
             {
                 position = -position;
             }
-            if (position >= maxPositions)
+            if (position >= maxPosition)
             {
-                position = maxPositions + maxPositions - position - 1;
+                position = maxPosition + maxPosition - position - 1;
             }
             return position;
         }
 
+        /// <summary>
+        /// Gets a pixel of a color channel at the position received as parameter. When the position is outside of the matrix, the mirrored position is used.
+        /// </summary>
+        /// <param name="colorChannel"></param>
+        /// <param name="positionX"></param>
+        /// <param name="positionY"></param>
+        /// <returns></returns>
         public static byte getPixelMirrored(byte[,] colorChannel, int positionX, int positionY)
         {
             return colorChannel[outsideMirroredPosition(positionY, colorChannel.GetLength(0)), outsideMirroredPosition(positionX, colorChannel.GetLength(1))];
         }
 
+        /// <summary>
+        /// Computes the result of the convolution with the floating point kernel specified and keeping the same output size as the input size by mirroring the margins of the channel.
+        /// </summary>
+        /// <param name="colorChannel"></param>
+        /// <param name="convolutionMatrix"></param>
+        /// <returns></returns>
         public static float[,] mirroredMarginConvolution(byte[,] colorChannel, float[,] convolutionMatrix)
         {
             int colorChannelSizeX = colorChannel.GetLength(1);
@@ -112,6 +142,12 @@ namespace ProcessingImageSDK
             return output;
         }
 
+        /// <summary>
+        /// Computes the result of the convolution with the floating point kernel specified and keeping the same output size as the input size by mirroring the margins of the input.
+        /// </summary>
+        /// <param name="inputMatrix"></param>
+        /// <param name="convolutionMatrix"></param>
+        /// <returns></returns>
         public static float[,] mirroredMarginConvolution(float[,] inputMatrix, float[,] convolutionMatrix)
         {
             int sizeX = inputMatrix.GetLength(1);
@@ -144,6 +180,12 @@ namespace ProcessingImageSDK
             return output;
         }
 
+        /// <summary>
+        /// Computes the result of the convolution with the integer kernel specified and keeping the same output size as the input size by mirroring the margins of the channel.
+        /// </summary>
+        /// <param name="colorChannel"></param>
+        /// <param name="convolutionMatrix"></param>
+        /// <returns></returns>
         public static int[,] mirroredMarginConvolution(byte[,] colorChannel, int[,] convolutionMatrix)
         {
             int colorChannelSizeX = colorChannel.GetLength(1);
@@ -176,6 +218,12 @@ namespace ProcessingImageSDK
             return output;
         }
 
+        /// <summary>
+        /// Computes the result of the convolution with the integer kernel specified and keeping the same output size as the input size by mirroring the margins of the input.
+        /// </summary>
+        /// <param name="inputMatrix"></param>
+        /// <param name="convolutionMatrix"></param>
+        /// <returns></returns>
         public static int[,] mirroredMarginConvolution(int[,] inputMatrix, int[,] convolutionMatrix)
         {
             int sizeX = inputMatrix.GetLength(1);
@@ -208,6 +256,11 @@ namespace ProcessingImageSDK
             return output;
         }
 
+        /// <summary>
+        /// Does a proportional input fit into the [0, 255] interval
+        /// </summary>
+        /// <param name="inputMatrix"></param>
+        /// <returns></returns>
         public static byte[,] fitHistogramToDisplay(int[,] inputMatrix)
         {
             int sizeX = inputMatrix.GetLength(1);
@@ -244,6 +297,11 @@ namespace ProcessingImageSDK
             return result;
         }
 
+        /// <summary>
+        /// Does a proportional input fit into the [0, 255] interval
+        /// </summary>
+        /// <param name="inputMatrix"></param>
+        /// <returns></returns>
         public static byte[,] fitHistogramToDisplay(float[,] inputMatrix)
         {
             int sizeX = inputMatrix.GetLength(1);
@@ -280,6 +338,11 @@ namespace ProcessingImageSDK
             return result;
         }
 
+        /// <summary>
+        /// Does a input truncate into the [0, 255] interval
+        /// </summary>
+        /// <param name="inputMatrix"></param>
+        /// <returns></returns>
         public static byte[,] truncateToDisplay(int[,] inputMatrix)
         {
             int sizeX = inputMatrix.GetLength(1);
@@ -305,6 +368,11 @@ namespace ProcessingImageSDK
             return result;
         }
 
+        /// <summary>
+        /// Does a input truncate into the [0, 255] interval
+        /// </summary>
+        /// <param name="inputMatrix"></param>
+        /// <returns></returns>
         public static byte[,] truncateToDisplay(float[,] inputMatrix)
         {
             int sizeX = inputMatrix.GetLength(1);
@@ -330,6 +398,11 @@ namespace ProcessingImageSDK
             return result;
         }
 
+        /// <summary>
+        /// Converts a color channel to a floating poing matrix
+        /// </summary>
+        /// <param name="colorChannel"></param>
+        /// <returns></returns>
         public static float[,] convertToFloat(byte[,] colorChannel)
         {
             int sizeX = colorChannel.GetLength(1);
@@ -347,6 +420,10 @@ namespace ProcessingImageSDK
             return result;
         }
 
+        /// <summary>
+        /// Normalizes the input matrix
+        /// </summary>
+        /// <param name="matrix"></param>
         public static void normalize(float[,] matrix)
         {
             int sizeX = matrix.GetLength(1);
@@ -369,6 +446,10 @@ namespace ProcessingImageSDK
             }
         }
 
+        /// <summary>
+        /// Normalizes the input matrix
+        /// </summary>
+        /// <param name="matrix"></param>
         public static void normalize(double[,] matrix)
         {
             int sizeX = matrix.GetLength(1);
@@ -391,6 +472,13 @@ namespace ProcessingImageSDK
             }
         }
         
+        /// <summary>
+        /// Creates a new color channel with the specified dimension and a default color
+        /// </summary>
+        /// <param name="sizeX"></param>
+        /// <param name="sizeY"></param>
+        /// <param name="defaultColor"></param>
+        /// <returns></returns>
         public static byte[,] createChannel(int sizeX, int sizeY, byte defaultColor = 0)
         {
             byte[,] channel = new byte[sizeY, sizeX];

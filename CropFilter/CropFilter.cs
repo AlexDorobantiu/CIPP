@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using ParametersSDK;
-using Plugins.Filters;
 using ProcessingImageSDK;
 
 namespace Plugins.Filters.CropFilter

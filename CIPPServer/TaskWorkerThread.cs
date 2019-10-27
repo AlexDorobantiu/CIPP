@@ -1,17 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Net;
 using System.Threading;
-using System.Reflection;
 
 using CIPPProtocols;
-using CIPPProtocols.Plugin;
-using ProcessingImageSDK;
-using Plugins.Filters;
-using Plugins.Masks;
-using Plugins.MotionRecognition;
-using CIPPProtocols.Tasks;
 
 namespace CIPPServer
 {

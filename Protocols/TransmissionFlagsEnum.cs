@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CIPPProtocols
+﻿namespace CIPPProtocols
 {
     public enum TrasmissionFlagsEnum
     {

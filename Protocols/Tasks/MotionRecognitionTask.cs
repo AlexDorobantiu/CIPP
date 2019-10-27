@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 using ProcessingImageSDK;
 using ProcessingImageSDK.MotionVectors;
@@ -31,16 +29,16 @@ namespace CIPPProtocols.Tasks
             ProcessingImage frame, ProcessingImage nextFrame, MotionRecognitionTask parent)
             : base(id, Type.MOTION_RECOGNITION, pluginFullName, parameters)
         {
-            this.status = Status.NOT_TAKEN;
+            status = Status.NOT_TAKEN;
             this.motionId = motionId;
             this.blockSize = blockSize;
             this.searchDistance = searchDistance;
             this.frame = frame;
             this.nextFrame = nextFrame;
             this.parent = parent;
-            
-            this.subParts = 0;            
-            this.result = null;
+
+            subParts = 0;
+            result = null;
         }
 
         public void join(MotionRecognitionTask subTask)
@@ -68,7 +66,7 @@ namespace CIPPProtocols.Tasks
             subParts--;
             if (subParts == 0)
             {
-                this.status = Status.SUCCESSFUL;
+                status = Status.SUCCESSFUL;
             }
         }
 

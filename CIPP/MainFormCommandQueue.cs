@@ -270,14 +270,14 @@ namespace CIPP
 
         private void updateTCPList(TcpProxy proxy)
         {
-            if (this.TCPConnectionsListBox.InvokeRequired)
+            if (TCPConnectionsListBox.InvokeRequired)
             {
                 updateTCPListCallback d = new updateTCPListCallback(updateTCPList);
-                this.Invoke(d, new object[] { proxy });
+                Invoke(d, new object[] { proxy });
             }
             else
             {
-                if (this.TCPConnectionsListBox.IsDisposed)
+                if (TCPConnectionsListBox.IsDisposed)
                 {
                     return;
                 }
@@ -285,9 +285,9 @@ namespace CIPP
                 {
                     if (proxy == TCPConnections[i])
                     {
-                        if (this.TCPConnectionsListBox.Items[i] != null)
+                        if (TCPConnectionsListBox.Items[i] != null)
                         {
-                            this.TCPConnectionsListBox.Items[i] = proxy.getNameAndStatus();
+                            TCPConnectionsListBox.Items[i] = proxy.getNameAndStatus();
                             break;
                         }
                     }
@@ -297,24 +297,24 @@ namespace CIPP
 
         private void displayWorker(string workerName, bool visible)
         {
-            if (this.workersList.InvokeRequired)
+            if (workersList.InvokeRequired)
             {
                 addWorkerItemCallback d = new addWorkerItemCallback(displayWorker);
-                this.Invoke(d, new object[] { workerName, visible });
+                Invoke(d, new object[] { workerName, visible });
             }
             else
             {
-                if (this.workersList.IsDisposed)
+                if (workersList.IsDisposed)
                 {
                     return;
                 }
                 if (visible)
                 {
-                    this.workersList.Items.Add(workerName);
+                    workersList.Items.Add(workerName);
                 }
                 else
                 {
-                    this.workersList.Items.Remove(workerName);
+                    workersList.Items.Remove(workerName);
                 }
             }
         }
@@ -323,14 +323,14 @@ namespace CIPP
         {
             try
             {
-                if (this.messagesList.InvokeRequired)
+                if (messagesList.InvokeRequired)
                 {
                     addMessageCallback d = new addMessageCallback(addMessage);
-                    this.Invoke(d, new object[] { message });
+                    Invoke(d, new object[] { message });
                 }
                 else
                 {
-                    if (this.messagesList.IsDisposed)
+                    if (messagesList.IsDisposed)
                     {
                         return;
                     }
@@ -347,14 +347,14 @@ namespace CIPP
 
         private void addImage(ProcessingImage processingImage, Task.Type taskType)
         {
-            if (this.processedImageListBox.InvokeRequired)
+            if (processedImageListBox.InvokeRequired)
             {
                 addImageCallback d = new addImageCallback(addImage);
-                this.Invoke(d, new object[] { processingImage, taskType });
+                Invoke(d, new object[] { processingImage, taskType });
             }
             else
             {
-                if (this.processedImageListBox.IsDisposed)
+                if (processedImageListBox.IsDisposed)
                 {
                     return;
                 }
@@ -386,14 +386,14 @@ namespace CIPP
 
         private void addMotion(Motion motion)
         {
-            if (this.motionListBox.InvokeRequired)
+            if (motionListBox.InvokeRequired)
             {
                 addMotionCallback d = new addMotionCallback(addMotion);
-                this.Invoke(d, new object[] { motion });
+                Invoke(d, new object[] { motion });
             }
             else
             {
-                if (this.motionListBox.IsDisposed)
+                if (motionListBox.IsDisposed)
                 {
                     return;
                 }
@@ -404,10 +404,10 @@ namespace CIPP
 
         private void numberChanged(int number, bool commandOrTask)
         {
-            if (this.workersList.InvokeRequired)
+            if (workersList.InvokeRequired)
             {
                 numberChangedCallback d = new numberChangedCallback(numberChanged);
-                this.Invoke(d, new object[] { number, commandOrTask });
+                Invoke(d, new object[] { number, commandOrTask });
             }
             else
             {
@@ -424,10 +424,10 @@ namespace CIPP
 
         private void jobFinished()
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
                 jobFinishedCallback d = new jobFinishedCallback(jobFinished);
-                this.Invoke(d);
+                Invoke(d);
             }
             else
             {

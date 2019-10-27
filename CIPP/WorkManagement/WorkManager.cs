@@ -6,8 +6,6 @@ using CIPPProtocols.Commands;
 using CIPPProtocols.Plugin;
 using CIPPProtocols.Tasks;
 using Plugins.Filters;
-using Plugins.Masks;
-using Plugins.MotionRecognition;
 using ProcessingImageSDK;
 
 namespace CIPP.WorkManagement
@@ -79,11 +77,11 @@ namespace CIPP.WorkManagement
 
         public void updateCommandQueue(List<MotionRecognitionCommand> motionDetectionRequests)
         {
-            lock (this.motionRecognitionRequests)
+            lock (motionRecognitionRequests)
             {
                 foreach (MotionRecognitionCommand command in motionDetectionRequests)
                 {
-                    this.motionRecognitionRequests.Enqueue(command);
+                    motionRecognitionRequests.Enqueue(command);
                 }
                 commandsNumber += motionDetectionRequests.Count;
                 callbacks.numberChanged(commandsNumber, false);
@@ -99,7 +97,7 @@ namespace CIPP.WorkManagement
                     threads = new Thread[numberOfLocalThreads];
                     for (int i = 0; i < threads.Length; i++)
                     {
-                        threads[i] = new Thread(this.doWork, threadStackSize);
+                        threads[i] = new Thread(doWork, threadStackSize);
                         threads[i].Name = "Local Thread " + i;
                         threads[i].IsBackground = true;
                         threads[i].Start();
@@ -111,7 +109,7 @@ namespace CIPP.WorkManagement
                     {
                         if (threads[i].ThreadState == ThreadState.Stopped)
                         {
-                            threads[i] = new Thread(this.doWork, threadStackSize);
+                            threads[i] = new Thread(doWork, threadStackSize);
                             threads[i].Name = "Local Thread " + i;
                             threads[i].IsBackground = true;
                             threads[i].Start();

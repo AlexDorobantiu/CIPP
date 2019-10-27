@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using System.Windows.Forms;
-
-using CIPPProtocols;
 using CIPPProtocols.Plugin;
 using ParametersSDK;
 using Plugins.Filters;
@@ -32,7 +29,7 @@ namespace CIPP
             FlowLayoutPanel currentFlowLayoutPanel;
             List<CheckBox> currentCheckBoxList;
 
-            this.SuspendLayout();
+            SuspendLayout();
             try
             {
                 switch (processingTab.SelectedIndex)
@@ -98,8 +95,8 @@ namespace CIPP
             {
                 MessageBox.Show(exception.Message);
             }
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         private void updatePluginFinder()

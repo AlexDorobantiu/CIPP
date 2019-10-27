@@ -1,18 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 using ParametersSDK;
-using Plugins.Filters;
 using System.Globalization;
 
 namespace CIPP
 {
-    public partial class OptionsForm : Form
+    partial class OptionsForm : Form
     {
         List<IParameters> parametersList;
 
@@ -24,7 +20,7 @@ namespace CIPP
             cancelButton.BringToFront();
 
             this.parametersList = parametersList;
-            this.SuspendLayout();
+            SuspendLayout();
             foreach (IParameters parameter in parametersList)
             {
                 Label label = new Label();
@@ -55,8 +51,8 @@ namespace CIPP
                             }
                         }
 
-                        this.flowLayoutPanel.Controls.Add(textBox);
-                        this.flowLayoutPanel.SetFlowBreak(textBox, true);
+                        flowLayoutPanel.Controls.Add(textBox);
+                        flowLayoutPanel.SetFlowBreak(textBox, true);
                     }
                     else
                     {
@@ -79,8 +75,8 @@ namespace CIPP
                             {
                                 trackBar.Value = (int)values[0];
                             }
-                            this.flowLayoutPanel.Controls.Add(trackBar);
-                            this.flowLayoutPanel.SetFlowBreak(trackBar, true);
+                            flowLayoutPanel.Controls.Add(trackBar);
+                            flowLayoutPanel.SetFlowBreak(trackBar, true);
                         }
                     }
                 }
@@ -109,8 +105,8 @@ namespace CIPP
                                 }
                             }
 
-                            this.flowLayoutPanel.Controls.Add(textBox);
-                            this.flowLayoutPanel.SetFlowBreak(textBox, true);
+                            flowLayoutPanel.Controls.Add(textBox);
+                            flowLayoutPanel.SetFlowBreak(textBox, true);
                         }
                     }
                     else
@@ -136,14 +132,14 @@ namespace CIPP
                                 }
                                 else
                                 {
-                                    foreach (Object o in values)
+                                    foreach (object o in values)
                                     {
                                         listBox.SetSelected((int)o, true);
                                     }
                                 }
 
-                                this.flowLayoutPanel.Controls.Add(listBox);
-                                this.flowLayoutPanel.SetFlowBreak(listBox, true);
+                                flowLayoutPanel.Controls.Add(listBox);
+                                flowLayoutPanel.SetFlowBreak(listBox, true);
                             }
                             else
                             {
@@ -167,16 +163,16 @@ namespace CIPP
                                     {
                                         comboBox.SelectedIndex = (int)values[0];
                                     }
-                                    this.flowLayoutPanel.Controls.Add(comboBox);
-                                    this.flowLayoutPanel.SetFlowBreak(comboBox, true);
+                                    flowLayoutPanel.Controls.Add(comboBox);
+                                    flowLayoutPanel.SetFlowBreak(comboBox, true);
                                 }
                             }
                         }
                     }
                 }
             }
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         private void okButton_Click(object sender, EventArgs e)
@@ -213,7 +209,7 @@ namespace CIPP
                 }
                 i += 2;
             }
-            this.Close();
+            Close();
         }
     }
 }

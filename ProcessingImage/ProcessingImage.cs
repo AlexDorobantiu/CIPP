@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Runtime.Serialization;
 using System.IO;
 using ProcessingImageSDK.PixelStructures;
 using ProcessingImageSDK.Position;
@@ -78,51 +76,91 @@ namespace ProcessingImageSDK
             this.position = position;
         }
 
+        /// <summary>
+        /// Gets the image name
+        /// </summary>
+        /// <returns>The name to be displayed on screen</returns>
         public string getName()
         {
             return name;
         }
 
+        /// <summary>
+        /// Sets the image name
+        /// </summary>
+        /// <param name="name">The name to be displayed on screen</param>
         public void setName(string name)
         {
             this.name = name;
         }
 
+        /// <summary>
+        /// Gets the width of the image
+        /// </summary>
+        /// <returns>The width of the image</returns>
         public int getSizeX()
         {
             return sizeX;
         }
 
+        /// <summary>
+        /// Gets the height of the image
+        /// </summary>
+        /// <returns>The heigth of the image</returns>
         public int getSizeY()
         {
             return sizeY;
         }
 
+        /// <summary>
+        /// Gets the position of the image in a parent image from which this image was split
+        /// </summary>
+        /// <returns>The position</returns>
         public Position2d getPosition()
         {
             return position;
         }
 
+        /// <summary>
+        /// The red channel
+        /// </summary>
+        /// <returns></returns>
         public byte[,] getRed()
         {
             return red;
         }
 
+        /// <summary>
+        /// The green channel
+        /// </summary>
+        /// <returns></returns>
         public byte[,] getGreen()
         {
             return green;
         }
 
+        /// <summary>
+        /// The blue channel
+        /// </summary>
+        /// <returns></returns>
         public byte[,] getBlue()
         {
             return blue;
         }
 
+        /// <summary>
+        /// The alpha channel
+        /// </summary>
+        /// <returns></returns>
         public byte[,] getAlpha()
         {
             return alpha;
         }
 
+        /// <summary>
+        /// The gray channel
+        /// </summary>
+        /// <returns>The gray channel. If it doesn't exist at the time of the call, it is computed and then returned.</returns>
         public byte[,] getGray()
         {
             if (gray == null)
@@ -132,6 +170,10 @@ namespace ProcessingImageSDK
             return gray;
         }
 
+        /// <summary>
+        /// The luminance channel
+        /// </summary>
+        /// <returns>The luminance channel. If it doesn't exist at the time of the call, it is computed and then returned.</returns>
         public byte[,] getLuminance()
         {
             if (luminance == null)
@@ -141,34 +183,67 @@ namespace ProcessingImageSDK
             return luminance;
         }
 
+        /// <summary>
+        /// Sets the width of the image
+        /// </summary>
+        /// <param name="sizeX"></param>
         public void setSizeX(int sizeX)
         {
             this.sizeX = sizeX;
         }
 
+        /// <summary>
+        /// Sets the height of the image
+        /// </summary>
+        /// <param name="sizeY"></param>
         public void setSizeY(int sizeY)
         {
             this.sizeY = sizeY;
         }
 
+        /// <summary>
+        /// Sets the red channel
+        /// </summary>
+        /// <param name="red"></param>
         public void setRed(byte[,] red)
         {
             this.red = red;
         }
 
+        /// <summary>
+        /// Sets the green channel
+        /// </summary>
+        /// <param name="green"></param>
         public void setGreen(byte[,] green)
         {
             this.green = green;
         }
 
+        /// <summary>
+        /// Sets the blue channel
+        /// </summary>
+        /// <param name="blue"></param>
         public void setBlue(byte[,] blue)
         {
             this.blue = blue;
         }
 
+        /// <summary>
+        /// Sets the alpha channel
+        /// </summary>
+        /// <param name="alpha"></param>
         public void setAlpha(byte[,] alpha)
         {
             this.alpha = alpha;
+        }
+
+        /// <summary>
+        /// Returns the file system path of the ProcessingImage. If the ProcessingImage was not loaded from the disk, then it should be null.
+        /// </summary>
+        /// <returns></returns>
+        public string getPath()
+        {
+            return path;
         }
 
         /// <summary>
@@ -178,13 +253,17 @@ namespace ProcessingImageSDK
         public void setGray(byte[,] gray)
         {
             this.gray = gray;
-            this.grayscale = true;
-            this.red = null;
-            this.green = null;
-            this.blue = null;
-            this.luminance = null;
+            grayscale = true;
+            red = null;
+            green = null;
+            blue = null;
+            luminance = null;
         }
 
+        /// <summary>
+        /// Loads the content from a Bitmap object
+        /// </summary>
+        /// <param name="bitmap">The Bitmap object</param>
         public void loadImage(Bitmap bitmap)
         {
             sizeX = bitmap.Width;
@@ -372,23 +451,23 @@ namespace ProcessingImageSDK
 
             if (grayscale)
             {
-                this.gray = this.red;
-                this.red = null;
-                this.green = null;
-                this.blue = null;
+                gray = red;
+                red = null;
+                green = null;
+                blue = null;
             }
         }
 
         /// <summary>
-        /// Loads Image from specified file name
+        /// Loads Image from the specified file name
         /// </summary>
         /// <param name="fileName">Full path of the file to be loaded</param>
         public void loadImage(string fileName)
         {
             Bitmap bitmap = new Bitmap(fileName);
             loadImage(bitmap);
-            this.path = fileName;
-            this.name = Path.GetFileName(fileName);
+            path = fileName;
+            name = Path.GetFileName(fileName);
         }
 
         /// <summary>
@@ -710,7 +789,7 @@ namespace ProcessingImageSDK
                             {
                                 if (gray == null)
                                 {
-                                    this.computeGray();
+                                    computeGray();
                                 }
                                 unsafe
                                 {
@@ -732,7 +811,7 @@ namespace ProcessingImageSDK
                             {
                                 if (gray == null)
                                 {
-                                    this.computeGray();
+                                    computeGray();
                                 }
                                 unsafe
                                 {
@@ -754,7 +833,7 @@ namespace ProcessingImageSDK
                             {
                                 if (luminance == null)
                                 {
-                                    this.computeLuminance();
+                                    computeLuminance();
                                 }
                                 unsafe
                                 {
@@ -776,7 +855,7 @@ namespace ProcessingImageSDK
                             {
                                 if (luminance == null)
                                 {
-                                    this.computeLuminance();
+                                    computeLuminance();
                                 }
                                 unsafe
                                 {
@@ -859,7 +938,7 @@ namespace ProcessingImageSDK
                             {
                                 if (gray == null)
                                 {
-                                    this.computeGray();
+                                    computeGray();
                                 }
                                 unsafe
                                 {
@@ -881,7 +960,7 @@ namespace ProcessingImageSDK
                             {
                                 if (gray == null)
                                 {
-                                    this.computeGray();
+                                    computeGray();
                                 }
                                 unsafe
                                 {
@@ -925,10 +1004,10 @@ namespace ProcessingImageSDK
             }
             try
             {
-                if (this.alpha == null)
+                if (alpha == null)
                 {
                     setAlpha(ProcessingImageUtils.createChannel(this.sizeX, this.sizeY, 255));
-                    this.watermaks.Add("Alpha channel was missing. A default one was generated.");
+                    watermaks.Add("Alpha channel was missing. A default one was generated.");
                 }
 
                 // take the best ratio
@@ -991,21 +1070,38 @@ namespace ProcessingImageSDK
             }
         }
 
+        /// <summary>
+        /// The list of image watermarks which contain the information of what processing was applied so far
+        /// </summary>
+        /// <returns>The list of watermarks</returns>
         public List<string> getWatermarks()
         {
             return watermaks;
         }
 
+        /// <summary>
+        /// Adds a watermark
+        /// </summary>
+        /// <param name="watermark"></param>
         public void addWatermark(string watermark)
         {
             watermaks.Add(watermark);
         }
 
-        public void setWatermarks(List<string> watermarks)
-        {
-            this.watermaks = watermarks;
-        }
-
+        /// <summary>
+        /// Copies to from the source to the target the following:
+        ///  - The display name
+        ///  - The width and the height
+        ///  - The grayscale flag
+        ///  - The masked flag
+        ///  - The watermarks
+        ///  - The alpha channel (if cloneAlpha is set to true)
+        ///  - The image dependencies (useful when using parallel processing)
+        ///  - The position in a parent image (useful when using parallel processing)
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        /// <param name="cloneAlpha"></param>
         public static void copyAttributes(ProcessingImage source, ProcessingImage target, bool cloneAlpha = true)
         {
             target.grayscale = source.grayscale;
@@ -1026,41 +1122,78 @@ namespace ProcessingImageSDK
             }
         }
 
+        /// <summary>
+        /// Copies to from the originalImage to the current image the following:
+        ///  - The display name
+        ///  - The width and the height
+        ///  - The grayscale flag
+        ///  - The masked flag
+        ///  - The watermarks
+        ///  - The image dependencies (useful when using parallel processing)
+        ///  - The position in a parent image (useful when using parallel processing)
+        /// </summary>
+        /// <param name="originalImage"></param>
         public void copyAttributes(ProcessingImage originalImage)
         {
             copyAttributes(originalImage, this, false);
         }
 
+        /// <summary>
+        /// Copies to from the originalImage to the current image the following:
+        ///  - The display name
+        ///  - The width and the height
+        ///  - The grayscale flag
+        ///  - The masked flag
+        ///  - The watermarks
+        ///  - The alpha channel
+        ///  - The image dependencies (useful when using parallel processing)
+        ///  - The position in a parent image (useful when using parallel processing)
+        /// </summary>
+        /// <param name="originalImage"></param>
         public void copyAttributesAndAlpha(ProcessingImage originalImage)
         {
             copyAttributes(originalImage, this, true);
         }
 
+        /// <summary>
+        /// Creates a duplicate of the image with the same attributes as the current one
+        /// </summary>
+        /// <param name="cloneAlpha"></param>
+        /// <returns></returns>
         public ProcessingImage clone(bool cloneAlpha = true)
         {
             ProcessingImage processingImage = new ProcessingImage();
             copyAttributes(this, processingImage, cloneAlpha);
             if (!grayscale)
             {
-                processingImage.red = (byte[,])this.red.Clone();
-                processingImage.green = (byte[,])this.green.Clone();
-                processingImage.blue = (byte[,])this.blue.Clone();
+                processingImage.red = (byte[,])red.Clone();
+                processingImage.green = (byte[,])green.Clone();
+                processingImage.blue = (byte[,])blue.Clone();
             }
             else
             {
                 processingImage.grayscale = true;
-                processingImage.gray = (byte[,])this.gray.Clone();
+                processingImage.gray = (byte[,])gray.Clone();
             }
             return processingImage;
         }
 
+        /// <summary>
+        /// Creates a duplicate of the image with the same attributes as the current one except the alpha channel which is replaced by the specified one
+        /// </summary>
+        /// <param name="alphaChannel"></param>
+        /// <returns></returns>
         public ProcessingImage cloneAndSubstituteAlpha(byte[,] alphaChannel)
         {
-            ProcessingImage processingImage = this.clone(false);
+            ProcessingImage processingImage = clone(false);
             processingImage.alpha = alphaChannel;
             return processingImage;
         }
 
+        /// <summary>
+        /// Creates a duplicate of the image but with blank channels
+        /// </summary>
+        /// <returns></returns>
         public ProcessingImage blankClone()
         {
             ProcessingImage processingImage = new ProcessingImage();
@@ -1081,6 +1214,11 @@ namespace ProcessingImageSDK
             return processingImage;
         }
 
+        /// <summary>
+        /// Computes an image which is the result of the convolution with the integer kernel specified
+        /// </summary>
+        /// <param name="matrix"></param>
+        /// <returns></returns>
         public ProcessingImage convolution(int[,] matrix)
         {
             ProcessingImage processingImage = new ProcessingImage();
@@ -1104,6 +1242,11 @@ namespace ProcessingImageSDK
             return processingImage;
         }
 
+        /// <summary>
+        /// Computes an image which is the result of the convolution with the floating point kernel specified
+        /// </summary>
+        /// <param name="matrix"></param>
+        /// <returns></returns>
         public ProcessingImage convolution(float[,] matrix)
         {
             ProcessingImage processingImage = new ProcessingImage();
@@ -1127,6 +1270,11 @@ namespace ProcessingImageSDK
             return processingImage;
         }
 
+        /// <summary>
+        /// Computes an image which is the result of the convolution with the integer kernel specified and which keeps the original image size by mirroring the margins when applying the kernel
+        /// </summary>
+        /// <param name="matrix"></param>
+        /// <returns></returns>
         public ProcessingImage mirroredMarginConvolution(float[,] matrix)
         {
             ProcessingImage processingImage = new ProcessingImage();
@@ -1148,6 +1296,11 @@ namespace ProcessingImageSDK
             return processingImage;
         }
 
+        /// <summary>
+        /// Computes an image which is the result of the convolution with the floating point kernel specified and which keeps the original image size by mirroring the margins when applying the kernel
+        /// </summary>
+        /// <param name="matrix"></param>
+        /// <returns></returns>
         public ProcessingImage mirroredMarginConvolution(int[,] matrix)
         {
             ProcessingImage processingImage = new ProcessingImage();
@@ -1169,6 +1322,10 @@ namespace ProcessingImageSDK
             return processingImage;
         }
 
+        /// <summary>
+        /// Gets the list of supported filetypes for loading and saving
+        /// </summary>
+        /// <returns></returns>
         public static List<string> getKnownExtensions()
         {
             return knownExtensionsList;
@@ -1340,7 +1497,7 @@ namespace ProcessingImageSDK
                         }
                     }
 
-                    this.watermaks = subPart.watermaks;
+                    watermaks = subPart.watermaks;
                 }
                 else
                 {
@@ -1359,7 +1516,7 @@ namespace ProcessingImageSDK
                         red = null;
                         green = null;
                         blue = null;
-                        gray = new byte[this.sizeY, this.sizeX];
+                        gray = new byte[sizeY, sizeX];
                         grayscale = true;
                     }
                     if (subPart.position.x == 0)
@@ -1388,9 +1545,9 @@ namespace ProcessingImageSDK
                     if (grayscale)
                     {
                         gray = null;
-                        red = new byte[this.sizeY, this.sizeX];
-                        green = new byte[this.sizeY, this.sizeX];
-                        blue = new byte[this.sizeY, this.sizeX];
+                        red = new byte[sizeY, sizeX];
+                        green = new byte[sizeY, sizeX];
+                        blue = new byte[sizeY, sizeX];
                         grayscale = false;
                     }
                     if (subPart.position.x == 0)

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CIPP.WorkManagement
+﻿namespace CIPP.WorkManagement
 {
     class WorkManagerCallbacks
     {
@@ -23,7 +19,7 @@ namespace CIPP.WorkManagement
             this.addMotion = addMotion;
             this.jobDone = jobDone;
             this.numberChanged = numberChanged;
-            this.updateTcpList = updateTCPList;
+            updateTcpList = updateTCPList;
         }
     }
 }

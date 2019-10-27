@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 using ProcessingImageSDK;
 
@@ -22,12 +20,12 @@ namespace CIPPProtocols.Tasks
 
         public FilterTask(int id, string pluginFullName, object[] parameters, ProcessingImage originalImage, FilterTask parent)
             : base(id, Type.FILTER, pluginFullName, parameters)
-        {           
-            this.status = Status.NOT_TAKEN;
+        {
+            status = Status.NOT_TAKEN;
             subParts = 0;
             this.parent = parent;
             this.originalImage = originalImage;
-            this.result = null;
+            result = null;
         }
 
         public void join(FilterTask subTask)
@@ -47,7 +45,7 @@ namespace CIPPProtocols.Tasks
             subParts--;
             if (subParts == 0)
             {
-                this.status = Status.SUCCESSFUL;
+                status = Status.SUCCESSFUL;
             }
         }
 
