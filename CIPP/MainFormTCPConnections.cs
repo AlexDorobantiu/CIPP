@@ -5,7 +5,7 @@ using CIPP.WorkManagement;
 
 namespace CIPP
 {
-    public partial class CIPPForm
+    partial class CIPPForm
     {
         private const string connectionsFilename = "connections.txt";
 

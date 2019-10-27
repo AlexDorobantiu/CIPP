@@ -10,7 +10,7 @@ using CIPP.Utils;
 
 namespace CIPP
 {
-    public partial class CIPPForm : Form
+    partial class CIPPForm : Form
     {
         private const string tutorialsUrl = "https://alex.dorobantiu.ro";
         private const string STATE_FILENAME = "cipp_state.json";
@@ -166,17 +166,24 @@ namespace CIPP
         {
             if (visibleImage != null)
             {
-                previewPicture.Image = visibleImage.getPreviewBitmap(previewPicture.Size.Width, previewPicture.Size.Height);
-                widthValueLabel.Text = "" + visibleImage.getSizeX();
-                heightValueLabel.Text = "" + visibleImage.getSizeY();
-                grayscaleValueLabel.Text = visibleImage.grayscale.ToString();
-                maskedValueLabel.Text = visibleImage.masked.ToString();
-
-                watermarkListBox.Items.Clear();
-                List<string> list = visibleImage.getWatermarks();
-                foreach (string s in list)
+                try
                 {
-                    watermarkListBox.Items.Add(s);
+                    previewPicture.Image = visibleImage.getPreviewBitmap(previewPicture.Size.Width, previewPicture.Size.Height);
+                    widthValueLabel.Text = "" + visibleImage.getSizeX();
+                    heightValueLabel.Text = "" + visibleImage.getSizeY();
+                    grayscaleValueLabel.Text = visibleImage.grayscale.ToString();
+                    maskedValueLabel.Text = visibleImage.masked.ToString();
+
+                    watermarkListBox.Items.Clear();
+                    List<string> list = visibleImage.getWatermarks();
+                    foreach (string s in list)
+                    {
+                        watermarkListBox.Items.Add(s);
+                    }
+                } 
+                catch (Exception e)
+                {
+                    addMessage(e.Message);
                 }
             }
             GC.Collect();

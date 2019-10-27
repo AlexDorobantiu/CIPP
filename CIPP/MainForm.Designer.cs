@@ -151,13 +151,13 @@ namespace CIPP
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(92, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(93, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -167,20 +167,20 @@ namespace CIPP
             this.tutorialToolStripMenuItem,
             this.aboutToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.helpToolStripMenuItem.Text = "Help";
             // 
             // tutorialToolStripMenuItem
             // 
             this.tutorialToolStripMenuItem.Name = "tutorialToolStripMenuItem";
-            this.tutorialToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
+            this.tutorialToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.tutorialToolStripMenuItem.Text = "Tutorial";
             this.tutorialToolStripMenuItem.Click += new System.EventHandler(this.tutorialToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(114, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -880,9 +880,9 @@ namespace CIPP
             this.messagesListLabel.Location = new System.Drawing.Point(207, 14);
             this.messagesListLabel.Margin = new System.Windows.Forms.Padding(0);
             this.messagesListLabel.Name = "messagesListLabel";
-            this.messagesListLabel.Size = new System.Drawing.Size(142, 13);
+            this.messagesListLabel.Size = new System.Drawing.Size(58, 13);
             this.messagesListLabel.TabIndex = 2;
-            this.messagesListLabel.Text = "Messages between workers:";
+            this.messagesListLabel.Text = "Messages:";
             // 
             // messagesList
             // 
@@ -948,7 +948,7 @@ namespace CIPP
             // numberOfCommandsLabel
             // 
             this.numberOfCommandsLabel.Name = "numberOfCommandsLabel";
-            this.numberOfCommandsLabel.Size = new System.Drawing.Size(63, 17);
+            this.numberOfCommandsLabel.Size = new System.Drawing.Size(72, 17);
             this.numberOfCommandsLabel.Text = "Commands:";
             // 
             // numberOfCommandsValueLabel
@@ -960,7 +960,7 @@ namespace CIPP
             // numberOfTasksLabel
             // 
             this.numberOfTasksLabel.Name = "numberOfTasksLabel";
-            this.numberOfTasksLabel.Size = new System.Drawing.Size(38, 17);
+            this.numberOfTasksLabel.Size = new System.Drawing.Size(37, 17);
             this.numberOfTasksLabel.Text = "Tasks:";
             // 
             // numberOfTasksValueLabel
@@ -972,7 +972,7 @@ namespace CIPP
             // timeLabel
             // 
             this.timeLabel.Name = "timeLabel";
-            this.timeLabel.Size = new System.Drawing.Size(81, 17);
+            this.timeLabel.Size = new System.Drawing.Size(89, 17);
             this.timeLabel.Text = "Execution time:";
             // 
             // timeValueLabel
@@ -984,7 +984,7 @@ namespace CIPP
             // totalTimeLabel
             // 
             this.totalTimeLabel.Name = "totalTimeLabel";
-            this.totalTimeLabel.Size = new System.Drawing.Size(58, 17);
+            this.totalTimeLabel.Size = new System.Drawing.Size(62, 17);
             this.totalTimeLabel.Text = "Total time:";
             // 
             // totalTimeValueLabel
