@@ -9,6 +9,8 @@ namespace CIPPProtocols.Plugin
 {
     public class PluginHelper
     {
+        private const string GET_PARAMETERS_METHOD_NAME = "getParametersList";
+
         private static List<Assembly> loadPlugInAssemblies(string path)
         {
             DirectoryInfo dInfo = new DirectoryInfo(path);
@@ -41,8 +43,11 @@ namespace CIPPProtocols.Plugin
                             List<IParameters> parameterList = null;
                             try
                             {
-                                parameterList = (List<IParameters>)type.InvokeMember("getParametersList", 
-                                    BindingFlags.Default | BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null, null);                                
+                                MethodInfo getParametersList = type.GetMethod(GET_PARAMETERS_METHOD_NAME, BindingFlags.Default | BindingFlags.Static | BindingFlags.Public);
+                                if (getParametersList != null)
+                                {
+                                    parameterList = (List<IParameters>)getParametersList.Invoke(null, null);
+                                }                            
                             }
                             catch
                             {
