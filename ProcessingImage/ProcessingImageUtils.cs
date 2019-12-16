@@ -424,10 +424,11 @@
         /// Normalizes the input matrix
         /// </summary>
         /// <param name="matrix"></param>
-        public static void normalize(float[,] matrix)
+        public static float[,] normalize(float[,] matrix)
         {
             int sizeX = matrix.GetLength(1);
             int sizeY = matrix.GetLength(0);
+            float[,] result = new float[sizeY, sizeX];
 
             float sum = 0;
             for (int i = 0; i < sizeY; i++)
@@ -441,19 +442,21 @@
             {
                 for (int j = 0; j < sizeX; j++)
                 {
-                    matrix[i, j] /= sum;
+                    result[i, j] = matrix[i, j] / sum;
                 }
             }
+            return result;
         }
 
         /// <summary>
         /// Normalizes the input matrix
         /// </summary>
         /// <param name="matrix"></param>
-        public static void normalize(double[,] matrix)
+        public static double[,] normalize(double[,] matrix)
         {
             int sizeX = matrix.GetLength(1);
             int sizeY = matrix.GetLength(0);
+            double[,] result = new double[sizeY, sizeX];
 
             double sum = 0;
             for (int i = 0; i < sizeY; i++)
@@ -467,11 +470,43 @@
             {
                 for (int j = 0; j < sizeX; j++)
                 {
-                    matrix[i, j] /= sum;
+                    result[i, j] = matrix[i, j] / sum;
                 }
             }
+            return result;
         }
-        
+
+        /// <summary>
+        /// Divides the values in the matrix to the sum of the positive values,
+        /// thus limiting the maximum value of a convolution operation to 1
+        /// </summary>
+        public static float[,] semiNormalize(float[,] matrix)
+        {
+            int sizeX = matrix.GetLength(1);
+            int sizeY = matrix.GetLength(0);
+            float[,] result = new float[sizeY, sizeX];
+
+            float sum = 0;
+            for (int i = 0; i < sizeY; i++)
+            {
+                for (int j = 0; j < sizeX; j++)
+                {
+                    if (matrix[i, j] > 0)
+                    {
+                        sum += matrix[i, j];
+                    }
+                }
+            }
+            for (int i = 0; i < sizeY; i++)
+            {
+                for (int j = 0; j < sizeX; j++)
+                {
+                    result[i, j] = matrix[i, j] / sum;
+                }
+            }
+            return result;
+        }
+
         /// <summary>
         /// Creates a new color channel with the specified dimension and a default color
         /// </summary>

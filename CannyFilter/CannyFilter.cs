@@ -18,14 +18,14 @@ namespace CannyFilter
         private int step;
 
         private static string[] yesNoEnumValues = { "Yes", "No" };
-        private static string[] stepEnumValues = { "Gauss", "Gradient", "Angles", "NMS", "Hyst Threshold" };
+        private static string[] stepEnumValues = { "Gauss", "Gradient", "Angles", "Quantized Angles", "NMS", "Hyst Threshold" };
         private static string[] gradientTypeEnumValues = { "Sobel", "Scharr" };
 
-        private static float[,] sobelX = new float[3, 3] { { 1 / 4.0f, 2 / 4.0f, 1 / 4.0f }, { 0, 0, 0 }, { -1 / 4.0f, -2 / 4.0f, -1 / 4.0f } };
-        private static float[,] sobelY = new float[3, 3] { { -1 / 4.0f, 0, 1 / 4.0f }, { -2 / 4.0f, 0, 2 / 4.0f }, { -1 / 4.0f, 0, 1 / 4.0f } };
+        private static float[,] sobelX = new float[3, 3] { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
+        private static float[,] sobelY = new float[3, 3] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
 
-        private static float[,] scharrX = new float[3, 3] { { 3 / 16.0f, 10 / 16.0f, 3 / 16.0f }, { 0, 0, 0 }, { -3 / 16.0f, -10 / 16.0f, -3 / 16.0f } };
-        private static float[,] scharrY = new float[3, 3] { { -3 / 16.0f, 0, 3 / 16.0f }, { -10 / 16.0f, 0, 10 / 16.0f }, { -3 / 16.0f, 0, 3 / 16.0f } };
+        private static float[,] scharrX = new float[3, 3] { { 3, 10, 3 }, { 0, 0, 0 }, { -3, -10, -3 } };
+        private static float[,] scharrY = new float[3, 3] { { -3, 0, 3 }, { -10, 0, 10 }, { -3, 0, 3 } };
 
         // delta for eight directions
         private static int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
@@ -37,9 +37,9 @@ namespace CannyFilter
             parameters.Add(new ParametersEnum("Apply gauss:", 0, yesNoEnumValues, ParameterDisplayTypeEnum.listBox));
             parameters.Add(new ParametersFloat(0, 20, 1.4f, "Sigma:", ParameterDisplayTypeEnum.textBox));
             parameters.Add(new ParametersEnum("Gradient type:", 0, gradientTypeEnumValues, ParameterDisplayTypeEnum.listBox));
-            parameters.Add(new ParametersInt32(0, 255, 0, "Threshold low:", ParameterDisplayTypeEnum.textBox));
+            parameters.Add(new ParametersInt32(0, 255, 16, "Threshold low:", ParameterDisplayTypeEnum.textBox));
             parameters.Add(new ParametersInt32(0, 255, 32, "Threshold high:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersEnum("Up to step:", 4, stepEnumValues, ParameterDisplayTypeEnum.listBox));
+            parameters.Add(new ParametersEnum("Up to step:", 5, stepEnumValues, ParameterDisplayTypeEnum.listBox));
 
             return parameters;
         }
@@ -75,16 +75,15 @@ namespace CannyFilter
                     gaussConvolutionMatrix[y + min, x + min] = coef1 * (float)Math.Exp(coef2 * (x * x + y * y));
                 }
             }
-
-            ProcessingImageUtils.normalize(gaussConvolutionMatrix);
-            return gaussConvolutionMatrix;
+            return ProcessingImageUtils.normalize(gaussConvolutionMatrix);
         }
 
         public ProcessingImage filter(ProcessingImage inputImage)
         {
             ProcessingImage pi = new ProcessingImage();
             pi.initialize(Path.ChangeExtension(inputImage.getName(), ".png"), inputImage.getSizeX(), inputImage.getSizeY());
-            pi.addWatermark("Canny Filter sigma: " + sigma.ToString("0.0") + " TL: " + thresholdLow + " TH: " + thresholdHigh + " Step: " + stepEnumValues[step] + " v1.0, Alexandru Dorobanțiu");
+            pi.addWatermark("Canny Filter sigma: " + sigma.ToString("0.0") + " Gradien: " + gradientTypeEnumValues[gradientType] +
+                " TL: " + thresholdLow + " TH: " + thresholdHigh + " Step: " + stepEnumValues[step] + " v1.0, Alexandru Dorobanțiu");
 
             int imageSizeX = pi.getSizeX();
             int imageSizeY = pi.getSizeY();
@@ -108,13 +107,13 @@ namespace CannyFilter
             float[,] gradientFilterY;
             if (gradientType == 0)
             {
-                gradientFilterX = sobelX;
-                gradientFilterY = sobelY;
+                gradientFilterX = ProcessingImageUtils.semiNormalize(sobelX);
+                gradientFilterY = ProcessingImageUtils.semiNormalize(sobelY);
             }
             else
             {
-                gradientFilterX = scharrX;
-                gradientFilterY = scharrY;
+                gradientFilterX = ProcessingImageUtils.semiNormalize(scharrX);
+                gradientFilterY = ProcessingImageUtils.semiNormalize(scharrY);
             }
             float[,] gradientX = ProcessingImageUtils.mirroredMarginConvolution(gaussResult, gradientFilterX);
             float[,] gradientY = ProcessingImageUtils.mirroredMarginConvolution(gaussResult, gradientFilterY);
@@ -139,8 +138,8 @@ namespace CannyFilter
                 }
             }
 
-            // 5. Non maximal suppresion
-            float[,] nmsResult = new float[imageSizeY, imageSizeX];
+            // 5. Quantized angles
+            int[,] quantizedAngles = new int[imageSizeY, imageSizeX];
             for (int i = 0; i < imageSizeY; i++)
             {
                 for (int j = 0; j < imageSizeX; j++)
@@ -148,46 +147,70 @@ namespace CannyFilter
                     float angle = anglesResult[i, j];
                     if ((angle <= (5 * Math.PI) / 8 && angle > (3 * Math.PI) / 8) || (angle > -(5 * Math.PI) / 8 && angle <= -(3 * Math.PI) / 8))
                     {
-                        if ((i == 0 || amplitudeResult[i, j] >= amplitudeResult[i - 1, j]) &&
-                            (i == imageSizeY - 1 || amplitudeResult[i, j] > amplitudeResult[i + 1, j]))
-                        {
-                            nmsResult[i, j] = amplitudeResult[i, j];
-                        }
+                        quantizedAngles[i, j] = 1;
                     }
                     else
                     {
                         if (angle <= (3 * Math.PI) / 8 && angle > Math.PI / 8 || angle > -(7 * Math.PI) / 8 && angle <= -(5 * Math.PI) / 8)
                         {
-                            if ((i == 0 || j == imageSizeX - 1 || amplitudeResult[i, j] >= amplitudeResult[i - 1, j + 1]) &&
-                                (i == imageSizeY - 1 || j == 0 || amplitudeResult[i, j] > amplitudeResult[i + 1, j - 1]))
-                            {
-                                nmsResult[i, j] = amplitudeResult[i, j];
-                            }
+                            quantizedAngles[i, j] = 2;
                         }
                         else
                         {
                             if (angle <= (7 * Math.PI / 8) && angle > (5 * Math.PI / 8) || angle > -(3 * Math.PI) / 8 && angle < -(Math.PI / 8))
                             {
-                                if ((i == 0 || j == 0 || amplitudeResult[i, j] >= amplitudeResult[i - 1, j - 1]) &&
-                                    (i == imageSizeY - 1 || j == imageSizeX - 1 || amplitudeResult[i, j] > amplitudeResult[i + 1, j + 1]))
-                                {
-                                    nmsResult[i, j] = amplitudeResult[i, j];
-                                }
+                                quantizedAngles[i, j] = 3;
                             }
                             else
                             {
-                                if ((j == 0 || amplitudeResult[i, j] >= amplitudeResult[i, j - 1]) &&
-                                    (j == imageSizeX - 1 || amplitudeResult[i, j] > amplitudeResult[i, j + 1]))
-                                {
-                                    nmsResult[i, j] = amplitudeResult[i, j];
-                                }
+                                quantizedAngles[i, j] = 4;
                             }
                         }
                     }
                 }
             }
 
-            // 6. Hysteresis thresolding
+            // 6. Non maximal suppresion
+            float[,] nmsResult = new float[imageSizeY, imageSizeX];
+            for (int i = 0; i < imageSizeY; i++)
+            {
+                for (int j = 0; j < imageSizeX; j++)
+                {
+                    switch (quantizedAngles[i, j])
+                    {
+                        case 1:
+                            if ((i == 0 || amplitudeResult[i, j] >= amplitudeResult[i - 1, j]) &&
+                                (i == imageSizeY - 1 || amplitudeResult[i, j] > amplitudeResult[i + 1, j]))
+                            {
+                                nmsResult[i, j] = amplitudeResult[i, j];
+                            }
+                            break;
+                        case 2:
+                            if ((i == 0 || j == imageSizeX - 1 || amplitudeResult[i, j] >= amplitudeResult[i - 1, j + 1]) &&
+                                (i == imageSizeY - 1 || j == 0 || amplitudeResult[i, j] > amplitudeResult[i + 1, j - 1]))
+                            {
+                                nmsResult[i, j] = amplitudeResult[i, j];
+                            }
+                            break;
+                        case 3:
+                            if ((i == 0 || j == 0 || amplitudeResult[i, j] >= amplitudeResult[i - 1, j - 1]) &&
+                                (i == imageSizeY - 1 || j == imageSizeX - 1 || amplitudeResult[i, j] > amplitudeResult[i + 1, j + 1]))
+                            {
+                                nmsResult[i, j] = amplitudeResult[i, j];
+                            }
+                            break;
+                        case 4:
+                            if ((j == 0 || amplitudeResult[i, j] >= amplitudeResult[i, j - 1]) &&
+                                (j == imageSizeX - 1 || amplitudeResult[i, j] > amplitudeResult[i, j + 1]))
+                            {
+                                nmsResult[i, j] = amplitudeResult[i, j];
+                            }
+                            break;
+                    }
+                }
+            }
+
+            // 7. Hysteresis thresolding
             float[,] hysteresisResult = new float[imageSizeY, imageSizeX];
             bool[,] retainedPositions = applyHysteresisThreshold(nmsResult, imageSizeX, imageSizeY);
 
@@ -215,9 +238,12 @@ namespace CannyFilter
                     pi.setGray(convertAnglesToBytesForPreview(imageSizeY, imageSizeX, anglesResult));
                     break;
                 case 3:
-                    pi.setGray(ProcessingImageUtils.truncateToDisplay(nmsResult));
+                    pi.setGray(convertQuantizedAnglesToBytesForPreview(imageSizeY, imageSizeX, quantizedAngles));
                     break;
                 case 4:
+                    pi.setGray(ProcessingImageUtils.truncateToDisplay(nmsResult));
+                    break;
+                case 5:
                     pi.setGray(ProcessingImageUtils.truncateToDisplay(hysteresisResult));
                     break;
                 default:
@@ -280,6 +306,35 @@ namespace CannyFilter
                 for (int j = 0; j < newSizeX; j++)
                 {
                     result[i, j] = (byte)(((angles[i, j] + Math.PI / 2) / Math.PI * 255) + 0.5);
+                }
+            }
+
+            return result;
+        }
+
+        private byte[,] convertQuantizedAnglesToBytesForPreview(int newSizeY, int newSizeX, int[,] quantizedAngles)
+        {
+            byte[,] result = new byte[newSizeY, newSizeX];
+            for (int i = 0; i < newSizeY; i++)
+            {
+                for (int j = 0; j < newSizeX; j++)
+                {
+                    switch(quantizedAngles[i, j])
+                    {
+                        case 1:
+                            result[i, j] = 1;
+                            break;
+                        case 2:
+                            result[i, j] = 64;
+                            break;
+                        case 3:
+                            result[i, j] = 128;
+                            break;
+                        case 4:
+                            result[i, j] = 255;
+                            break;
+                    }
+                    
                 }
             }
 

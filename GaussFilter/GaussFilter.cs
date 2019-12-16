@@ -54,7 +54,7 @@ namespace Plugins.Filters.GaussFilter
                 }
             }
 
-            ProcessingImageUtils.normalize(gaussConvolutionMatrix);
+            gaussConvolutionMatrix = ProcessingImageUtils.normalize(gaussConvolutionMatrix);
 
             ProcessingImage outputImage = inputImage.mirroredMarginConvolution(gaussConvolutionMatrix);
             outputImage.addWatermark("Gauss Filter, size: " + size + ", sigma: " + sigma + " v1.0, Alex Dorobantiu");

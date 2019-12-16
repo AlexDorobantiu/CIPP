@@ -14,15 +14,23 @@ namespace KirschFilter
 
         private static List<float[,]> templates = new List<float[,]> 
         {
-           new float[,] {{ -3 / 15.0f, -3 / 15.0f, 5 / 15.0f }, { -3 / 15.0f, 0, 5 / 15.0f }, { -3 / 15.0f, -3 / 15.0f, 5 / 15.0f } }, // -
-           new float[,] {{ -3 / 15.0f, 5 / 15.0f, 5 / 15.0f }, { -3 / 15.0f, 0, 5 / 15.0f }, { -3 / 15.0f, -3 / 15.0f, -3 / 15.0f } }, // /
-           new float[,] {{ 5 / 15.0f, 5 / 15.0f, 5 / 15.0f }, { -3 / 15.0f, 0, -3 / 15.0f }, { -3 / 15.0f, -3 / 15.0f, -3 / 15.0f } }, // |
-           new float[,] {{ 5 / 15.0f, 5 / 15.0f, -3 / 15.0f }, { 5 / 15.0f, 0, -3 / 15.0f }, { -3 / 15.0f, -3 / 15.0f, -3 / 15.0f } }, // \
-           new float[,] {{ 5 / 15.0f, -3 / 15.0f, -3 / 15.0f }, { 5 / 15.0f, 0, -3 / 15.0f }, { 5 / 15.0f, -3 / 15.0f, -3 / 15.0f } }, // -
-           new float[,] {{ -3 / 15.0f, -3 / 15.0f, -3 / 15.0f }, { 5 / 15.0f, 0, -3 / 15.0f }, { 5 / 15.0f, 5 / 15.0f, -3 / 15.0f } }, // /
-           new float[,] {{ -3 / 15.0f, -3 / 15.0f, -3 / 15.0f }, { -3 / 15.0f, 0, -3 / 15.0f }, { 5 / 15.0f, 5 / 15.0f, 5 / 15.0f } }, // |
-           new float[,] {{ -3 / 15.0f, -3 / 15.0f, -3 / 15.0f }, { -3 / 15.0f, 0, 5 / 15.0f }, { -3 / 15.0f, 5 / 15.0f, 5 / 15.0f } }  // \
+           new float[,] {{ -3, -3, 5 }, { -3, 0, 5 }, { -3, -3, 5 } }, // -
+           new float[,] {{ -3, 5, 5 }, { -3, 0, 5 }, { -3, -3, -3 } }, // /
+           new float[,] {{ 5, 5, 5 }, { -3, 0, -3 }, { -3, -3, -3 } }, // |
+           new float[,] {{ 5, 5, -3 }, { 5, 0, -3 }, { -3, -3, -3 } }, // \
+           new float[,] {{ 5, -3, -3 }, { 5, 0, -3 }, { 5, -3, -3 } }, // -
+           new float[,] {{ -3, -3, -3 }, { 5, 0, -3 }, { 5, 5, -3 } }, // /
+           new float[,] {{ -3, -3, -3 }, { -3, 0, -3 }, { 5, 5, 5 } }, // |
+           new float[,] {{ -3, -3, -3 }, { -3, 0, 5 }, { -3, 5, 5 } }  // \
         };
+
+        static KirschFilter()
+        {
+            for (int i = 0; i < templates.Count; i++)
+            {
+                templates[i] = ProcessingImageUtils.semiNormalize(templates[i]);
+            }
+        }
 
         // delta for eight directions
         private static int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
@@ -83,8 +91,7 @@ namespace KirschFilter
                 }
             }
 
-            ProcessingImageUtils.normalize(gaussConvolutionMatrix);
-            return gaussConvolutionMatrix;
+            return ProcessingImageUtils.normalize(gaussConvolutionMatrix);
         }
 
         public ProcessingImage filter(ProcessingImage inputImage)
