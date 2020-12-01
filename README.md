@@ -1,6 +1,6 @@
 CIPP - Compact Image Processing Platform
 ===================================
-Version 1.1 Released by [Alexandru Dorobanțiu](http://alex.dorobantiu.ro) on 24.01.2018
+Version 1.2 Released by [Alexandru Dorobanțiu](http://alex.dorobantiu.ro) on 01.12.2020
 
 ### Features
 - parallel and distributed image processing
@@ -9,8 +9,8 @@ Version 1.1 Released by [Alexandru Dorobanțiu](http://alex.dorobantiu.ro) on 24
 - contains example plugins for various consecrated image processing algorithms (more will be added)
 
 ### Technology:
- - Written in plain **C#** using **Visual Studio 2010**
- - **.NET** framework is kept to version **2.0** for compatibility with older operating systems and Visual Studio versions. It also encourages writing simple and portable code to other programming languages without abusing syntactic sugar provided by newer C# extensions
+ - Written in plain **C#** using **Visual Studio**
+ - **.NET** framework is kept to version **4.6.2** for compatibility with older operating systems and Visual Studio versions. It also encourages writing simple and portable code to other programming languages without abusing syntactic sugar provided by newer C# extensions
  - The front-end is implemented using Windows Forms
  
 #### Details
@@ -32,7 +32,7 @@ Disclaimer: The initial version of the program was developed during my Bachelor'
 
 ##### Notes
  - The plugins are loaded from a fixed folder relative to the application. In order to have a plugin build copied automatically to the specified folder, see the Post-build event command line (project -> properties -> Build Events tab) in the example plugins. The script copies the *.dll* file (which is the output of a class library) to the plugins folders of both the client and the server applications.
- - The framework code is using unsafe C# code for fast loading, creating, saving and transforming Bitmaps, but I strongly discourage the use of unsafe code in plugins.
+ - The framework code is using unsafe C# code for fast loading, creating, saving and transforming Bitmaps, but I strongly discourage the use of unsafe code in any of the plugins.
  - The solution should be easy to migrate to newer Visual Studio environments without any changes.
  - The platform does not come with an installation package (ready for execution).
 
