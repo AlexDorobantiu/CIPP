@@ -10,7 +10,7 @@ namespace CIPP
 {
     partial class OptionsForm : Form
     {
-        List<IParameters> parametersList;
+        readonly List<IParameters> parametersList;
 
         public OptionsForm(List<IParameters> parametersList)
         {
@@ -23,61 +23,70 @@ namespace CIPP
             SuspendLayout();
             foreach (IParameters parameter in parametersList)
             {
-                Label label = new Label();
-                label.AutoSize = true;
-                label.Text = parameter.getDisplayName();
+                Label label = new Label
+                {
+                    AutoSize = true,
+                    Text = parameter.getDisplayName()
+                };
                 flowLayoutPanel.Controls.Add(label);
 
                 if (parameter.GetType() == typeof(ParametersInt32))
                 {
                     ParametersInt32 p = (ParametersInt32)parameter;
-                    if (p.getPreferredDisplayType() == ParameterDisplayTypeEnum.textBox)
+                    switch (p.getPreferredDisplayType())
                     {
-                        label.Padding = new Padding(5, 6, 0, 0);
-
-                        TextBox textBox = new TextBox();
-                        textBox.Size = new Size(60, 20);
-                        List<object> values = p.getValues();
-                        if (values.Count == 0)
-                        {
-                            textBox.Text = "" + p.defaultValue;
-                        }
-                        else
-                        {
-                            textBox.Text = "";
-                            foreach (object o in values)
+                        case ParameterDisplayTypeEnum.textBox:
                             {
-                                textBox.Text += (int)o + " ";
+                                label.Padding = new Padding(5, 6, 0, 0);
+
+                                TextBox textBox = new TextBox
+                                {
+                                    Size = new Size(60, 20)
+                                };
+                                List<object> values = p.getValues();
+                                if (values.Count == 0)
+                                {
+                                    textBox.Text = $"{p.defaultValue}";
+                                }
+                                else
+                                {
+                                    textBox.Text = "";
+                                    foreach (object o in values)
+                                    {
+                                        textBox.Text += $"{(int)o} ";
+                                    }
+                                }
+
+                                flowLayoutPanel.Controls.Add(textBox);
+                                flowLayoutPanel.SetFlowBreak(textBox, true);
+                                break;
                             }
-                        }
 
-                        flowLayoutPanel.Controls.Add(textBox);
-                        flowLayoutPanel.SetFlowBreak(textBox, true);
-                    }
-                    else
-                    {
-                        if (p.getPreferredDisplayType() == ParameterDisplayTypeEnum.trackBar)
-                        {
-                            label.Padding = new Padding(5, 15, 0, 0);
-
-                            TrackBar trackBar = new TrackBar();
-                            trackBar.AutoSize = true;
-                            trackBar.Minimum = p.minValue;
-                            trackBar.Maximum = p.maxValue;
-                            trackBar.TickStyle = TickStyle.Both;
-
-                            List<object> values = p.getValues();
-                            if (values.Count == 0)
+                        case ParameterDisplayTypeEnum.trackBar:
                             {
-                                trackBar.Value = p.defaultValue;
+                                label.Padding = new Padding(5, 15, 0, 0);
+
+                                TrackBar trackBar = new TrackBar
+                                {
+                                    AutoSize = true,
+                                    Minimum = p.minValue,
+                                    Maximum = p.maxValue,
+                                    TickStyle = TickStyle.Both
+                                };
+
+                                List<object> values = p.getValues();
+                                if (values.Count == 0)
+                                {
+                                    trackBar.Value = p.defaultValue;
+                                }
+                                else
+                                {
+                                    trackBar.Value = (int)values[0];
+                                }
+                                flowLayoutPanel.Controls.Add(trackBar);
+                                flowLayoutPanel.SetFlowBreak(trackBar, true);
+                                break;
                             }
-                            else
-                            {
-                                trackBar.Value = (int)values[0];
-                            }
-                            flowLayoutPanel.Controls.Add(trackBar);
-                            flowLayoutPanel.SetFlowBreak(trackBar, true);
-                        }
                     }
                 }
                 else
@@ -89,8 +98,10 @@ namespace CIPP
                         {
                             label.Padding = new Padding(5, 6, 0, 0);
 
-                            TextBox textBox = new TextBox();
-                            textBox.Size = new Size(60, 20);
+                            TextBox textBox = new TextBox
+                            {
+                                Size = new Size(60, 20)
+                            };
                             List<object> values = p.getValues();
                             if (values.Count == 0)
                             {
@@ -101,7 +112,7 @@ namespace CIPP
                                 textBox.Text = "";
                                 foreach (object value in values)
                                 {
-                                    textBox.Text += ((float)value).ToString(CultureInfo.InvariantCulture) + " ";
+                                    textBox.Text += $"{((float)value).ToString(CultureInfo.InvariantCulture)} ";
                                 }
                             }
 
@@ -118,8 +129,10 @@ namespace CIPP
                             {
                                 label.Padding = new Padding(5, 6, 0, 0);
 
-                                ListBox listBox = new ListBox();
-                                listBox.SelectionMode = SelectionMode.MultiExtended;
+                                ListBox listBox = new ListBox
+                                {
+                                    SelectionMode = SelectionMode.MultiExtended
+                                };
                                 listBox.Height = listBox.ItemHeight * 4;
                                 foreach (string s in p.displayValues)
                                 {
@@ -147,13 +160,12 @@ namespace CIPP
                                 {
                                     label.Padding = new Padding(5, 6, 0, 0);
 
-                                    ComboBox comboBox = new ComboBox();
-                                    comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-                                    comboBox.Size = new Size(60, 20);
-                                    foreach (string s in p.displayValues)
+                                    ComboBox comboBox = new ComboBox
                                     {
-                                        comboBox.Items.Add(s);
-                                    }
+                                        DropDownStyle = ComboBoxStyle.DropDownList,
+                                        Size = new Size(60, 20)
+                                    };
+                                    comboBox.Items.AddRange(p.displayValues);
                                     List<object> values = p.getValues();
                                     if (values.Count == 0)
                                     {
@@ -180,32 +192,22 @@ namespace CIPP
             int i = 1;
             foreach (IParameters parameter in parametersList)
             {
-                if (parameter.getPreferredDisplayType() == ParameterDisplayTypeEnum.textBox)
+                switch (parameter.getPreferredDisplayType())
                 {
-                    parameter.updateProperty(((TextBox)flowLayoutPanel.Controls[i]).Text);
-                }
-                else
-                {
-                    if (parameter.getPreferredDisplayType() == ParameterDisplayTypeEnum.trackBar)
-                    {
+                    case ParameterDisplayTypeEnum.textBox:
+                        parameter.updateProperty(((TextBox)flowLayoutPanel.Controls[i]).Text);
+                        break;
+                    case ParameterDisplayTypeEnum.trackBar:
                         parameter.updateProperty(((TrackBar)flowLayoutPanel.Controls[i]).Value);
-                    }
-                    else
-                    {
-                        if (parameter.getPreferredDisplayType() == ParameterDisplayTypeEnum.listBox)
-                        {
-                            int[] temp = new int[((ListBox)flowLayoutPanel.Controls[i]).SelectedIndices.Count];
-                            ((ListBox)flowLayoutPanel.Controls[i]).SelectedIndices.CopyTo(temp, 0);
-                            parameter.updateProperty(temp);
-                        }
-                        else
-                        {
-                            if (parameter.getPreferredDisplayType() == ParameterDisplayTypeEnum.comboBox)
-                            {
-                                parameter.updateProperty(((ComboBox)flowLayoutPanel.Controls[i]).SelectedIndex);
-                            }
-                        }
-                    }
+                        break;
+                    case ParameterDisplayTypeEnum.listBox:
+                        int[] temp = new int[((ListBox)flowLayoutPanel.Controls[i]).SelectedIndices.Count];
+                        ((ListBox)flowLayoutPanel.Controls[i]).SelectedIndices.CopyTo(temp, 0);
+                        parameter.updateProperty(temp);
+                        break;
+                    case ParameterDisplayTypeEnum.comboBox:
+                        parameter.updateProperty(((ComboBox)flowLayoutPanel.Controls[i]).SelectedIndex);
+                        break;
                 }
                 i += 2;
             }

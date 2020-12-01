@@ -10,17 +10,19 @@ namespace ParametersSDK
 
         private readonly string displayName;
         private readonly ParameterDisplayTypeEnum displayType;
-        private List<object> valuesList;
+        private readonly List<object> valuesList;
 
-        public ParametersInt32(int minValue, int maxValue, int defaultValue, string displayName, ParameterDisplayTypeEnum displayType)
+        public ParametersInt32(string displayName, int defaultValue, int minValue, int maxValue, ParameterDisplayTypeEnum displayType)
         {
             this.minValue = minValue;
             this.maxValue = maxValue;
             this.defaultValue = defaultValue;
             this.displayName = displayName;
             this.displayType = displayType;
-            valuesList = new List<object>();
-            valuesList.Add(defaultValue);
+            valuesList = new List<object>
+            {
+                defaultValue
+            };
         }
 
         #region IParameters Members

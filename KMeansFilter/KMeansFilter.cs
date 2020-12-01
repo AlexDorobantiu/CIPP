@@ -9,22 +9,23 @@ namespace KMeansFilter
 {
     public class KMeansFilter : IFilter
     {
-
-        private static string[] distanceEnumValues = { "SAD", "SSD", "Luminance" };
-        private static string[] initialSeedFunctionValues = { "Diagonal", "Random", "KMeans++" };
+        private static readonly string[] distanceEnumValues = { "SAD", "SSD", "Luminance" };
+        private static readonly string[] initialSeedFunctionValues = { "Diagonal", "Random", "KMeans++" };
 
         public static List<IParameters> getParametersList()
         {
-            List<IParameters> parameters = new List<IParameters>();
-            parameters.Add(new ParametersInt32(2, int.MaxValue, 16, "Number of classes:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersEnum("Distance function:", 0, distanceEnumValues, ParameterDisplayTypeEnum.listBox));
-            parameters.Add(new ParametersEnum("Seed Selection:", 0, initialSeedFunctionValues, ParameterDisplayTypeEnum.listBox));
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersInt32(displayName: "Number of classes:", defaultValue: 16, minValue: 2, maxValue: int.MaxValue, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersEnum(displayName: "Distance function:", defaultSelected: 0, displayValues: distanceEnumValues, displayType: ParameterDisplayTypeEnum.listBox),
+                new ParametersEnum(displayName: "Seed Selection:", defaultSelected: 0, displayValues: initialSeedFunctionValues, displayType: ParameterDisplayTypeEnum.listBox)
+            };
             return parameters;
         }
 
-        private int numberOfClasses;
-        private int distanceFunction;
-        private int initialSeedFunction;
+        private readonly int numberOfClasses;
+        private readonly int distanceFunction;
+        private readonly int initialSeedFunction;
 
         public KMeansFilter(int numberOfClasses, int distanceFunction, int initialSeedFunction)
         {
@@ -42,8 +43,7 @@ namespace KMeansFilter
         {
             ProcessingImage outputImage = new ProcessingImage();
             outputImage.copyAttributesAndAlpha(inputImage);
-            outputImage.addWatermark("KMeans Filter, Number of classes: " + numberOfClasses + ", Distance function: " + distanceEnumValues[distanceFunction] +
-                ", Seed selection: " + initialSeedFunctionValues[initialSeedFunction] + " v1.0, Alex Dorobantiu");
+            outputImage.addWatermark($"KMeans Filter, Number of classes: {numberOfClasses}, Distance function: {distanceEnumValues[distanceFunction]}, Seed selection: {initialSeedFunctionValues[initialSeedFunction]} v1.0, Alex Dorobanțiu");
 
             int sizeX = inputImage.getSizeX();
             int sizeY = inputImage.getSizeY();
@@ -198,7 +198,7 @@ namespace KMeansFilter
                 case 1:
                     // pic cluster starting points randomly but with a fixed seed
                     Random random = new Random(Seed: 123);
-                    clusterStartingPoints = new List<Position2d>(); // set is not implemented in .NET 2 (only from 3.5)
+                    clusterStartingPoints = new HashSet<Position2d>();
                     while (clusterStartingPoints.Count != numberOfClasses)
                     {
                         position = new Position2d(random.Next(sizeX), random.Next(sizeY));
@@ -216,8 +216,10 @@ namespace KMeansFilter
                     // 4. Repeat Steps 2 and 3 until k centers have been chosen.
 
                     random = new Random(Seed: 123);
-                    clusterStartingPoints = new List<Position2d>();
-                    clusterStartingPoints.Add(new Position2d(random.Next(sizeX), random.Next(sizeY))); // step 1
+                    clusterStartingPoints = new List<Position2d>
+                    {
+                        new Position2d(random.Next(sizeX), random.Next(sizeY)) // step 1
+                    };
 
                     double[,] distance = new double[sizeY, sizeX];
 

@@ -67,21 +67,25 @@ namespace CIPP
 
                 for (int i = 0; i < currentList.Count; i++)
                 {
-                    CheckBox cb = new CheckBox();
-                    cb.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-                    cb.AutoSize = true;
-                    cb.Text = currentList[i].displayName;
-                    cb.Padding = new Padding(5, 4, 0, 0);
+                    CheckBox cb = new CheckBox
+                    {
+                        TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
+                        AutoSize = true,
+                        Text = currentList[i].displayName,
+                        Padding = new Padding(5, 4, 0, 0)
+                    };
 
-                    Button b = new Button();
-                    b.FlatStyle = FlatStyle.Flat;
+                    Button b = new Button
+                    {
+                        FlatStyle = FlatStyle.Flat,
+                        Tag = currentList[i].parameters,
+                        Text = "Options"
+                    };
+                    b.Click += new EventHandler(optionsButton_Click);
                     if (currentList[i].parameters == null || currentList[i].parameters.Count == 0)
                     {
                         b.Enabled = false;
                     }
-                    b.Tag = currentList[i].parameters;
-                    b.Text = "Options";
-                    b.Click += new EventHandler(optionsButton_Click);
 
                     currentFlowLayoutPanel.Controls.Add(cb);
                     currentFlowLayoutPanel.Controls.Add(b);
@@ -89,7 +93,8 @@ namespace CIPP
 
                     currentCheckBoxList.Add(cb);
                 }
-                updatePluginFinder();                
+
+                pluginFinder.updatePluginLists(filterPluginList, maskPluginList, motionRecognitionPluginList);
             }
             catch (Exception exception)
             {
@@ -99,9 +104,5 @@ namespace CIPP
             PerformLayout();
         }
 
-        private void updatePluginFinder()
-        {
-            pluginFinder.updatePluginLists(filterPluginList, maskPluginList, motionRecognitionPluginList);
-        }
     }
 }

@@ -5,14 +5,13 @@ using ParametersSDK;
 using ProcessingImageSDK;
 using System.IO;
 using ProcessingImageSDK.Position;
+using ProcessingImageSDK.Utils;
 
 namespace KirschFilter
 {
     public class KirschFilter : IFilter
     {
-        private static readonly List<IParameters> parameters = new List<IParameters>();
-
-        private static List<float[,]> templates = new List<float[,]> 
+        private static readonly List<float[,]> templates = new List<float[,]>
         {
            new float[,] {{ -3, -3, 5 }, { -3, 0, 5 }, { -3, -3, 5 } }, // -
            new float[,] {{ -3, 5, 5 }, { -3, 0, 5 }, { -3, -3, -3 } }, // /
@@ -33,30 +32,31 @@ namespace KirschFilter
         }
 
         // delta for eight directions
-        private static int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
-        private static int[] dy = { -1, -1, 0, 1, 1, 1, 0, -1 };
+        private static readonly int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
+        private static readonly int[] dy = { -1, -1, 0, 1, 1, 1, 0, -1 };
 
-        private static string[] yesNoEnumValues = { "Yes", "No" };
-        private static string[] stepEnumValues = { "Gauss", "Max Gradient", "Angles", "NMS", "Hyst Threshold" };
+        private static readonly string[] yesNoEnumValues = { "Yes", "No" };
+        private static readonly string[] stepEnumValues = { "Gauss", "Max Gradient", "Angles", "NMS", "Hyst Threshold" };
 
         public static List<IParameters> getParametersList()
         {
-            List<IParameters> parameters = new List<IParameters>();
-
-            parameters.Add(new ParametersEnum("Apply gauss:", 0, yesNoEnumValues, ParameterDisplayTypeEnum.listBox));
-            parameters.Add(new ParametersFloat(0, 20, 1.4f, "Sigma:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersInt32(0, 255, 0, "Threshold low:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersInt32(0, 255, 32, "Threshold high:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersEnum("Up to step:", 4, stepEnumValues, ParameterDisplayTypeEnum.listBox));
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersEnum(displayName: "Apply gauss:", defaultSelected: 0, displayValues: yesNoEnumValues, displayType: ParameterDisplayTypeEnum.listBox),
+                new ParametersFloat(displayName: "Sigma:", defaultValue: 1.4f, minValue: 0, maxValue: 20, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersInt32(displayName: "Threshold low:", defaultValue: 0, minValue: 0, maxValue: 255, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersInt32(displayName: "Threshold high:", defaultValue: 32, minValue: 0, maxValue: 255, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersEnum(displayName: "Up to step:", defaultSelected: 4, displayValues: stepEnumValues, displayType: ParameterDisplayTypeEnum.listBox)
+            };
 
             return parameters;
         }
 
-        private int applyGauss;
-        private float sigma;
-        private int thresholdHigh;
-        private int thresholdLow;
-        private int step;
+        private readonly int applyGauss;
+        private readonly float sigma;
+        private readonly int thresholdHigh;
+        private readonly int thresholdLow;
+        private readonly int step;
 
         public KirschFilter(int applyGauss, float sigma, int thresholdLow, int thresholdHigh, int step)
         {
@@ -74,7 +74,7 @@ namespace KirschFilter
             return null;
         }
 
-        public float[,] generateNormalizedGaussConvolutionMatrix(float sigma, int size)
+        private static float[,] generateNormalizedGaussConvolutionMatrix(float sigma, int size)
         {
             float[,] gaussConvolutionMatrix = new float[size, size];
 
@@ -98,7 +98,7 @@ namespace KirschFilter
         {
             ProcessingImage pi = new ProcessingImage();
             pi.initialize(Path.ChangeExtension(inputImage.getName(), ".png"), inputImage.getSizeX(), inputImage.getSizeY());
-            pi.addWatermark("Kirsch Filter sigma: " + sigma.ToString("0.0") + " TL: " + thresholdLow + " TH: " + thresholdHigh + " Step: " + stepEnumValues[step] + " v1.0, Alexandru Dorobanțiu");
+            pi.addWatermark($"Kirsch Filter sigma: {sigma:0.0} TL: {thresholdLow} TH: {thresholdHigh} Step: {stepEnumValues[step]} v1.0, Alexandru Dorobanțiu");
 
             int imageSizeX = pi.getSizeX();
             int imageSizeY = pi.getSizeY();

@@ -2,7 +2,7 @@
 {
     class GrayCluster
     {
-        int index;
+        readonly int index;
         byte gray;
 
         int count;

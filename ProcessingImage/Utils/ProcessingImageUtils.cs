@@ -1,4 +1,4 @@
-﻿namespace ProcessingImageSDK
+﻿namespace ProcessingImageSDK.Utils
 {
     /// <summary>
     /// Utility class for working with image processing

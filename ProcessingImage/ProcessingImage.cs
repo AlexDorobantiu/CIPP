@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using ProcessingImageSDK.PixelStructures;
 using ProcessingImageSDK.Position;
+using ProcessingImageSDK.Utils;
 
 namespace ProcessingImageSDK
 {
@@ -14,7 +15,7 @@ namespace ProcessingImageSDK
     [Serializable]
     public class ProcessingImage
     {
-        private static List<string> knownExtensionsList = new List<string>() { ".PNG", ".JPG", ".JPEG", ".BMP", ".GIF", ".ICO", ".EMF", ".EXIF", ".TIFF", ".TIF", ".WMF" };
+        private static readonly List<string> knownExtensionsList = new List<string>() { ".PNG", ".JPG", ".JPEG", ".BMP", ".GIF", ".ICO", ".EMF", ".EXIF", ".TIFF", ".TIF", ".WMF" };
 
         private int sizeX;
         private int sizeY;
@@ -63,7 +64,7 @@ namespace ProcessingImageSDK
         /// <param name="sizeY">The height of the image</param>
         /// <param name="createOpaqueAlphaChannel">If true, a new opaque alpha channel will be created</param>
         /// <param name="position">The virtual position of the image (useful when the image is subdivided)</param>
-        public void initialize(String name, int sizeX, int sizeY, bool createOpaqueAlphaChannel = true, Position2d position = new Position2d())
+        public void initialize(string name, int sizeX, int sizeY, bool createOpaqueAlphaChannel = true, Position2d position = new Position2d())
         {
             this.name = name;
             this.sizeX = sizeX;
@@ -308,7 +309,8 @@ namespace ProcessingImageSDK
                             }
                         }
                         bitmap.UnlockBits(bitmapData);
-                    } break;
+                    }
+                    break;
                 case PixelFormat.Format24bppRgb:
                     {
                         BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, sizeX, sizeY), ImageLockMode.ReadOnly, bitmap.PixelFormat);
@@ -342,7 +344,8 @@ namespace ProcessingImageSDK
                             }
                         }
                         bitmap.UnlockBits(bitmapData);
-                    } break;
+                    }
+                    break;
                 case PixelFormat.Format8bppIndexed:
                     {
                         BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, sizeX, sizeY), ImageLockMode.ReadOnly, bitmap.PixelFormat);
@@ -394,7 +397,8 @@ namespace ProcessingImageSDK
                             grayscale = false;
                         }
                         bitmap.UnlockBits(bitmapData);
-                    } break;
+                    }
+                    break;
                 case PixelFormat.Format1bppIndexed:
                     {
                         alpha = new byte[sizeY, sizeX];
@@ -408,7 +412,8 @@ namespace ProcessingImageSDK
                                 red[i, j] = c.R;
                             }
                         }
-                    } break;
+                    }
+                    break;
                 case PixelFormat.Format4bppIndexed:
                     {
                         if (bitmap.Palette.Flags == 2) // grayscale: PaletteFlags.GrayScale = 2
@@ -445,7 +450,8 @@ namespace ProcessingImageSDK
                                 }
                             }
                         }
-                    } break;
+                    }
+                    break;
                 default: { } break;
             }
 
@@ -477,7 +483,7 @@ namespace ProcessingImageSDK
         public void saveImage(string fileName)
         {
             Bitmap bitmap = grayscale ? getBitmap(ProcessingImageBitmapType.AlphaGray) : getBitmap(ProcessingImageBitmapType.AlphaColor);
-            String extension = Path.GetExtension(fileName);
+            string extension = Path.GetExtension(fileName);
             if (extension == null || string.Empty.Equals(extension))
             {
                 extension = ".png";
@@ -575,7 +581,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.AlphaColor:
                             unsafe
                             {
@@ -591,7 +598,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.AlphaRed:
                             unsafe
                             {
@@ -607,7 +615,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.AlphaGreen:
                             unsafe
                             {
@@ -623,7 +632,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.AlphaBlue:
                             unsafe
                             {
@@ -639,7 +649,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.AlphaRedGreen:
                             unsafe
                             {
@@ -655,7 +666,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.AlphaRedBlue:
                             unsafe
                             {
@@ -671,7 +683,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.AlphaGreenBlue:
                             unsafe
                             {
@@ -687,7 +700,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.Red:
                             unsafe
                             {
@@ -703,7 +717,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.Green:
                             unsafe
                             {
@@ -719,7 +734,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.Blue:
                             unsafe
                             {
@@ -735,7 +751,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.RedGreen:
                             unsafe
                             {
@@ -751,7 +768,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.RedBlue:
                             unsafe
                             {
@@ -767,7 +785,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.GreenBlue:
                             unsafe
                             {
@@ -783,7 +802,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
 
                         case ProcessingImageBitmapType.AlphaGray:
                             {
@@ -806,7 +826,8 @@ namespace ProcessingImageSDK
                                         }
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.Gray:
                             {
                                 if (gray == null)
@@ -828,7 +849,8 @@ namespace ProcessingImageSDK
                                         }
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.AlphaLuminance:
                             {
                                 if (luminance == null)
@@ -850,7 +872,8 @@ namespace ProcessingImageSDK
                                         }
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.Luminance:
                             {
                                 if (luminance == null)
@@ -872,7 +895,8 @@ namespace ProcessingImageSDK
                                         }
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         default:
                             {
                                 if (grayscale)
@@ -911,7 +935,8 @@ namespace ProcessingImageSDK
                                         }
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                     }
                 }
                 else
@@ -933,7 +958,8 @@ namespace ProcessingImageSDK
                                         pBase++;
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         case ProcessingImageBitmapType.AlphaGray:
                             {
                                 if (gray == null)
@@ -955,7 +981,8 @@ namespace ProcessingImageSDK
                                         }
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                         default:
                             {
                                 if (gray == null)
@@ -977,16 +1004,17 @@ namespace ProcessingImageSDK
                                         }
                                     }
                                 }
-                            } break;
+                            }
+                            break;
                     }
                 }
 
                 bitmap.UnlockBits(bitmapData);
                 return bitmap;
             }
-            catch
+            catch (Exception e)
             {
-                throw new Exception("Could not convert to bitmap.");
+                throw new Exception("Could not convert to bitmap.", e);
             }
         }
 

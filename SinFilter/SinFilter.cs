@@ -1,30 +1,28 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 using ProcessingImageSDK;
 using ParametersSDK;
+using ProcessingImageSDK.Utils;
 
 namespace Plugins.Filters.SinFilter
 {
     public class SinFilter : IFilter
     {
-        private static readonly List<IParameters> parameters = new List<IParameters>();
-        private static string[] directionValues = { "horizontal", "vertical" };
-
-        static SinFilter()
-        {
-            parameters.Add(new ParametersInt32(3, 32, 5, "Size:", ParameterDisplayTypeEnum.textBox));           
-            
-            parameters.Add(new ParametersEnum("Direction:", 0, directionValues, ParameterDisplayTypeEnum.listBox));
-        }
+        private static readonly string[] directionValues = { "horizontal", "vertical" };
 
         public static List<IParameters> getParametersList()
         {
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersInt32(displayName: "Size:", defaultValue: 5, minValue: 3, maxValue: 32, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersEnum(displayName: "Direction:", defaultSelected: 0, displayValues: directionValues, displayType: ParameterDisplayTypeEnum.listBox)
+            };
             return parameters;
         }
 
-        private int size;
-        private int direction;
+        private readonly int size;
+        private readonly int direction;
 
         public SinFilter(int size, int direction)
         {
@@ -84,7 +82,7 @@ namespace Plugins.Filters.SinFilter
             byte[,] gray = ProcessingImageUtils.fitHistogramToDisplay(filteredImage);
 
             outputImage.setGray(gray);
-            outputImage.addWatermark("Sinusoidal Filter, size: " + size + " direction: " + directionValues[direction] + " v1.0, Alex Dorobantiu");
+            outputImage.addWatermark($"Sinusoidal Filter, size: {size} direction: {directionValues[direction]} v1.0, Alex Dorobanțiu");
             return outputImage;
         }
 

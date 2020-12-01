@@ -53,7 +53,7 @@ namespace CIPPServer
                 }
                 else
                 {
-                    ConnectionThread newconnection = new ConnectionThread(clients[clientPending], listeningPorts[clientPending]);
+                    _ = new ConnectionThread(clients[clientPending], listeningPorts[clientPending]);
                 }
             }
         }
@@ -73,8 +73,7 @@ namespace CIPPServer
                 while (!sr.EndOfStream)
                 {
                     string line = sr.ReadLine();
-                    int port;
-                    if (int.TryParse(line, out port))
+                    if (int.TryParse(line, out int port))
                     {
                         list_ports.Add(port);
                     }
@@ -105,7 +104,8 @@ namespace CIPPServer
                 List<PluginInfo> filterPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, FILTERS_RELATIVE_PATH), typeof(IFilter));
                 List<PluginInfo> maskPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, MASKS_RELATIVE_PATH), typeof(IMask));
                 List<PluginInfo> motionRecognitionPluginList = PluginHelper.getPluginsList(Path.Combine(Environment.CurrentDirectory, MOTION_RECOGNITION_RELATIVE_PATH), typeof(IMotionRecognition));
-                pluginFinder = new PluginFinder(filterPluginList, maskPluginList, motionRecognitionPluginList);
+                pluginFinder = new PluginFinder();
+                pluginFinder.updatePluginLists(filterPluginList, maskPluginList, motionRecognitionPluginList);
             }
             catch
             {

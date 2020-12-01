@@ -5,41 +5,44 @@ using Plugins.Filters;
 using ProcessingImageSDK;
 using System.IO;
 using ProcessingImageSDK.Position;
+using ProcessingImageSDK.Utils;
 
 namespace CannyFilter
 {
     public class CannyFilter : IFilter
     {
-        private int applyGauss;
-        private float sigma;
-        private int gradientType;
-        private int thresholdHigh;
-        private int thresholdLow;
-        private int step;
+        private readonly int applyGauss;
+        private readonly float sigma;
+        private readonly int gradientType;
+        private readonly int thresholdHigh;
+        private readonly int thresholdLow;
+        private readonly int step;
 
-        private static string[] yesNoEnumValues = { "Yes", "No" };
-        private static string[] stepEnumValues = { "Gauss", "Gradient", "Angles", "Quantized Angles", "NMS", "Hyst Threshold" };
-        private static string[] gradientTypeEnumValues = { "Sobel", "Scharr" };
+        private static readonly string[] yesNoEnumValues = { "Yes", "No" };
+        private static readonly string[] stepEnumValues = { "Gauss", "Gradient", "Angles", "Quantized Angles", "NMS", "Hyst Threshold" };
+        private static readonly string[] gradientTypeEnumValues = { "Sobel", "Scharr" };
 
-        private static float[,] sobelX = new float[3, 3] { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
-        private static float[,] sobelY = new float[3, 3] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+        private static readonly float[,] sobelX = new float[3, 3] { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
+        private static readonly float[,] sobelY = new float[3, 3] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
 
-        private static float[,] scharrX = new float[3, 3] { { 3, 10, 3 }, { 0, 0, 0 }, { -3, -10, -3 } };
-        private static float[,] scharrY = new float[3, 3] { { -3, 0, 3 }, { -10, 0, 10 }, { -3, 0, 3 } };
+        private static readonly float[,] scharrX = new float[3, 3] { { 3, 10, 3 }, { 0, 0, 0 }, { -3, -10, -3 } };
+        private static readonly float[,] scharrY = new float[3, 3] { { -3, 0, 3 }, { -10, 0, 10 }, { -3, 0, 3 } };
 
         // delta for eight directions
-        private static int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
-        private static int[] dy = { -1, -1, 0, 1, 1, 1, 0, -1 };
+        private static readonly int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 };
+        private static readonly int[] dy = { -1, -1, 0, 1, 1, 1, 0, -1 };
 
         public static List<IParameters> getParametersList()
         {
-            List<IParameters> parameters = new List<IParameters>();
-            parameters.Add(new ParametersEnum("Apply gauss:", 0, yesNoEnumValues, ParameterDisplayTypeEnum.listBox));
-            parameters.Add(new ParametersFloat(0, 20, 1.4f, "Sigma:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersEnum("Gradient type:", 0, gradientTypeEnumValues, ParameterDisplayTypeEnum.listBox));
-            parameters.Add(new ParametersInt32(0, 255, 16, "Threshold low:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersInt32(0, 255, 32, "Threshold high:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersEnum("Up to step:", 5, stepEnumValues, ParameterDisplayTypeEnum.listBox));
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersEnum(displayName: "Apply gauss:", defaultSelected: 0, displayValues: yesNoEnumValues, displayType: ParameterDisplayTypeEnum.listBox),
+                new ParametersFloat(displayName: "Sigma:", defaultValue: 1.4f, minValue: 0, maxValue: 20, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersEnum(displayName: "Gradient type:", defaultSelected: 0, displayValues: gradientTypeEnumValues, displayType: ParameterDisplayTypeEnum.listBox),
+                new ParametersInt32(displayName: "Threshold low:", defaultValue: 16, minValue: 0, maxValue: 255, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersInt32(displayName: "Threshold high:", defaultValue: 32, minValue: 0, maxValue: 255, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersEnum(displayName: "Up to step:", defaultSelected: 5, displayValues: stepEnumValues, displayType: ParameterDisplayTypeEnum.listBox)
+            };
 
             return parameters;
         }
@@ -59,7 +62,7 @@ namespace CannyFilter
             return null;
         }
 
-        public float[,] generateNormalizedGaussConvolutionMatrix(float sigma, int size)
+        public static float[,] generateNormalizedGaussConvolutionMatrix(float sigma, int size)
         {
             float[,] gaussConvolutionMatrix = new float[size, size];
 
@@ -82,8 +85,7 @@ namespace CannyFilter
         {
             ProcessingImage pi = new ProcessingImage();
             pi.initialize(Path.ChangeExtension(inputImage.getName(), ".png"), inputImage.getSizeX(), inputImage.getSizeY());
-            pi.addWatermark("Canny Filter sigma: " + sigma.ToString("0.0") + " Gradien: " + gradientTypeEnumValues[gradientType] +
-                " TL: " + thresholdLow + " TH: " + thresholdHigh + " Step: " + stepEnumValues[step] + " v1.0, Alexandru Dorobanțiu");
+            pi.addWatermark($"Canny Filter Sigma: {sigma:0.0} Gradient: {gradientTypeEnumValues[gradientType]} TL: {thresholdLow} TH: {thresholdHigh} Step: {stepEnumValues[step]} v1.0, Alexandru Dorobanțiu");
 
             int imageSizeX = pi.getSizeX();
             int imageSizeY = pi.getSizeY();

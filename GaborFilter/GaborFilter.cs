@@ -1,40 +1,38 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 using ProcessingImageSDK;
 using ParametersSDK;
+using ProcessingImageSDK.Utils;
 
 namespace Plugins.Filters.GaborFilter
 {
     public class GaborFilter : IFilter
     {
-        private static string[] intervalEnumValues = { "stretch", "truncate" };
-
-        private static readonly List<IParameters> parameters = new List<IParameters>();
-
-        static GaborFilter()
-        {
-            parameters.Add(new ParametersInt32(3, 100, 8, "Size:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersFloat(1, 100, 8, "Wavelength:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersFloat(0, 3.141592f, 0, "Orientation:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersFloat(0, 3.141592f, 1.5707f, "Phase:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersFloat(0, 100, 2, "Bandwidth:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersFloat(0, 100, 1, "Aspect Ratio:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersEnum("Interval:", 0, intervalEnumValues, ParameterDisplayTypeEnum.comboBox));
-        }
+        private static readonly string[] intervalEnumValues = { "stretch", "truncate" };
 
         public static List<IParameters> getParametersList()
         {
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersInt32(displayName: "Size:", defaultValue: 8, minValue: 3, maxValue: 100, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersFloat(displayName: "Wavelength:", defaultValue: 8, minValue: 1, maxValue: 100, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersFloat(displayName: "Orientation:", defaultValue: 0, minValue: 0, maxValue: 3.141592f, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersFloat(displayName: "Phase:", defaultValue: 1.5707f, minValue: 0, maxValue: 3.141592f, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersFloat(displayName: "Bandwidth:", defaultValue: 2, minValue: 0, maxValue: 100, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersFloat(displayName: "Aspect Ratio:", defaultValue: 1, minValue: 0, maxValue: 100, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersEnum(displayName: "Interval:", defaultSelected: 0, displayValues: intervalEnumValues, displayType: ParameterDisplayTypeEnum.comboBox)
+            };
             return parameters;
         }
 
-        private int filterSize;
-        private float wavelength;
-        private float orientation;
-        private float phase;
-        private float bandwidth;
-        private float aspectRatio;
-        private int intervalType;
+        private readonly int filterSize;
+        private readonly float wavelength;
+        private readonly float orientation;
+        private readonly float phase;
+        private readonly float bandwidth;
+        private readonly float aspectRatio;
+        private readonly int intervalType;
 
         public GaborFilter(int filterSize, float wavelength, float orientation, float phase, float bandwidth, float aspectRatio, int intervalType)
         {
@@ -100,8 +98,7 @@ namespace Plugins.Filters.GaborFilter
             {
                 outputImage = inputImage.mirroredMarginConvolution(gaborFilterMatrix);
             }
-            outputImage.addWatermark("Gabor Filter, size:" + filterSize + ", wavelength:" + wavelength + ", orientation:" + orientation + ", phase:" + phase
-                + ", bandwidth:" + bandwidth + ", aspect ratio:" + aspectRatio + ", interval:" + intervalEnumValues[intervalType] + " v1.0, Alex Dorobantiu");
+            outputImage.addWatermark($"Gabor Filter, size:{filterSize}, wavelength:{wavelength}, orientation:{orientation}, phase:{phase}, bandwidth:{bandwidth}, aspect ratio:{aspectRatio}, interval:{intervalEnumValues[intervalType]} v1.0, Alex Dorobanțiu");
             return outputImage;
         }
 

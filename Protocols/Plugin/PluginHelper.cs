@@ -7,7 +7,7 @@ using ParametersSDK;
 
 namespace CIPPProtocols.Plugin
 {
-    public class PluginHelper
+    public static class PluginHelper
     {
         private const string GET_PARAMETERS_METHOD_NAME = "getParametersList";
 

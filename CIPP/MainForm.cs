@@ -20,21 +20,24 @@ namespace CIPP
 
         private ProcessingImage visibleImage;
 
-        private List<ProcessingImage> originalImageList = new List<ProcessingImage>();
-        private List<ProcessingImage> processedImageList = new List<ProcessingImage>();
-        private List<ProcessingImage> maskedImageList = new List<ProcessingImage>();
-        private List<Motion> motionList = new List<Motion>();
+        private readonly List<ProcessingImage> originalImageList = new List<ProcessingImage>();
+        private readonly List<ProcessingImage> processedImageList = new List<ProcessingImage>();
+        private readonly List<ProcessingImage> maskedImageList = new List<ProcessingImage>();
+        private readonly List<Motion> motionList = new List<Motion>();
 
-        private PluginFinder pluginFinder;
-        private List<PluginInfo> filterPluginList = new List<PluginInfo>();
+        
+        private static readonly List<PluginInfo> lists = new List<PluginInfo>();
+        private List<PluginInfo> filterPluginList = lists;
         private List<PluginInfo> maskPluginList = new List<PluginInfo>();
         private List<PluginInfo> motionRecognitionPluginList = new List<PluginInfo>();
 
-        private List<CheckBox> filterPluginsCheckBoxList = new List<CheckBox>();
-        private List<CheckBox> maskPluginsCheckBoxList = new List<CheckBox>();
-        private List<CheckBox> motionRecognitionPluginsCheckBoxList = new List<CheckBox>();
+        private readonly List<CheckBox> filterPluginsCheckBoxList = new List<CheckBox>();
+        private readonly List<CheckBox> maskPluginsCheckBoxList = new List<CheckBox>();
+        private readonly List<CheckBox> motionRecognitionPluginsCheckBoxList = new List<CheckBox>();
 
-        private List<TcpProxy> TCPConnections = new List<TcpProxy>();
+        private readonly List<TcpProxy> TCPConnections = new List<TcpProxy>();
+
+        private readonly PluginFinder pluginFinder = new PluginFinder();
 
         /// <summary>
         /// Main application form
@@ -48,7 +51,6 @@ namespace CIPP
             TCPConnections = new List<TcpProxy>();
             loadConnectionsFromDisk();
 
-            pluginFinder = new PluginFinder(filterPluginList, maskPluginList, motionRecognitionPluginList);
             updatePlugins_Click(this, null);
             loadState();
         }
@@ -128,7 +130,7 @@ namespace CIPP
         {
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                foreach (String fileName in openFileDialog.FileNames)
+                foreach (string fileName in openFileDialog.FileNames)
                 {
                     loadFile(fileName);
                 }
@@ -338,7 +340,7 @@ namespace CIPP
                         for (int i = 0; i < visibleListBox.SelectedIndices.Count; i++)
                         {
                             ProcessingImage pi = visibleImagesList[visibleListBox.SelectedIndices[i]];
-                            String newPath = Path.Combine(folderBrowserDialog.SelectedPath, visibleListBox.Items[visibleListBox.SelectedIndices[i]].ToString());
+                            string newPath = Path.Combine(folderBrowserDialog.SelectedPath, visibleListBox.Items[visibleListBox.SelectedIndices[i]].ToString());
                             pi.saveImage(newPath);
                         }
                     }
@@ -453,7 +455,7 @@ namespace CIPP
 
         private void originalImageList_DragDrop(object sender, DragEventArgs e)
         {
-            String[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (string fileName in files)
             {
                 DirectoryInfo di = new DirectoryInfo(fileName);

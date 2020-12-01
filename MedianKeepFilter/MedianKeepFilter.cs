@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 using ProcessingImageSDK;
@@ -8,19 +8,16 @@ namespace Plugins.Filters.MedianKeepFilter
 {
     public class MedianKeepFilter : IFilter
     {
-        private static readonly List<IParameters> parameters = new List<IParameters>();
-
-        static MedianKeepFilter()
-        {
-            parameters.Add(new ParametersInt32(1, 32, 1, "Order:", ParameterDisplayTypeEnum.textBox));
-        }
-
         public static List<IParameters> getParametersList()
         {
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersInt32(displayName: "Order:", defaultValue: 1, minValue: 1, maxValue: 32, displayType: ParameterDisplayTypeEnum.textBox)
+            };
             return parameters;
         }
 
-        private int order;
+        private readonly int order;
 
         public MedianKeepFilter(int order)
         {
@@ -38,7 +35,7 @@ namespace Plugins.Filters.MedianKeepFilter
         {
             ProcessingImage outputImage = new ProcessingImage();
             outputImage.copyAttributesAndAlpha(inputImage);
-            outputImage.addWatermark("Median Keep Filter, order: " + order + " v1.0, Alex Dorobantiu");
+            outputImage.addWatermark($"Median Keep Filter, order: {order} v1.0, Alex Dorobanțiu");
 
             int medianSize = (2 * order + 1) * (2 * order + 1);
             int medianPosition = medianSize / 2;

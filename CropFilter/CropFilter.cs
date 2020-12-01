@@ -6,22 +6,20 @@ namespace Plugins.Filters.CropFilter
 {
     public class CropFilter : IFilter
     {
-        private static readonly List<IParameters> parameters = new List<IParameters>();
-
-        static CropFilter()
-        {
-            parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Left:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Rigth:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Top:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersInt32(0, int.MaxValue, 0, "Bottom:", ParameterDisplayTypeEnum.textBox));
-        }
 
         public static List<IParameters> getParametersList()
         {
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersInt32(displayName: "Left:", defaultValue: 0, minValue: 0, maxValue: int.MaxValue, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersInt32(displayName: "Rigth:", defaultValue: 0, minValue: 0, maxValue: int.MaxValue, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersInt32(displayName: "Top:", defaultValue: 0, minValue: 0, maxValue: int.MaxValue, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersInt32(displayName: "Bottom:", defaultValue: 0, minValue: 0, maxValue: int.MaxValue, displayType: ParameterDisplayTypeEnum.textBox)
+            };
             return parameters;
         }
 
-        private int left, right, top, bottom;
+        private readonly int left, right, top, bottom;
 
         public CropFilter(int left, int right, int top, int bottom)
         {
@@ -48,6 +46,7 @@ namespace Plugins.Filters.CropFilter
 
             ProcessingImage outputImage = new ProcessingImage();
             outputImage.initialize(inputImage.getName(), outputSizeX, outputSizeY, false);
+            outputImage.addWatermark($"Crop filter Left: {left} Right: {right} Top: {top} Bottom: {bottom} v1.0, Alex Dorobanțiu");
 
             byte[,] inputAlpha = inputImage.getAlpha();
             byte[,] outputAlpha = new byte[outputSizeY, outputSizeX];
@@ -90,8 +89,7 @@ namespace Plugins.Filters.CropFilter
                 outputImage.setBlue(outputBlue);
             }
             outputImage.setAlpha(outputAlpha);
-
-            outputImage.addWatermark("Crop filter Left: " + left + " Right: " + right + " Top: " + top + " Bottom: " + bottom + " v1.0, Alex Dorobantiu");
+            
             return outputImage;
         }
     }

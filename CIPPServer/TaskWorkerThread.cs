@@ -13,15 +13,17 @@ namespace CIPPServer
         private bool isPendingClosure = false;
 
         private readonly EventWaitHandle eventWaitHandleBetweenTasks = new AutoResetEvent(false);
-        private Thread thread;
+        private readonly Thread thread;
 
         public TaskWorkerThread(ConnectionThread parent, string threadName)
         {
             parentConnectionThread = parent;
             taskSource = parent.taskBuffer;
 
-            thread = new Thread(doWork);
-            thread.Name = threadName;
+            thread = new Thread(doWork)
+            {
+                Name = threadName
+            };
             thread.Start();
         }
 

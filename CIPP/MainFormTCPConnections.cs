@@ -79,7 +79,7 @@ namespace CIPP
                 StreamWriter streamWriter = new StreamWriter(connectionsFilename, false);
                 foreach (TcpProxy tcpProxy in TCPConnections)
                 {
-                    streamWriter.WriteLine(tcpProxy.hostname + ", " + tcpProxy.port);
+                    streamWriter.WriteLine($"{tcpProxy.hostname}, {tcpProxy.port}");
                 }
                 streamWriter.Close();
             }

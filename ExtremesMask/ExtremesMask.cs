@@ -7,23 +7,20 @@ namespace Plugins.Masks.ExtremesMask
 {
     public class ExtremesMask : IMask
     {
-        private static readonly List<IParameters> parameters = new List<IParameters>();
-
-        static ExtremesMask()
-        {
-            parameters.Add(new ParametersInt32(0, 128, 96, "Upper delta:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersInt32(0, 128, 96, "Lower delta:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersInt32(1, int.MaxValue, 32, "Minimum Area:", ParameterDisplayTypeEnum.textBox));
-        }
-
         public static List<IParameters> getParametersList()
         {
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersInt32(displayName: "Upper delta:", defaultValue: 96, minValue: 0, maxValue: 128, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersInt32(displayName: "Lower delta:", defaultValue: 96, minValue: 0, maxValue: 128, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersInt32(displayName: "Minimum Area:", defaultValue: 32, minValue: 1, maxValue: int.MaxValue, displayType: ParameterDisplayTypeEnum.textBox)
+            };
             return parameters;
         }
 
-        private int upperDelta;
-        private int lowerDelta;
-        private int minimumAreaSize;
+        private readonly int upperDelta;
+        private readonly int lowerDelta;
+        private readonly int minimumAreaSize;
 
         public ExtremesMask(int upperDelta, int lowerDelta, int minimumAreaSize)
         {

@@ -20,10 +20,10 @@ namespace CIPPServer
 
         private string clientName;
 
-        private Thread connectionThread;
+        private readonly Thread connectionThread;
 
-        private int numberOfWorkerThreads;
-        private TaskWorkerThread[] workerThreads;
+        private readonly int numberOfWorkerThreads;
+        private readonly TaskWorkerThread[] workerThreads;
 
         public readonly Queue<Task> taskBuffer = new Queue<Task>();
 
@@ -39,8 +39,10 @@ namespace CIPPServer
                 workerThreads[i] = new TaskWorkerThread(this, "worker thread # " + i);
             }
 
-            connectionThread = new Thread(handleConnection);
-            connectionThread.Name = "Connection thread";
+            connectionThread = new Thread(handleConnection)
+            {
+                Name = "Connection thread"
+            };
             connectionThread.Start();
         }
 
@@ -55,16 +57,17 @@ namespace CIPPServer
                     int header = networkStream.ReadByte(); // Client Name Byte
                     if (header != (byte)TrasmissionFlagsEnum.ClientName)
                     {
-                        throw new Exception();
+                        throw new Exception("Invalid Client Package");
                     }
 
                     clientName = (string)formatter.Deserialize(networkStream);
                 }
                 Console.WriteLine("Connected to " + clientName + " on port " + port);
             }
-            catch
+            catch (Exception e)
             {
                 Console.WriteLine("Invalid Client");
+                Console.WriteLine(e.StackTrace);
                 if (networkStream != null)
                 {
                     networkStream.Close();

@@ -6,20 +6,22 @@ namespace ParametersSDK
     public class ParametersEnum : IParameters
     {
         public readonly int defaultSelected;
-        public readonly String[] displayValues;
+        public readonly string[] displayValues;
         private readonly string displayName;
         private readonly ParameterDisplayTypeEnum displayType;
 
-        private List<object> valuesList;
+        private readonly List<object> valuesList;
 
-        public ParametersEnum(string displayName, int defaultSelected, String[] displayValues, ParameterDisplayTypeEnum displayType)
+        public ParametersEnum(string displayName, int defaultSelected, string[] displayValues, ParameterDisplayTypeEnum displayType)
         {
             this.displayName = displayName;
             this.defaultSelected = defaultSelected;
             this.displayValues = displayValues;
             this.displayType = displayType;
-            valuesList = new List<object>();
-            valuesList.Add(defaultSelected);
+            valuesList = new List<object>
+            {
+                defaultSelected
+            };
         }
 
         #region IParameters Members

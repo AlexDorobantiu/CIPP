@@ -1,26 +1,16 @@
-﻿using System.Collections.Generic;
-using ParametersSDK;
-using ProcessingImageSDK;
+﻿using ProcessingImageSDK;
+using ProcessingImageSDK.Utils;
 
 namespace Plugins.Filters.SecondDerivativeEdgeDetect
 {
     public class SecondDerivativeEdgeDetectFilter : IFilter
     {
-        public static List<IParameters> getParametersList()
-        {
-            return new List<IParameters>();
-        }
-
-        public SecondDerivativeEdgeDetectFilter()
-        {
-        }
-
         public ImageDependencies getImageDependencies()
         {
             return new ImageDependencies(-1, -1, -1, -1);
         }
 
-        public ProcessingImage filter(ProcessingImageSDK.ProcessingImage inputImage)
+        public ProcessingImage filter(ProcessingImage inputImage)
         {
             const int laplacianOfGaussianSize = 5;
             ProcessingImage outputImage = new ProcessingImage();

@@ -21,7 +21,7 @@ namespace CIPP
 
     partial class CIPPForm
     {
-        private const String NO_NAME_DEFAULT = " - no name - ";
+        private const string NO_NAME_DEFAULT = " - no name - ";
 
         WorkManager workManager = null;
 
@@ -204,12 +204,12 @@ namespace CIPP
                 {
                     WorkManagerCallbacks callbacks = new WorkManagerCallbacks(addMessage, displayWorker, addImage, addMotion, jobFinished, numberChanged, updateTCPList);
                     int numberOfLocalThreads = (int)localNumberOfWorkers.Value;
-                    workManager = new WorkManager(numberOfLocalThreads, (GranularityTypeEnum)localGranularityComboBox.SelectedIndex, callbacks);
-                    displayWorker("Manager - " + numberOfLocalThreads + " local threads", true);
+                    workManager = new WorkManager(pluginFinder, numberOfLocalThreads, (GranularityTypeEnum)localGranularityComboBox.SelectedIndex, callbacks);
+                    displayWorker($"Manager - {numberOfLocalThreads} local threads", true);
                     workerControlTab.Enabled = false;
                     finishButton.Enabled = true;
                 }
-                workManager.updateLists(filterPluginList, maskPluginList, motionRecognitionPluginList);
+
 
                 switch (processingTab.SelectedIndex)
                 {
@@ -374,10 +374,10 @@ namespace CIPP
             }
         }
 
-        private String getNameOrDefault(ProcessingImage processingImage)
+        private string getNameOrDefault(ProcessingImage processingImage)
         {
-            String nameToAdd = processingImage.getName();
-            if (nameToAdd == null || String.Empty.Equals(nameToAdd))
+            string nameToAdd = processingImage.getName();
+            if (nameToAdd == null || string.Empty.Equals(nameToAdd))
             {
                 return NO_NAME_DEFAULT;
             }

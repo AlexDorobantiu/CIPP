@@ -9,26 +9,24 @@ namespace Plugins.MotionRecognition.Sweeper
 {
     public class Sweeper : IMotionRecognition
     {
-        private static readonly List<IParameters> parameters = new List<IParameters>();
-
-        static Sweeper()
-        {
-            parameters.Add(new ParametersInt32(1, 128, 16, "Block Size:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersInt32(1, 128, 16, "Search Distance:", ParameterDisplayTypeEnum.textBox));
-            string[] compareMethodValues = { "SumOfAbsoluteDifferences", "SumOfSquareDistances", "Correlation" };
-            parameters.Add(new ParametersEnum("Compare Method:", 1, compareMethodValues, ParameterDisplayTypeEnum.listBox));
-            parameters.Add(new ParametersFloat(-1, 1, 0.5f, "Minimum Correlation:", ParameterDisplayTypeEnum.textBox));
-        }
+        private static readonly string[] compareMethodValues = { "SumOfAbsoluteDifferences", "SumOfSquareDistances", "Correlation" };
 
         public static List<IParameters> getParametersList()
         {
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersInt32(displayName: "Block Size:", defaultValue: 16, minValue: 1, maxValue: 128, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersInt32(displayName: "Search Distance:", defaultValue: 16, minValue: 1, maxValue: 128, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersEnum(displayName: "Compare Method:", defaultSelected: 1, displayValues: compareMethodValues, displayType: ParameterDisplayTypeEnum.listBox),
+                new ParametersFloat(displayName: "Minimum Correlation:", defaultValue: 0.5f, minValue: -1, maxValue: 1, displayType: ParameterDisplayTypeEnum.textBox)
+            };
             return parameters;
         }
 
-        int blockSize;
-        int searchDistance;
-        int compareMethod;
-        float minimumCorrelation;
+        readonly int blockSize;
+        readonly int searchDistance;
+        readonly int compareMethod;
+        readonly float minimumCorrelation;
 
         public Sweeper(int blockSize, int searchDistance, int compareMethod, float minimumCorrelation)
         {
@@ -105,7 +103,8 @@ namespace Plugins.MotionRecognition.Sweeper
                             }
                             blockY++;
                         }
-                    } break;
+                    }
+                    break;
                 case 2:
                     {
                         int blockArea = blockSize * blockSize;
@@ -117,8 +116,6 @@ namespace Plugins.MotionRecognition.Sweeper
                             {
                                 int sum = 0;
                                 int squaredSum = 0;
-                                double productSum = 0;
-
                                 for (int i = 0; i < blockSize; i++)
                                 {
                                     for (int j = 0; j < blockSize; j++)
@@ -142,7 +139,7 @@ namespace Plugins.MotionRecognition.Sweeper
                                     {
                                         sum = 0;
                                         squaredSum = 0;
-                                        productSum = 0;
+                                        double productSum = 0;
                                         for (int y = firstY; y < firstY + blockSize; y++)
                                         {
                                             for (int x = firstX; x < firstX + blockSize; x++)
@@ -181,7 +178,8 @@ namespace Plugins.MotionRecognition.Sweeper
                             }
                             blockY++;
                         }
-                    } break;
+                    }
+                    break;
 
             }
             return motionVectors;

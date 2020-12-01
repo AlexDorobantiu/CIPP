@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using CIPPProtocols;
@@ -13,81 +14,65 @@ namespace CIPP.WorkManagement
     class WorkManager
     {
         private const int threadStackSize = 8 * (1 << 20);
-        private readonly object locker = new object();
 
         private volatile int commandsNumber = 0;
         private volatile int tasksNumber = 0;
 
-        private readonly Queue<FilterCommand> filterRequests = new Queue<FilterCommand>();
-        private readonly Queue<MaskCommand> maskRequests = new Queue<MaskCommand>();
-        private readonly Queue<MotionRecognitionCommand> motionRecognitionRequests = new Queue<MotionRecognitionCommand>();
+        private readonly ConcurrentQueue<FilterCommand> filterRequests = new ConcurrentQueue<FilterCommand>();
+        private readonly ConcurrentQueue<MaskCommand> maskRequests = new ConcurrentQueue<MaskCommand>();
+        private readonly ConcurrentQueue<MotionRecognitionCommand> motionRecognitionRequests = new ConcurrentQueue<MotionRecognitionCommand>();
 
-        private readonly Queue<Task> tasks = new Queue<Task>();
-        private readonly Dictionary<int, Task> activeTasks = new Dictionary<int, Task>();
-        private readonly Dictionary<int, Motion> activeMotions = new Dictionary<int, Motion>();
+        private readonly ConcurrentQueue<Task> tasks = new ConcurrentQueue<Task>();
+        private readonly ConcurrentDictionary<int, Task> activeTasks = new ConcurrentDictionary<int, Task>();
+        private readonly ConcurrentDictionary<int, Motion> activeMotions = new ConcurrentDictionary<int, Motion>();
 
         private readonly int numberOfLocalThreads;
         private readonly GranularityTypeEnum granularityType;
         private readonly WorkManagerCallbacks callbacks;
-               
-        private readonly PluginFinder pluginFinder = new PluginFinder();
+
+        private readonly PluginFinder pluginFinder;
+
 
         private Thread[] threads = null;
 
-        public WorkManager(int numberOfLocalThreads, GranularityTypeEnum granularityType, WorkManagerCallbacks callbacks)
+        public WorkManager(PluginFinder pluginFinder, int numberOfLocalThreads, GranularityTypeEnum granularityType, WorkManagerCallbacks callbacks)
         {
+            this.pluginFinder = pluginFinder;
             this.numberOfLocalThreads = numberOfLocalThreads;
             this.granularityType = granularityType;
             this.callbacks = callbacks;
         }
 
-        public void updateLists(List<PluginInfo> filterPluginList, List<PluginInfo> maskPluginList, List<PluginInfo> motionRecognitionPluginList)
-        {
-            lock (pluginFinder)
-            {
-                pluginFinder.updatePluginLists(filterPluginList, maskPluginList, motionRecognitionPluginList);
-            }
-        }
-
         public void updateCommandQueue(List<FilterCommand> filterRequests)
         {
-            lock (this.filterRequests)
+            foreach (FilterCommand command in filterRequests)
             {
-                foreach (FilterCommand command in filterRequests)
-                {
-                    this.filterRequests.Enqueue(command);
-                }
-                commandsNumber += filterRequests.Count;
-                callbacks.numberChanged(commandsNumber, false);
+                this.filterRequests.Enqueue(command);
             }
+            commandsNumber += filterRequests.Count;
+            callbacks.numberChanged(commandsNumber, false);
         }
 
         public void updateCommandQueue(List<MaskCommand> maskRequests)
         {
-            lock (this.maskRequests)
+            foreach (MaskCommand command in maskRequests)
             {
-                foreach (MaskCommand command in maskRequests)
-                {
-                    this.maskRequests.Enqueue(command);
-                }
-                commandsNumber += maskRequests.Count;
-                callbacks.numberChanged(commandsNumber, false);
+                this.maskRequests.Enqueue(command);
             }
+            commandsNumber += maskRequests.Count;
+            callbacks.numberChanged(commandsNumber, false);
         }
 
         public void updateCommandQueue(List<MotionRecognitionCommand> motionDetectionRequests)
         {
-            lock (motionRecognitionRequests)
+            foreach (MotionRecognitionCommand command in motionDetectionRequests)
             {
-                foreach (MotionRecognitionCommand command in motionDetectionRequests)
-                {
-                    motionRecognitionRequests.Enqueue(command);
-                }
-                commandsNumber += motionDetectionRequests.Count;
-                callbacks.numberChanged(commandsNumber, false);
+                motionRecognitionRequests.Enqueue(command);
             }
+            commandsNumber += motionDetectionRequests.Count;
+            callbacks.numberChanged(commandsNumber, false);
         }
-        
+
         public void startWorkers(List<TcpProxy> TCPConnections)
         {
             if (numberOfLocalThreads > 0)
@@ -97,9 +82,11 @@ namespace CIPP.WorkManagement
                     threads = new Thread[numberOfLocalThreads];
                     for (int i = 0; i < threads.Length; i++)
                     {
-                        threads[i] = new Thread(doWork, threadStackSize);
-                        threads[i].Name = "Local Thread " + i;
-                        threads[i].IsBackground = true;
+                        threads[i] = new Thread(doWork, threadStackSize)
+                        {
+                            Name = $"Local Thread {i}",
+                            IsBackground = true
+                        };
                         threads[i].Start();
                     }
                 }
@@ -109,9 +96,11 @@ namespace CIPP.WorkManagement
                     {
                         if (threads[i].ThreadState == ThreadState.Stopped)
                         {
-                            threads[i] = new Thread(doWork, threadStackSize);
-                            threads[i].Name = "Local Thread " + i;
-                            threads[i].IsBackground = true;
+                            threads[i] = new Thread(doWork, threadStackSize)
+                            {
+                                Name = $"Local Thread {i}",
+                                IsBackground = true
+                            };
                             threads[i].Start();
                         }
                     }
@@ -141,7 +130,7 @@ namespace CIPP.WorkManagement
             }
 
             foreach (TcpProxy proxy in TCPConnections)
-            {                
+            {
                 if (proxy.connected)
                 {
                     proxy.sendAbortRequest();
@@ -171,70 +160,56 @@ namespace CIPP.WorkManagement
 
         private Task extractFreeTask()
         {
-            lock (tasks)
+            if (!tasks.TryDequeue(out Task task))
             {
-                if (tasks.Count > 0)
-                {
-                    Task task = tasks.Dequeue();
-                    task.status = Task.Status.TAKEN;
-                    return task;
-                }
+                return null;
             }
-            return null;
+            task.status = Task.Status.TAKEN;
+            return task;
         }
 
         private void addActiveTask(Task task, bool parentTask)
         {
-            lock (activeTasks)
+            activeTasks.TryAdd(task.id, task);
+            if (parentTask)
             {
-                activeTasks.Add(task.id, task);
-                if (parentTask)
-                {
-                    tasksNumber++;
-                }
+                tasksNumber++;
             }
         }
 
         private void removeActiveTask(Task task)
         {
-            lock (activeTasks)
+            if (activeTasks.ContainsKey(task.id))
             {
-                if (activeTasks.ContainsKey(task.id))
-                {
-                    activeTasks.Remove(task.id);
-                    tasksNumber--;
-                }
-                else
-                {
-                    throw new Exception("Invalid task received");
-                }
+                activeTasks.TryRemove(task.id, out _);
+                tasksNumber--;
+            }
+            else
+            {
+                throw new Exception("Invalid task received");
             }
         }
 
         private void addTask(Task task)
         {
-            lock (tasks)
-            {
-                task.status = Task.Status.NOT_TAKEN;
-                tasks.Enqueue(task);
-                tasksNumber++;
-            }
+            task.status = Task.Status.NOT_TAKEN;
+            tasks.Enqueue(task);
+            tasksNumber++;
         }
-        
+
         private Task getTask()
         {
-            Task task = extractFreeTask();
-            if (task != null)
+            lock (tasks)
             {
-                addActiveTask(task, false);
-                return task;
-            }
-
-            lock (filterRequests)
-            {
-                if (filterRequests.Count > 0)
+                Task task = extractFreeTask();
+                if (task != null)
                 {
-                    FilterCommand filterCommand = filterRequests.Dequeue();
+                    addActiveTask(task, false);
+                    return task;
+                }
+
+                if (filterRequests.TryDequeue(out FilterCommand filterCommand))
+                {
                     commandsNumber--;
                     callbacks.numberChanged(commandsNumber, false);
                     FilterTask tempTask = new FilterTask(IdGenerator.getId(), filterCommand.pluginFullName, filterCommand.arguments, filterCommand.processingImage, null);
@@ -245,11 +220,7 @@ namespace CIPP.WorkManagement
                     }
                     else
                     {
-                        PluginInfo pluginInfo;
-                        lock (pluginFinder)
-                        {
-                            pluginInfo = pluginFinder.findPluginForTask(tempTask);
-                        }
+                        PluginInfo pluginInfo = pluginFinder.findPluginForTask(tempTask);
                         IFilter filter = PluginHelper.createInstance<IFilter>(pluginInfo, tempTask.parameters);
                         ImageDependencies imageDependencies = filter.getImageDependencies();
                         if (imageDependencies == null)
@@ -258,30 +229,20 @@ namespace CIPP.WorkManagement
                         }
                         else
                         {
-                            int numberOfSubParts = 0;
-                            if (granularityType == GranularityTypeEnum.medium)
-                            {
-                                numberOfSubParts = Environment.ProcessorCount;
-                            }
-                            else
-                            {
-                                numberOfSubParts = 2 * Environment.ProcessorCount;
-                            }
+                            int numberOfSubParts = granularityType == GranularityTypeEnum.medium ? Environment.ProcessorCount : 2 * Environment.ProcessorCount;
 
-                            ProcessingImage[] subParts = ((FilterTask)tempTask).originalImage.split(imageDependencies, numberOfSubParts);
+                            ProcessingImage[] subParts = tempTask.originalImage.split(imageDependencies, numberOfSubParts);
                             if (subParts == null)
                             {
                                 addTask(tempTask);
                             }
                             else
                             {
-                                ((FilterTask)tempTask).result = ((FilterTask)tempTask).originalImage.blankClone();
-                                ((FilterTask)tempTask).subParts = subParts.Length;
-
-                                FilterTask filterTask = null;
+                                tempTask.result = tempTask.originalImage.blankClone();
+                                tempTask.subParts = subParts.Length;
                                 foreach (ProcessingImage subPart in subParts)
                                 {
-                                    filterTask = new FilterTask(IdGenerator.getId(), tempTask.pluginFullName, tempTask.parameters, subPart, tempTask);
+                                    FilterTask filterTask = new FilterTask(IdGenerator.getId(), tempTask.pluginFullName, tempTask.parameters, subPart, tempTask);
                                     addTask(filterTask);
                                 }
                                 addActiveTask(tempTask, true);
@@ -291,35 +252,27 @@ namespace CIPP.WorkManagement
                     callbacks.numberChanged(tasksNumber, true);
                     return getTask();
                 }
-            }
 
-            lock (maskRequests)
-            {
-                if (maskRequests.Count > 0)
+
+                if (maskRequests.TryDequeue(out MaskCommand maskCommand))
                 {
-                    MaskCommand maskCommand;
-                    maskCommand = maskRequests.Dequeue();
                     commandsNumber--;
                     callbacks.numberChanged(commandsNumber, false);
 
                     Task tempTask = new MaskTask(IdGenerator.getId(), maskCommand.pluginFullName, maskCommand.arguments, maskCommand.processingImage);
                     addTask(tempTask);
-                    callbacks.numberChanged(tasksNumber, true);                    
+                    callbacks.numberChanged(tasksNumber, true);
                     return getTask();
                 }
-            }
 
-            lock (motionRecognitionRequests)
-            {
-                if (motionRecognitionRequests.Count > 0)
+
+                if (motionRecognitionRequests.TryDequeue(out MotionRecognitionCommand motionRecognitionCommand))
                 {
-                    MotionRecognitionCommand motionRecognitionCommand;
-                    motionRecognitionCommand = motionRecognitionRequests.Dequeue();
                     commandsNumber--;
                     callbacks.numberChanged(commandsNumber, false);
 
                     Motion motion = new Motion(IdGenerator.getId(), (int)motionRecognitionCommand.arguments[0], (int)motionRecognitionCommand.arguments[1], motionRecognitionCommand.processingImageList);
-                    activeMotions.Add(motion.id, motion);
+                    activeMotions.TryAdd(motion.id, motion);
 
                     for (int i = 1; i < motion.imageNumber; i++)
                     {
@@ -334,18 +287,10 @@ namespace CIPP.WorkManagement
                         }
                         else
                         {
-                            int numberOfSubParts = 0;
-                            if (granularityType == GranularityTypeEnum.medium)
-                            {
-                                numberOfSubParts = Environment.ProcessorCount;
-                            }
-                            else
-                            {
-                                numberOfSubParts = 2 * Environment.ProcessorCount;
-                            }
+                            int numberOfSubParts = granularityType == GranularityTypeEnum.medium ? Environment.ProcessorCount : 2 * Environment.ProcessorCount;
                             ImageDependencies imageDependencies = new ImageDependencies(motion.searchDistance, motion.searchDistance, motion.searchDistance, motion.searchDistance);
-                            ProcessingImage[] images1 = ((MotionRecognitionTask)tempTask).frame.split(imageDependencies, numberOfSubParts);
-                            ProcessingImage[] images2 = ((MotionRecognitionTask)tempTask).nextFrame.split(imageDependencies, numberOfSubParts);
+                            ProcessingImage[] images1 = tempTask.frame.split(imageDependencies, numberOfSubParts);
+                            ProcessingImage[] images2 = tempTask.nextFrame.split(imageDependencies, numberOfSubParts);
                             if (images1 == null || images2 == null)
                             {
                                 addTask(tempTask);
@@ -392,7 +337,7 @@ namespace CIPP.WorkManagement
                         }
                         else
                         {
-                            callbacks.addMessage("Task with id " + task.id + " failed.");
+                            callbacks.addMessage($"Task with id {task.id} failed.");
                         }
                     }
                     break;
@@ -424,9 +369,9 @@ namespace CIPP.WorkManagement
                                 if (motion.missingVectors == 0)
                                 {
                                     callbacks.addMotion(motion);
-                                    activeMotions.Remove(motion.id);
+                                    activeMotions.TryRemove(motion.id, out _);
                                 }
-                            }                            
+                            }
                         }
                         else
                         {
@@ -440,12 +385,10 @@ namespace CIPP.WorkManagement
 
             removeActiveTask(task);
             callbacks.numberChanged(tasksNumber, true);
-            lock (locker)
+
+            if (tasksNumber == 0 && filterRequests.Count == 0 && maskRequests.Count == 0 && motionRecognitionRequests.Count == 0)
             {
-                if (tasksNumber == 0 && filterRequests.Count == 0 && maskRequests.Count == 0 && motionRecognitionRequests.Count == 0)
-                {
-                    callbacks.jobDone();
-                }
+                callbacks.jobDone();
             }
         }
 
@@ -455,25 +398,26 @@ namespace CIPP.WorkManagement
             callbacks.addWorkerItem(threadName, true);
             while (true)
             {
-                callbacks.addMessage(threadName + " requesting task!");
+                callbacks.addMessage($"{threadName} requesting task!");
                 Task task = getTask();
+                
                 if (task == null)
                 {
-                    callbacks.addMessage(threadName + " finished work!");
+                    callbacks.addMessage($"{threadName} finished work!");
                     break;
                 }
 
-                callbacks.addMessage(threadName + " starting " + task.type.ToString() + " task " + task.id);
+                callbacks.addMessage($"{threadName} starting {task.type} task {task.id}");
                 try
                 {
                     TaskHelper.solveTask(task, pluginFinder);
                     switch (task.status)
                     {
                         case Task.Status.SUCCESSFUL:
-                            callbacks.addMessage(threadName + " finished task " + task.id);
+                            callbacks.addMessage($"{threadName} finished task {task.id}");
                             break;
                         case Task.Status.FAILED:
-                            callbacks.addMessage(threadName + " failed task " + task.id + " with exception: " + task.exception.Message);
+                            callbacks.addMessage($"{threadName} failed task {task.id} with exception: {task.exception.Message}");
                             break;
                         default:
                             throw new NotImplementedException();
@@ -482,7 +426,7 @@ namespace CIPP.WorkManagement
                 }
                 catch (ThreadAbortException)
                 {
-                    callbacks.addMessage(threadName + " stopped working on task " + task.id);
+                    callbacks.addMessage($"{threadName} stopped working on task {task.id}");
                 }
             }
             callbacks.addWorkerItem(threadName, false);
@@ -501,7 +445,6 @@ namespace CIPP.WorkManagement
 
         private void proxyResultReceived(object sender, TcpProxy.ResultReceivedEventArgs e)
         {
-            TcpProxy proxy = (TcpProxy)sender;
             taskFinished(e.task);
         }
 

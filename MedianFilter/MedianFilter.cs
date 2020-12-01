@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 using ProcessingImageSDK;
@@ -8,19 +8,16 @@ namespace Plugins.Filters.MedianFilter
 {
     public class MedianFilter : IFilter
     {
-        private static readonly List<IParameters> parameters = new List<IParameters>();
-
-        static MedianFilter()
-        {
-            parameters.Add(new ParametersInt32(1, 32, 1, "Order:", ParameterDisplayTypeEnum.textBox));
-        }
-
         public static List<IParameters> getParametersList()
         {
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersInt32("Order:", defaultValue: 1, minValue: 1, maxValue: 32, displayType: ParameterDisplayTypeEnum.textBox)
+            };
             return parameters;
         }
 
-        private int order;
+        private readonly int order;
 
         public MedianFilter(int order)
         {
@@ -38,10 +35,9 @@ namespace Plugins.Filters.MedianFilter
         {
             ProcessingImage outputImage = new ProcessingImage();
             outputImage.copyAttributesAndAlpha(inputImage);
-            outputImage.addWatermark("Median Filter, order: " + order + " v1.0, Alex Dorobantiu");
+            outputImage.addWatermark($"Median Filter, order: {order} v1.1, Alex Dorobanțiu");
 
             int medianSize = (2 * order + 1) * (2 * order + 1);
-            int medianPosition = medianSize / 2;
 
             if (!inputImage.grayscale)
             {
@@ -58,28 +54,28 @@ namespace Plugins.Filters.MedianFilter
                 byte[] medianG = new byte[medianSize];
                 byte[] medianB = new byte[medianSize];
 
-                for (int i = order; i < outputImage.getSizeY() - order; i++)
+                for (int i = 0; i < outputImage.getSizeY(); i++)
                 {
-                    for (int j = order; j < outputImage.getSizeX() - order; j++)
+                    for (int j = 0; j < outputImage.getSizeX(); j++)
                     {
-                        int pivot = 0;
-                        for (int k = i - order; k <= i + order; k++)
+                        int elements = 0;
+                        for (int k = (i - order > 0 ? i - order : 0); k <= (i + order < inputImage.getSizeY() ? i + order : inputImage.getSizeY() - 1); k++)
                         {
-                            for (int l = j - order; l <= j + order; l++)
+                            for (int l = (j - order > 0 ? j - order : 0); l <= (j + order < inputImage.getSizeX() ? j + order : inputImage.getSizeX() - 1); l++)
                             {
-                                medianR[pivot] = inputRed[k, l];
-                                medianG[pivot] = inputGreen[k, l];
-                                medianB[pivot] = inputBlue[k, l];
-                                pivot++;
+                                medianR[elements] = inputRed[k, l];
+                                medianG[elements] = inputGreen[k, l];
+                                medianB[elements] = inputBlue[k, l];
+                                elements++;
                             }
                         }
-                        Array.Sort(medianR);
-                        Array.Sort(medianG);
-                        Array.Sort(medianB);
+                        Array.Sort(medianR, 0, elements);
+                        Array.Sort(medianG, 0, elements);
+                        Array.Sort(medianB, 0, elements);
 
-                        outputRed[i, j] = medianR[medianPosition];
-                        outputGreen[i, j] = medianG[medianPosition];
-                        outputBlue[i, j] = medianB[medianPosition];
+                        outputRed[i, j] = medianR[elements / 2];
+                        outputGreen[i, j] = medianG[elements / 2];
+                        outputBlue[i, j] = medianB[elements / 2];
                     }
                 }
                 outputImage.setRed(outputRed);
@@ -92,20 +88,20 @@ namespace Plugins.Filters.MedianFilter
                 byte[,] inputGray = inputImage.getGray();
 
                 byte[] medianGray = new byte[medianSize];
-                for (int i = order; i < outputImage.getSizeY() - order; i++)
+                for (int i = 0; i < outputImage.getSizeY(); i++)
                 {
-                    for (int j = order; j < outputImage.getSizeX() - order; j++)
+                    for (int j = 0; j < outputImage.getSizeX(); j++)
                     {
-                        int pivot = 0;
-                        for (int k = i - order; k <= i + order; k++)
+                        int elements = 0;
+                        for (int k = (i - order > 0 ? i - order : 0); k <= (i + order < inputImage.getSizeY() ? i + order : inputImage.getSizeY() - 1); k++)
                         {
-                            for (int l = j - order; l <= j + order; l++)
+                            for (int l = (j - order > 0 ? j - order : 0); l <= (j + order < inputImage.getSizeX() ? j + order : inputImage.getSizeX() - 1); l++)
                             {
-                                medianGray[pivot++] = inputGray[k, l];
+                                medianGray[elements++] = inputGray[k, l];
                             }
                         }
-                        Array.Sort(medianGray);
-                        outputGray[i, j] = medianGray[medianPosition];
+                        Array.Sort(medianGray, 0, elements);
+                        outputGray[i, j] = medianGray[elements / 2];
                     }
                 }
                 outputImage.setGray(outputGray);

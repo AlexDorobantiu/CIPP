@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using ProcessingImageSDK;
 using ParametersSDK;
@@ -7,19 +7,16 @@ namespace Plugins.Filters.HighPassFilter
 {
     public class HighPassFilter : IFilter
     {
-        private static readonly List<IParameters> parameters = new List<IParameters>();
-
-        static HighPassFilter()
-        {
-            parameters.Add(new ParametersInt32(1, 3, 2, "Strength:", ParameterDisplayTypeEnum.textBox));
-        }
-
         public static List<IParameters> getParametersList()
         {
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersInt32("Strength:", 2, 1, 3, ParameterDisplayTypeEnum.textBox)
+            };
             return parameters;
         }
 
-        private int strength;
+        private readonly int strength;
 
         public HighPassFilter(int strength)
         {
@@ -42,23 +39,26 @@ namespace Plugins.Filters.HighPassFilter
                     {
                         f[1, 0] = f[0, 1] = f[2, 1] = f[1, 2] = -1;
                         f[1, 1] = 5;
-                    } break;
+                    }
+                    break;
                 case 2:
                     {
                         f[0, 0] = f[2, 0] = f[0, 2] = f[2, 2] = -1;
                         f[1, 0] = f[0, 1] = f[2, 1] = f[1, 2] = -1;
                         f[1, 1] = 9;
-                    } break;
+                    }
+                    break;
                 case 3:
                     {
                         f[0, 0] = f[2, 0] = f[0, 2] = f[2, 2] = 1;
                         f[1, 0] = f[0, 1] = f[2, 1] = f[1, 2] = -2;
                         f[1, 1] = 5;
-                    } break;
+                    }
+                    break;
             }
 
             ProcessingImage outputImage = inputImage.mirroredMarginConvolution(f);
-            outputImage.addWatermark("High Pass Filter, strength: " + strength + " v1.0, Alex Dorobantiu");
+            outputImage.addWatermark($"High Pass Filter, strength: {strength} v1.0, Alex Dorobanțiu");
             return outputImage;
         }
 

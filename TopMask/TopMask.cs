@@ -7,21 +7,18 @@ namespace Plugins.Masks.TopMask
 {
     public class TopMask : IMask
     {
-        private static readonly List<IParameters> parameters = new List<IParameters>();
-
-        static TopMask()
-        {
-            parameters.Add(new ParametersInt32(0, 255, 128, "Upper delta:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersInt32(1, int.MaxValue, 32, "Minimum Area:", ParameterDisplayTypeEnum.textBox));
-        }
-
         public static List<IParameters> getParametersList()
         {
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersInt32(displayName: "Upper delta:", defaultValue: 128, minValue: 0, maxValue: 255, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersInt32(displayName: "Minimum Area:", defaultValue: 32, minValue: 1, maxValue: int.MaxValue, displayType: ParameterDisplayTypeEnum.textBox)
+            };
             return parameters;
         }
 
-        private int upperDelta;
-        private int minimumAreaSize;
+        private readonly int upperDelta;
+        private readonly int minimumAreaSize;
 
         public TopMask(int upperDelta, int minimumAreaSize)
         {

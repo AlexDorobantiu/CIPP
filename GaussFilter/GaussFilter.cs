@@ -1,28 +1,26 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 using ProcessingImageSDK;
 using ParametersSDK;
+using ProcessingImageSDK.Utils;
 
 namespace Plugins.Filters.GaussFilter
 {
     public class GaussFilter : IFilter
     {
-        private static readonly List<IParameters> parameters = new List<IParameters>();
-
-        static GaussFilter()
-        {
-            parameters.Add(new ParametersInt32(3, 32, 5, "Size:", ParameterDisplayTypeEnum.textBox));
-            parameters.Add(new ParametersFloat(0.01f, 32, 1, "Sigma:", ParameterDisplayTypeEnum.textBox));
-        }
-
         public static List<IParameters> getParametersList()
         {
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersInt32(displayName: "Size:", defaultValue: 5, minValue: 3, maxValue: 32, displayType: ParameterDisplayTypeEnum.textBox),
+                new ParametersFloat(displayName: "Sigma:", defaultValue: 1, minValue: 0.01f, maxValue: 32, displayType: ParameterDisplayTypeEnum.textBox)
+            };
             return parameters;
         }
 
-        private int size;
-        private float sigma;
+        private readonly int size;
+        private readonly float sigma;
 
         public GaussFilter(int size, float sigma)
         {
@@ -57,7 +55,7 @@ namespace Plugins.Filters.GaussFilter
             gaussConvolutionMatrix = ProcessingImageUtils.normalize(gaussConvolutionMatrix);
 
             ProcessingImage outputImage = inputImage.mirroredMarginConvolution(gaussConvolutionMatrix);
-            outputImage.addWatermark("Gauss Filter, size: " + size + ", sigma: " + sigma + " v1.0, Alex Dorobantiu");
+            outputImage.addWatermark($"Gauss Filter, size: {size}, sigma: {sigma} v1.0, Alex Dorobanțiu");
             return outputImage;
         }
 

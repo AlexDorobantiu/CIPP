@@ -2,7 +2,7 @@
 {
     class RgbCluster
     {
-        int index;
+        readonly int index;
         Rgb rgb;
 
         int count;

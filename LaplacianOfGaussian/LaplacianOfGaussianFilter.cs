@@ -1,27 +1,10 @@
-using System.Collections.Generic;
-
+﻿
 using ProcessingImageSDK;
-using ParametersSDK;
 
 namespace Plugins.Filters.LaplacianOfGaussian
 {
     public class LaplacianOfGaussianFilter : IFilter
     {
-        private static readonly List<IParameters> parameters = new List<IParameters>();
-
-        static LaplacianOfGaussianFilter()
-        {
-        }
-
-        public static List<IParameters> getParametersList()
-        {
-            return parameters;
-        }
-
-        public LaplacianOfGaussianFilter()
-        {
-        }
-
         #region IFilter Members
 
         public ImageDependencies getImageDependencies()
@@ -46,7 +29,7 @@ namespace Plugins.Filters.LaplacianOfGaussian
             f[4, 0] = f[4, 1] = f[4, 3] = f[4, 4] = 0;
             f[4, 2] = -1;
             ProcessingImage outputImage = inputImage.mirroredMarginConvolution(f);
-            outputImage.addWatermark("Laplacian of Gaussian Filter v1.0, Alex Dorobantiu");
+            outputImage.addWatermark("Laplacian of Gaussian Filter v1.0, Alex Dorobanțiu");
             return outputImage;
         }
 

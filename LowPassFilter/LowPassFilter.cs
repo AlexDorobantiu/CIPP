@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using ProcessingImageSDK;
 using ParametersSDK;
@@ -7,19 +7,16 @@ namespace Plugins.Filters.LowPassFilter
 {
     public class LowPassFilter : IFilter
     {
-        private static readonly List<IParameters> parameters = new List<IParameters>();
-
-        static LowPassFilter()
-        {
-            parameters.Add(new ParametersInt32(1, 16, 1, "Strength:", ParameterDisplayTypeEnum.textBox));
-        }
-
         public static List<IParameters> getParametersList()
         {
+            List<IParameters> parameters = new List<IParameters>
+            {
+                new ParametersInt32(displayName: "Strength:", defaultValue: 1, minValue: 1, maxValue: 16, displayType: ParameterDisplayTypeEnum.textBox)
+            };
             return parameters;
         }
 
-        private int strength;
+        private readonly int strength;
 
         public LowPassFilter(int strength)
         {
@@ -41,7 +38,7 @@ namespace Plugins.Filters.LowPassFilter
             f[1, 1] = (float)strength * strength / ((strength + 2) * (strength + 2));
 
             ProcessingImage outputImage = inputImage.mirroredMarginConvolution(f);
-            outputImage.addWatermark("Low Pass Filter, strength: " + strength + " v1.0, Alex Dorobantiu");
+            outputImage.addWatermark($"Low Pass Filter, strength: {strength} v1.0, Alex Dorobanțiu");
             return outputImage;
         }
 

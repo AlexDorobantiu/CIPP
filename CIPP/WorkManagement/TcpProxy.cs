@@ -84,7 +84,7 @@ namespace CIPP.WorkManagement
                 }
                 connected = true;
                 
-                postMessage("Connected to " + hostname + " on port " + port);
+                postMessage($"Connected to {hostname} on port {port}");
                 isConnectionThreadRunning = true;
                 listeningThread = new Thread(handleConnection);
                 listeningThread.Start();
@@ -107,7 +107,7 @@ namespace CIPP.WorkManagement
                 }
                 catch (Exception e)
                 {
-                    postMessage(getNameAndStatus() + " error: " + e.Message);
+                    postMessage($"{getNameAndStatus()} error: {e.Message}");
                 }
                 connected = false;
                 listening = false;
@@ -132,7 +132,7 @@ namespace CIPP.WorkManagement
                         networkStream.WriteByte((byte)TrasmissionFlagsEnum.Listening);
                         networkStream.Flush();
                     }
-                    postMessage("Listening to " + hostname + ", " + port);
+                    postMessage($"Listening to {hostname}, {port}");
                 }
                 catch (Exception e)
                 {
@@ -158,7 +158,7 @@ namespace CIPP.WorkManagement
                     formatter.Serialize(networkStream, task);
                     networkStream.Flush();
                 }
-                postMessage("Task sent to " + hostname + " on port " + port);
+                postMessage($"Task sent to {hostname} on port {port}");
                 lock (sentTasks)
                 {
                     sentTasks.Add(task.id, task);
@@ -180,7 +180,7 @@ namespace CIPP.WorkManagement
                     networkStream.WriteByte((byte)TrasmissionFlagsEnum.AbortWork);
                     networkStream.Flush();
                 }
-                postMessage("Abort request sent to: " + hostname + " on port: " + port);
+                postMessage($"Abort request sent to: {hostname} on port: {port}");
                 lock (sentTasks)
                 {
                     sentTasks.Clear();
@@ -208,13 +208,10 @@ namespace CIPP.WorkManagement
                     switch (header)
                     {
                         case (byte)TrasmissionFlagsEnum.TaskRequest:
-                            postWorker("Worker @: " + hostname, false);
-                            if (taskRequestReceivedEventHandler != null)
-                            {
-                                taskRequestReceivedEventHandler(this, EventArgs.Empty);
-                            }
+                            postWorker($"Worker @: {hostname}", false);
+                            taskRequestReceivedEventHandler?.Invoke(this, EventArgs.Empty);
                             taskRequests++;
-                            postMessage("Received a task request from " + hostname + " on port " + port);
+                            postMessage($"Received a task request from {hostname} on port {port}");
                             break;
                         case (byte)TrasmissionFlagsEnum.Result:
                             ResultPackage resultPackage = (ResultPackage)formatter.Deserialize(networkStream);
@@ -230,7 +227,7 @@ namespace CIPP.WorkManagement
                                     }
                                     else
                                     {
-                                        postMessage("Received a false result from " + hostname + " on port " + port + " ");
+                                        postMessage($"Received a false result from {hostname} on port {port} ");
                                         throw new Exception("Invalid result package received");
                                     }
                                 }
@@ -251,31 +248,25 @@ namespace CIPP.WorkManagement
                                             throw new NotImplementedException();
                                     }
                                     tempTask.status = Task.Status.SUCCESSFUL;
-                                    postMessage("Received a result from " + hostname + " on port " + port + " ");
+                                    postMessage($"Received a result from {hostname} on port {port} ");
                                 }
                                 else
                                 {
                                     tempTask.status = Task.Status.FAILED;
-                                    postMessage("Task " + tempTask.id + " not completed succesfuly by " + hostname + " on port " + port + " ");
+                                    postMessage($"Task {tempTask.id} not completed succesfuly by {hostname} on port {port} ");
                                 }
-                                if (resultsReceivedEventHandler != null)
-                                {
-                                    resultsReceivedEventHandler(this, new ResultReceivedEventArgs(tempTask));
-                                }
+                                resultsReceivedEventHandler?.Invoke(this, new ResultReceivedEventArgs(tempTask));
                             }
                             else
                             {
-                                postMessage("Received an empty result package from " + hostname + " on port " + port + " ");
+                                postMessage($"Received an empty result package from {hostname} on port {port} ");
                                 throw new Exception("Invalid result package received");
                             }
-                            postWorker("Worker @: " + hostname, true);
+                            postWorker($"Worker @: {hostname}", true);
                             break;
                         default:
-                            if (connectionLostEventHandler != null)
-                            {
-                                connectionLostEventHandler(this, EventArgs.Empty);
-                            }
-                            postMessage("Invalid message header received: " + header);
+                            connectionLostEventHandler?.Invoke(this, EventArgs.Empty);
+                            postMessage($"Invalid message header received: {header}");
                             isConnectionThreadRunning = false;
                             listening = false;
                             break;
@@ -288,49 +279,40 @@ namespace CIPP.WorkManagement
             }
             finally
             {
-                postMessage("Connection to " + hostname + " on port " + port + " terminated");
+                postMessage($"Connection to {hostname} on port {port} terminated");
                 isConnectionThreadRunning = false;
                 connected = false;
                 listening = false;
                 for (int i = 0; i < taskRequests; i++)
                 {
-                    postWorker("Worker @: " + hostname, true);
+                    postWorker($"Worker @: {hostname}", true);
                 }
                 lock (sentTasks)
                 {
                     sentTasks.Clear();
                     taskRequests = 0;
                 }
-                if (connectionLostEventHandler != null)
-                {
-                    connectionLostEventHandler(this, EventArgs.Empty);
-                }
+                connectionLostEventHandler?.Invoke(this, EventArgs.Empty);
             }
         }
 
         private void postMessage(string message)
         {
-            if (messagePosted != null)
-            {
-                messagePosted(this, new StringEventArgs(message));
-            }
+            messagePosted?.Invoke(this, new StringEventArgs(message));
         }
 
         private void postWorker(string name, bool left)
         {
-            if (workerPosted != null)
-            {
-                workerPosted(this, new WorkerEventArgs(name, left));
-            }
+            workerPosted?.Invoke(this, new WorkerEventArgs(name, left));
         }
 
         public string getNameAndStatus()
         {
             if (connected)
             {
-                return hostname + ", " + port + ", connected";
+                return $"{hostname}, {port}, connected";
             }
-            return hostname + ", " + port + ", not connected";
+            return $"{hostname}, {port}, not connected";
         }
 
         #region IDisposable Support

@@ -1,21 +1,10 @@
-using System.Collections.Generic;
-
+﻿
 using ProcessingImageSDK;
-using ParametersSDK;
 
 namespace Plugins.Filters.NegativeFilter
 {
     public class NegativeFilter : IFilter
     {
-        public static List<IParameters> getParametersList()
-        {
-            return new List<IParameters>();
-        }
-
-        public NegativeFilter()
-        {
-        }
-
         #region IFilter Members
 
         public ImageDependencies getImageDependencies()
@@ -27,7 +16,7 @@ namespace Plugins.Filters.NegativeFilter
         {
             ProcessingImage outputImage = new ProcessingImage();
             outputImage.copyAttributesAndAlpha(inputImage);
-            outputImage.addWatermark("Negative Filter, v1.0, Alex Dorobantiu");
+            outputImage.addWatermark("Negative Filter, v1.0, Alex Dorobanțiu");
             if (!inputImage.grayscale)
             {
                 byte[,] red = new byte[inputImage.getSizeY(), inputImage.getSizeX()];
