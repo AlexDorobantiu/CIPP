@@ -5,12 +5,12 @@ Version 1.2 Released by [Alexandru Dorobanțiu](http://alex.dorobantiu.ro) on 01
 ### Features
 - parallel and distributed image processing
 - pluggable architecture, explicitly designed for developing algorithms
-- simple Design Space Exploration through parameter combinatorics.
+- simple Design Space Exploration through parameter combinatorics
 - contains example plugins for various consecrated image processing algorithms (more will be added)
 
 ### Technology:
  - Written in plain **C#** using **Visual Studio**
- - **.NET** framework is kept to version **4.6.2** for compatibility with older operating systems and Visual Studio versions. It also encourages writing simple and portable code to other programming languages without abusing syntactic sugar provided by newer C# extensions
+ - **.NET** framework is kept to version **4.6.2** for compatibility with older operating systems and Visual Studio versions.
  - The front-end is implemented using Windows Forms
  
 #### Details

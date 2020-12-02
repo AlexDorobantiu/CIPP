@@ -48,7 +48,6 @@ namespace Plugins.Filters.MedianFilter
                 byte[,] inputRed = inputImage.getRed();
                 byte[,] inputGreen = inputImage.getGreen();
                 byte[,] inputBlue = inputImage.getBlue();
-
                 
                 byte[] medianR = new byte[medianSize];
                 byte[] medianG = new byte[medianSize];

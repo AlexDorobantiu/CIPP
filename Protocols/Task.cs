@@ -27,7 +27,7 @@ namespace CIPPProtocols
         public Status status;
         public Exception exception;
 
-        public Task(int id, Type type, string pluginFullName, object[] parameters)
+        protected Task(int id, Type type, string pluginFullName, object[] parameters)
         {
             this.id = id;
             this.type = type;

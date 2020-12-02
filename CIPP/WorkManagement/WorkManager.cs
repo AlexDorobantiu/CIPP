@@ -35,6 +35,8 @@ namespace CIPP.WorkManagement
 
         private Thread[] threads = null;
 
+        private static readonly EventWaitHandle eventWaitHandle = new ManualResetEvent(initialState: false);
+
         public WorkManager(PluginFinder pluginFinder, int numberOfLocalThreads, GranularityTypeEnum granularityType, WorkManagerCallbacks callbacks)
         {
             this.pluginFinder = pluginFinder;
@@ -92,18 +94,7 @@ namespace CIPP.WorkManagement
                 }
                 else
                 {
-                    for (int i = 0; i < threads.Length; i++)
-                    {
-                        if (threads[i].ThreadState == ThreadState.Stopped)
-                        {
-                            threads[i] = new Thread(doWork, threadStackSize)
-                            {
-                                Name = $"Local Thread {i}",
-                                IsBackground = true
-                            };
-                            threads[i].Start();
-                        }
-                    }
+                    eventWaitHandle.Set();
                 }
             }
 
@@ -165,6 +156,7 @@ namespace CIPP.WorkManagement
                 return null;
             }
             task.status = Task.Status.TAKEN;
+            addActiveTask(task, false);
             return task;
         }
 
@@ -199,12 +191,11 @@ namespace CIPP.WorkManagement
 
         private Task getTask()
         {
-            lock (tasks)
+            lock (eventWaitHandle)
             {
                 Task task = extractFreeTask();
                 if (task != null)
                 {
-                    addActiveTask(task, false);
                     return task;
                 }
 
@@ -250,7 +241,7 @@ namespace CIPP.WorkManagement
                         }
                     }
                     callbacks.numberChanged(tasksNumber, true);
-                    return getTask();
+                    return extractFreeTask();
                 }
 
 
@@ -262,7 +253,7 @@ namespace CIPP.WorkManagement
                     Task tempTask = new MaskTask(IdGenerator.getId(), maskCommand.pluginFullName, maskCommand.arguments, maskCommand.processingImage);
                     addTask(tempTask);
                     callbacks.numberChanged(tasksNumber, true);
-                    return getTask();
+                    return extractFreeTask();
                 }
 
 
@@ -309,7 +300,7 @@ namespace CIPP.WorkManagement
                         }
                     }
                     callbacks.numberChanged(tasksNumber, true);
-                    return getTask();
+                    return extractFreeTask();
                 }
             }
             return null;
@@ -400,11 +391,13 @@ namespace CIPP.WorkManagement
             {
                 callbacks.addMessage($"{threadName} requesting task!");
                 Task task = getTask();
-                
                 if (task == null)
                 {
+                    eventWaitHandle.Reset();
                     callbacks.addMessage($"{threadName} finished work!");
-                    break;
+                    eventWaitHandle.WaitOne();
+                    callbacks.addMessage($"{threadName} resumes work!");
+                    continue;
                 }
 
                 callbacks.addMessage($"{threadName} starting {task.type} task {task.id}");
@@ -429,7 +422,6 @@ namespace CIPP.WorkManagement
                     callbacks.addMessage($"{threadName} stopped working on task {task.id}");
                 }
             }
-            callbacks.addWorkerItem(threadName, false);
         }
 
         private void proxyRequestReceived(object sender, EventArgs e)

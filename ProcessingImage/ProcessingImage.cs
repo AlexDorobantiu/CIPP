@@ -1384,45 +1384,45 @@ namespace ProcessingImageSDK
                 return null;
             }
 
-            ProcessingImage[] processingImage = new ProcessingImage[subParts];
+            ProcessingImage[] processingImages = new ProcessingImage[subParts];
             for (int i = 0; i < subParts; i++)
             {
-                processingImage[i] = new ProcessingImage();
+                processingImages[i] = new ProcessingImage();
             }
 
             int stepSize = sizeX / subParts;
             int size = stepSize + imageDependencies.left + imageDependencies.right;
-            int start = 0;
+            int startX = 0;
 
             for (int i = 0; i < subParts; i++)
             {
-                processingImage[i].imageDependencies = imageDependencies;
-                processingImage[i].position.x = start;
-                processingImage[i].position.y = 0;
+                processingImages[i].imageDependencies = imageDependencies;
+                processingImages[i].position.x = startX;
+                processingImages[i].position.y = 0;
                 if (i == 0)
                 {
-                    processingImage[i].sizeX = stepSize + imageDependencies.right;
+                    processingImages[i].sizeX = stepSize + imageDependencies.right;
                 }
                 else
                 {
                     if (i == subParts - 1)
                     {
-                        processingImage[i].sizeX = sizeX - (subParts - 1) * stepSize + imageDependencies.left;
+                        processingImages[i].sizeX = sizeX - (subParts - 1) * stepSize + imageDependencies.left;
                     }
                     else
                     {
-                        processingImage[i].sizeX = size;
+                        processingImages[i].sizeX = size;
                     }
                 }
-                processingImage[i].sizeY = sizeY;
+                processingImages[i].sizeY = sizeY;
 
 
-                byte[,] alpha = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
+                byte[,] alpha = new byte[processingImages[i].sizeY, processingImages[i].sizeX];
                 if (i == 0)
                 {
-                    for (int y = 0; y < processingImage[i].sizeY; y++)
+                    for (int y = 0; y < processingImages[i].sizeY; y++)
                     {
-                        for (int x = 0; x < processingImage[i].sizeX; x++)
+                        for (int x = 0; x < processingImages[i].sizeX; x++)
                         {
                             alpha[y, x] = this.alpha[y, x];
                         }
@@ -1430,26 +1430,26 @@ namespace ProcessingImageSDK
                 }
                 else
                 {
-                    for (int y = 0; y < processingImage[i].sizeY; y++)
+                    for (int y = 0; y < processingImages[i].sizeY; y++)
                     {
-                        for (int x = 0; x < processingImage[i].sizeX; x++)
+                        for (int x = 0; x < processingImages[i].sizeX; x++)
                         {
-                            alpha[y, x] = this.alpha[y, x - imageDependencies.left + start];
+                            alpha[y, x] = this.alpha[y, x - imageDependencies.left + startX];
                         }
                     }
                 }
 
-                processingImage[i].alpha = alpha;
+                processingImages[i].alpha = alpha;
 
                 if (grayscale)
                 {
-                    processingImage[i].grayscale = true;
-                    byte[,] gray = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
+                    processingImages[i].grayscale = true;
+                    byte[,] gray = new byte[processingImages[i].sizeY, processingImages[i].sizeX];
                     if (i == 0)
                     {
-                        for (int y = 0; y < processingImage[i].sizeY; y++)
+                        for (int y = 0; y < processingImages[i].sizeY; y++)
                         {
-                            for (int x = 0; x < processingImage[i].sizeX; x++)
+                            for (int x = 0; x < processingImages[i].sizeX; x++)
                             {
                                 gray[y, x] = this.gray[y, x];
                             }
@@ -1457,27 +1457,27 @@ namespace ProcessingImageSDK
                     }
                     else
                     {
-                        for (int y = 0; y < processingImage[i].sizeY; y++)
+                        for (int y = 0; y < processingImages[i].sizeY; y++)
                         {
-                            for (int x = 0; x < processingImage[i].sizeX; x++)
+                            for (int x = 0; x < processingImages[i].sizeX; x++)
                             {
-                                gray[y, x] = this.gray[y, x - imageDependencies.left + start];
+                                gray[y, x] = this.gray[y, x - imageDependencies.left + startX];
                             }
                         }
                     }
-                    processingImage[i].gray = gray;
+                    processingImages[i].gray = gray;
                 }
                 else
                 {
-                    byte[,] red = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
-                    byte[,] green = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
-                    byte[,] blue = new byte[processingImage[i].sizeY, processingImage[i].sizeX];
+                    byte[,] red = new byte[processingImages[i].sizeY, processingImages[i].sizeX];
+                    byte[,] green = new byte[processingImages[i].sizeY, processingImages[i].sizeX];
+                    byte[,] blue = new byte[processingImages[i].sizeY, processingImages[i].sizeX];
 
                     if (i == 0)
                     {
-                        for (int y = 0; y < processingImage[i].sizeY; y++)
+                        for (int y = 0; y < processingImages[i].sizeY; y++)
                         {
-                            for (int x = 0; x < processingImage[i].sizeX; x++)
+                            for (int x = 0; x < processingImages[i].sizeX; x++)
                             {
                                 red[y, x] = this.red[y, x];
                                 green[y, x] = this.green[y, x];
@@ -1487,24 +1487,24 @@ namespace ProcessingImageSDK
                     }
                     else
                     {
-                        for (int y = 0; y < processingImage[i].sizeY; y++)
+                        for (int y = 0; y < processingImages[i].sizeY; y++)
                         {
-                            for (int x = 0; x < processingImage[i].sizeX; x++)
+                            for (int x = 0; x < processingImages[i].sizeX; x++)
                             {
-                                red[y, x] = this.red[y, x - imageDependencies.left + start];
-                                green[y, x] = this.green[y, x - imageDependencies.left + start];
-                                blue[y, x] = this.blue[y, x - imageDependencies.left + start];
+                                red[y, x] = this.red[y, x - imageDependencies.left + startX];
+                                green[y, x] = this.green[y, x - imageDependencies.left + startX];
+                                blue[y, x] = this.blue[y, x - imageDependencies.left + startX];
                             }
                         }
                     }
-                    processingImage[i].red = red;
-                    processingImage[i].green = green;
-                    processingImage[i].blue = blue;
+                    processingImages[i].red = red;
+                    processingImages[i].green = green;
+                    processingImages[i].blue = blue;
                 }
 
-                start += stepSize;
+                startX += stepSize;
             }
-            return processingImage;
+            return processingImages;
         }
 
         /// <summary>
@@ -1515,28 +1515,29 @@ namespace ProcessingImageSDK
         {
             try
             {
+                int subPartStartX = subPart.imageDependencies.left;
+                int subPartEndX = subPart.sizeX - subPart.imageDependencies.right;
                 if (subPart.position.x == 0)
                 {
-                    for (int i = subPart.imageDependencies.top; i < subPart.sizeY - subPart.imageDependencies.bottom; i++)
-                    {
-                        for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
-                        {
-                            alpha[i + subPart.position.y, j + subPart.position.x] = subPart.alpha[i, j];
-                        }
-                    }
-
-                    watermaks = subPart.watermaks;
+                    watermaks = subPart.watermaks; // copy watermarks only from the first chunk
+                    subPartStartX = 0;
                 }
                 else
                 {
-                    for (int i = subPart.imageDependencies.top; i < subPart.sizeY - subPart.imageDependencies.bottom; i++)
+                    if (subPart.position.x + subPart.sizeX >= sizeX)
                     {
-                        for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
-                        {
-                            alpha[i + subPart.position.y, j + subPart.position.x - subPart.imageDependencies.left] = subPart.alpha[i, j];
-                        }
+                        subPartEndX = subPart.sizeX;
                     }
                 }
+
+                for (int i = 0; i < subPart.sizeY; i++)
+                {
+                    for (int j = subPartStartX; j < subPartEndX; j++)
+                    {
+                        alpha[i + subPart.position.y, j + subPart.position.x - subPartStartX] = subPart.alpha[i, j];
+                    }
+                }
+
                 if (subPart.grayscale)
                 {
                     if (!grayscale)
@@ -1547,24 +1548,11 @@ namespace ProcessingImageSDK
                         gray = new byte[sizeY, sizeX];
                         grayscale = true;
                     }
-                    if (subPart.position.x == 0)
+                    for (int i = 0; i < subPart.sizeY; i++)
                     {
-                        for (int i = subPart.imageDependencies.top; i < subPart.sizeY - subPart.imageDependencies.bottom; i++)
+                        for (int j = subPartStartX; j < subPartEndX; j++)
                         {
-                            for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
-                            {
-                                gray[i + subPart.position.y, j + subPart.position.x] = subPart.gray[i, j];
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (int i = subPart.imageDependencies.top; i < subPart.sizeY - subPart.imageDependencies.bottom; i++)
-                        {
-                            for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
-                            {
-                                gray[i + subPart.position.y, j + subPart.position.x - subPart.imageDependencies.left] = subPart.gray[i, j];
-                            }
+                            gray[i + subPart.position.y, j + subPart.position.x - subPartStartX] = subPart.gray[i, j];
                         }
                     }
                 }
@@ -1578,28 +1566,13 @@ namespace ProcessingImageSDK
                         blue = new byte[sizeY, sizeX];
                         grayscale = false;
                     }
-                    if (subPart.position.x == 0)
+                    for (int i = 0; i < subPart.sizeY; i++)
                     {
-                        for (int i = subPart.imageDependencies.top; i < subPart.sizeY - subPart.imageDependencies.bottom; i++)
+                        for (int j = subPartStartX; j < subPartEndX; j++)
                         {
-                            for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
-                            {
-                                red[i + subPart.position.y, j + subPart.position.x] = subPart.red[i, j];
-                                green[i + subPart.position.y, j + subPart.position.x] = subPart.green[i, j];
-                                blue[i + subPart.position.y, j + subPart.position.x] = subPart.blue[i, j];
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (int i = subPart.imageDependencies.top; i < subPart.sizeY - subPart.imageDependencies.bottom; i++)
-                        {
-                            for (int j = subPart.imageDependencies.left; j < subPart.sizeX - subPart.imageDependencies.right; j++)
-                            {
-                                red[i + subPart.position.y, j + subPart.position.x - subPart.imageDependencies.left] = subPart.red[i, j];
-                                green[i + subPart.position.y, j + subPart.position.x - subPart.imageDependencies.left] = subPart.green[i, j];
-                                blue[i + subPart.position.y, j + subPart.position.x - subPart.imageDependencies.left] = subPart.blue[i, j];
-                            }
+                            red[i + subPart.position.y, j + subPart.position.x - subPartStartX] = subPart.red[i, j];
+                            green[i + subPart.position.y, j + subPart.position.x - subPartStartX] = subPart.green[i, j];
+                            blue[i + subPart.position.y, j + subPart.position.x - subPartStartX] = subPart.blue[i, j];
                         }
                     }
                 }
