@@ -1117,20 +1117,31 @@ namespace ProcessingImageSDK
         }
 
         /// <summary>
+        /// Clones the watermarks from the source
+        /// </summary>
+        /// <param name="source"></param>
+        public void cloneWatermarks(ProcessingImage source)
+        {
+            watermaks.Clear();
+            watermaks.AddRange(source.watermaks);
+        }
+
+        /// <summary>
         /// Copies to from the source to the target the following:
         ///  - The display name
         ///  - The width and the height
         ///  - The grayscale flag
         ///  - The masked flag
-        ///  - The watermarks
+        ///  - The watermarks (if cloneWatermarks is set to true)
         ///  - The alpha channel (if cloneAlpha is set to true)
         ///  - The image dependencies (useful when using parallel processing)
         ///  - The position in a parent image (useful when using parallel processing)
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
+        /// <param name="cloneWatermarks"></param>
         /// <param name="cloneAlpha"></param>
-        public static void copyAttributes(ProcessingImage source, ProcessingImage target, bool cloneAlpha = true)
+        public static void copyAttributes(ProcessingImage source, ProcessingImage target, bool cloneWatermarks = true, bool cloneAlpha = true)
         {
             target.grayscale = source.grayscale;
             target.masked = source.masked;
@@ -1142,8 +1153,10 @@ namespace ProcessingImageSDK
             target.path = null;
             target.name = source.name;
 
-            target.watermaks.Clear();
-            target.watermaks.AddRange(source.watermaks);
+            if (cloneWatermarks)
+            {
+                target.cloneWatermarks(source);
+            }
             if (cloneAlpha)
             {
                 target.alpha = (byte[,])source.getAlpha().Clone();
@@ -1163,7 +1176,7 @@ namespace ProcessingImageSDK
         /// <param name="originalImage"></param>
         public void copyAttributes(ProcessingImage originalImage)
         {
-            copyAttributes(originalImage, this, false);
+            copyAttributes(originalImage, this, true, false);
         }
 
         /// <summary>
@@ -1180,7 +1193,7 @@ namespace ProcessingImageSDK
         /// <param name="originalImage"></param>
         public void copyAttributesAndAlpha(ProcessingImage originalImage)
         {
-            copyAttributes(originalImage, this, true);
+            copyAttributes(originalImage, this, true, true);
         }
 
         /// <summary>

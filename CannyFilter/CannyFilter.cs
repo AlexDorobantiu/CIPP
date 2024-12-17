@@ -85,6 +85,7 @@ namespace CannyFilter
         {
             ProcessingImage pi = new ProcessingImage();
             pi.initialize(Path.ChangeExtension(inputImage.getName(), ".png"), inputImage.getSizeX(), inputImage.getSizeY());
+            pi.cloneWatermarks(inputImage);
             pi.addWatermark($"Canny Filter Sigma: {sigma:0.0} Gradient: {gradientTypeEnumValues[gradientType]} TL: {thresholdLow} TH: {thresholdHigh} Step: {stepEnumValues[step]} v1.0, Alexandru Dorobanțiu");
 
             int imageSizeX = pi.getSizeX();
